@@ -1,0 +1,39 @@
+﻿🧠 Business (İş Katmanı)
+Uygulamanın kuralları ve iş mantığı burada
+“Ne yapılmalı?” sorusunu cevaplar
+DataAccess’i çağırır, UI’a sonuç döner
+Örn: sipariş oluşturma, indirim hesaplama
+
+🧩 Core (Ortak/Çekirdek Katman)
+Tüm projede kullanılan ortak yapılar
+Bağımsızdır, her katman kullanabilir
+Örn:
+Base entity’ler
+Result wrapper’lar
+Helper/util sınıflar
+Cross-cutting (logging, caching vs.)
+
+🗄️ DataAccess (Veri Erişim Katmanı)
+Database ile konuşur
+CRUD işlemleri burada yapılır
+Genelde Entity Framework Core gibi araçlar kullanılır
+Repository pattern burada olur
+
+📦 Entity (Model Katmanı)
+Veritabanı tablolarının karşılığı olan sınıflar
+Sadece veri taşır (genelde logic olmaz)
+Örn: User, Product, Order
+
+
+🖥️ UI (Sunum Katmanı)
+Kullanıcı ile etkileşim
+API, MVC, Blazor vs. olabilir
+Business katmanını çağırır
+Örn: Controller’lar, View’lar
+
+UI → Business → DataAccess → Database
+        ↑
+      Entity
+        ↑
+       Core (her yerde)
+

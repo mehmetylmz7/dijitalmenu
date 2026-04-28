@@ -7,38 +7,38 @@ using System.Linq;
 
 namespace DataAccessLayer.Repositories
 {
-    public class CategoryRepository : ICategoryDal
+    public class AdminRepository : IAdminDal
     {
         private readonly Context _context;
 
-        public CategoryRepository(Context context)
+        public AdminRepository(Context context)
         {
             _context = context;
         }
 
-        public void Delete(Category t)
+        public void Delete(Admin t)
         {
             _context.Remove(t);
             _context.SaveChanges();
         }
 
-        public Category GetByID(int id)
+        public Admin GetByID(int id)
         {
-            return _context.Categories.Find(id);
+            return _context.Admins.Find(id);
         }
 
-        public List<Category> GetListAll()
+        public List<Admin> GetListAll()
         {
-            return _context.Categories.ToList();
+            return _context.Admins.ToList();
         }
 
-        public void Insert(Category t)
+        public void Insert(Admin t)
         {
             _context.Add(t);
             _context.SaveChanges();
         }
 
-        public void Update(Category t)
+        public void Update(Admin t)
         {
             _context.Update(t);
             _context.SaveChanges();

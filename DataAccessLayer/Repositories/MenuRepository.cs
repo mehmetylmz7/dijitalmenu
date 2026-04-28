@@ -7,38 +7,38 @@ using System.Linq;
 
 namespace DataAccessLayer.Repositories
 {
-    public class CategoryRepository : ICategoryDal
+    public class MenuRepository : IMenuDal
     {
         private readonly Context _context;
 
-        public CategoryRepository(Context context)
+        public MenuRepository(Context context)
         {
             _context = context;
         }
 
-        public void Delete(Category t)
+        public void Delete(Menu t)
         {
             _context.Remove(t);
             _context.SaveChanges();
         }
 
-        public Category GetByID(int id)
+        public Menu GetByID(int id)
         {
-            return _context.Categories.Find(id);
+            return _context.Menus.Find(id);
         }
 
-        public List<Category> GetListAll()
+        public List<Menu> GetListAll()
         {
-            return _context.Categories.ToList();
+            return _context.Menus.ToList();
         }
 
-        public void Insert(Category t)
+        public void Insert(Menu t)
         {
             _context.Add(t);
             _context.SaveChanges();
         }
 
-        public void Update(Category t)
+        public void Update(Menu t)
         {
             _context.Update(t);
             _context.SaveChanges();

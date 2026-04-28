@@ -7,38 +7,38 @@ using System.Linq;
 
 namespace DataAccessLayer.Repositories
 {
-    public class CategoryRepository : ICategoryDal
+    public class ThemeRepository : IThemeDal
     {
         private readonly Context _context;
 
-        public CategoryRepository(Context context)
+        public ThemeRepository(Context context)
         {
             _context = context;
         }
 
-        public void Delete(Category t)
+        public void Delete(Theme t)
         {
             _context.Remove(t);
             _context.SaveChanges();
         }
 
-        public Category GetByID(int id)
+        public Theme GetByID(int id)
         {
-            return _context.Categories.Find(id);
+            return _context.Themes.Find(id);
         }
 
-        public List<Category> GetListAll()
+        public List<Theme> GetListAll()
         {
-            return _context.Categories.ToList();
+            return _context.Themes.ToList();
         }
 
-        public void Insert(Category t)
+        public void Insert(Theme t)
         {
             _context.Add(t);
             _context.SaveChanges();
         }
 
-        public void Update(Category t)
+        public void Update(Theme t)
         {
             _context.Update(t);
             _context.SaveChanges();
