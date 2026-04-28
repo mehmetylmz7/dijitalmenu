@@ -12,7 +12,8 @@ namespace DataAccessLayer.Concrete
     {
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("server=DIDIM\\SQLEXPRESS;database=CoreBlogDb;integrated security=true");
+            optionsBuilder.UseSqlServer(
+                "server=DIDIM\\SQLEXPRESS;database=CoreBlogDb;integrated security=true;TrustServerCertificate=True");
         }
         public DbSet<Admin> Admins { get; set; }
         public DbSet<Category> Categories { get; set; }
