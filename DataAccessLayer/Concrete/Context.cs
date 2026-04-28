@@ -1,4 +1,4 @@
-﻿using EntityLayer.Concrete;
+using EntityLayer.Concrete;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -10,10 +10,8 @@ namespace DataAccessLayer.Concrete
 {
     public class Context : DbContext
     {
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        public Context(DbContextOptions<Context> options) : base(options)
         {
-            optionsBuilder.UseSqlServer(
-                "server=DIDIM\\SQLEXPRESS;database=CoreBlogDb;integrated security=true;TrustServerCertificate=True");
         }
         public DbSet<Admin> Admins { get; set; }
         public DbSet<Category> Categories { get; set; }
