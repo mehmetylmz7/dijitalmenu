@@ -1,0 +1,39 @@
+@{
+    ViewData["Title"] = "Dashboard";
+    ViewBag.AdminUser = ViewBag.AdminUser;
+}
+
+<div class="stat-grid">
+    <div class="stat-card stat-purple">
+        <div class="stat-icon">🏪</div>
+        <div class="stat-label">Toplam Restoran</div>
+        <div class="stat-value">@ViewBag.RestaurantCount</div>
+    </div>
+    <div class="stat-card stat-blue">
+        <div class="stat-icon">📋</div>
+        <div class="stat-label">Toplam Menü</div>
+        <div class="stat-value">@ViewBag.MenuCount</div>
+    </div>
+    <div class="stat-card stat-green">
+        <div class="stat-icon">🏷️</div>
+        <div class="stat-label">Toplam Kategori</div>
+        <div class="stat-value">@ViewBag.CategoryCount</div>
+    </div>
+    <div class="stat-card stat-orange">
+        <div class="stat-icon">🍕</div>
+        <div class="stat-label">Toplam Ürün</div>
+        <div class="stat-value">@ViewBag.MenuItemCount</div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5>🚀 Hızlı İşlemler</h5>
+    </div>
+    <div class="card-body" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap:12px;">
+        <a asp-area="Admin" asp-controller="Restaurant" asp-action="Create" class="btn btn-primary">➕ Yeni Restoran</a>
+        <a asp-area="Admin" asp-controller="Category" asp-action="Create" class="btn btn-primary">➕ Yeni Kategori</a>
+        <a asp-area="Admin" asp-controller="MenuItem" asp-action="Create" class="btn btn-primary">➕ Yeni Ürün</a>
+        <a asp-area="Admin" asp-controller="Theme" asp-action="Create" class="btn btn-primary">➕ Yeni Tema</a>
+    </div>
+</div>

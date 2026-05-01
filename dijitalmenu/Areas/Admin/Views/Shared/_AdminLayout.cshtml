@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] — Dijital Menü Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --sidebar-w: 260px;
+            --bg: #0f1117;
+            --surface: #1a1d27;
+            --surface2: #21253a;
+            --accent: #6c63ff;
+            --accent-light: #8b85ff;
+            --text: #e2e8f0;
+            --text-muted: #8892a4;
+            --border: #2d3148;
+            --danger: #ff4d6d;
+            --success: #22c55e;
+            --warning: #f59e0b;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ─── Sidebar ─── */
+        .sidebar {
+            width: var(--sidebar-w);
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            z-index: 100;
+            transition: transform .3s;
+        }
+
+        .sidebar-brand {
+            padding: 28px 24px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-brand h2 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .sidebar-brand span {
+            font-size: .75rem;
+            color: var(--text-muted);
+            display: block;
+            margin-top: 2px;
+        }
+
+        .sidebar-nav { padding: 16px 12px; flex: 1; overflow-y: auto; }
+
+        .nav-section-label {
+            font-size: .65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--text-muted);
+            padding: 12px 12px 6px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: .875rem;
+            font-weight: 500;
+            transition: all .2s;
+            margin-bottom: 2px;
+        }
+
+        .nav-link:hover { background: var(--surface2); color: var(--text); }
+        .nav-link.active { background: rgba(108,99,255,.18); color: var(--accent-light); }
+
+        .nav-link .icon { font-size: 1.1rem; width: 20px; text-align: center; }
+
+        .sidebar-footer {
+            padding: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .sidebar-footer a {
+            display: flex; align-items: center; gap: 8px;
+            color: var(--danger); text-decoration: none;
+            font-size: .875rem; padding: 8px 14px;
+            border-radius: 8px; transition: background .2s;
+        }
+        .sidebar-footer a:hover { background: rgba(255,77,109,.1); }
+
+        /* ─── Main ─── */
+        .main-wrapper {
+            margin-left: var(--sidebar-w);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .topbar-title { font-size: 1.1rem; font-weight: 600; }
+
+        .topbar-user {
+            display: flex; align-items: center; gap: 10px;
+            font-size: .875rem; color: var(--text-muted);
+        }
+
+        .avatar {
+            width: 34px; height: 34px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: .8rem; color: #fff;
+        }
+
+        .content { padding: 32px; flex: 1; }
+
+        /* ─── Cards / Tables ─── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+
+        .card-header h5 { font-size: 1rem; font-weight: 600; }
+
+        .card-body { padding: 24px; }
+
+        table { width: 100%; border-collapse: collapse; font-size: .875rem; }
+        thead th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: .75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+        }
+        tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; }
+        tbody tr:hover { background: var(--surface2); }
+        tbody td { padding: 14px 16px; }
+        tbody tr:last-child { border-bottom: none; }
+
+        /* ─── Buttons ─── */
+        .btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 9px 18px; border-radius: 10px;
+            font-size: .875rem; font-weight: 500;
+            border: none; cursor: pointer; text-decoration: none;
+            transition: all .2s;
+        }
+        .btn-primary { background: var(--accent); color: #fff; }
+        .btn-primary:hover { background: var(--accent-light); transform: translateY(-1px); }
+        .btn-sm { padding: 5px 12px; font-size: .8rem; border-radius: 7px; }
+        .btn-warning { background: rgba(245,158,11,.15); color: var(--warning); }
+        .btn-warning:hover { background: rgba(245,158,11,.25); }
+        .btn-danger { background: rgba(255,77,109,.15); color: var(--danger); }
+        .btn-danger:hover { background: rgba(255,77,109,.25); }
+        .btn-secondary { background: var(--surface2); color: var(--text); }
+        .btn-secondary:hover { background: var(--border); }
+
+        /* ─── Forms ─── */
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-size: .875rem; font-weight: 500; margin-bottom: 8px; color: var(--text-muted); }
+        .form-control {
+            width: 100%; padding: 10px 14px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: .875rem;
+            font-family: inherit;
+            transition: border-color .2s;
+            outline: none;
+        }
+        .form-control:focus { border-color: var(--accent); }
+
+        /* ─── Stat Cards ─── */
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 32px; }
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0;
+            width: 80px; height: 80px;
+            border-radius: 0 16px 0 100%;
+            opacity: .12;
+        }
+        .stat-label { font-size: .8rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 500; }
+        .stat-value { font-size: 2rem; font-weight: 700; }
+        .stat-icon { font-size: 1.5rem; margin-bottom: 12px; }
+
+        .stat-purple::before { background: #6c63ff; }
+        .stat-blue::before { background: #3b82f6; }
+        .stat-green::before { background: #22c55e; }
+        .stat-orange::before { background: #f59e0b; }
+        .stat-purple .stat-value { color: #a78bfa; }
+        .stat-blue .stat-value { color: #60a5fa; }
+        .stat-green .stat-value { color: #4ade80; }
+        .stat-orange .stat-value { color: #fbbf24; }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: .75rem;
+            font-weight: 500;
+        }
+        .badge-purple { background: rgba(108,99,255,.2); color: var(--accent-light); }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="sidebar-brand">
+        <h2>🍽️ DijitalMenü</h2>
+        <span>Admin Paneli</span>
+    </div>
+
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Genel</div>
+        <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active" : "")"
+           asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+            <span class="icon">📊</span> Dashboard
+        </a>
+
+        <div class="nav-section-label">Yönetim</div>
+        <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Restaurant" ? "active" : "")"
+           asp-area="Admin" asp-controller="Restaurant" asp-action="Index">
+            <span class="icon">🏪</span> Restoranlar
+        </a>
+        <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Menu" ? "active" : "")"
+           asp-area="Admin" asp-controller="Menu" asp-action="Index">
+            <span class="icon">📋</span> Menüler
+        </a>
+        <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Category" ? "active" : "")"
+           asp-area="Admin" asp-controller="Category" asp-action="Index">
+            <span class="icon">🏷️</span> Kategoriler
+        </a>
+        <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "MenuItem" ? "active" : "")"
+           asp-area="Admin" asp-controller="MenuItem" asp-action="Index">
+            <span class="icon">🍕</span> Menü Öğeleri
+        </a>
+        <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Theme" ? "active" : "")"
+           asp-area="Admin" asp-controller="Theme" asp-action="Index">
+            <span class="icon">🎨</span> Temalar
+        </a>
+        <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "User" ? "active" : "")"
+           asp-area="Admin" asp-controller="User" asp-action="Index">
+            <span class="icon">👥</span> Kullanıcılar
+        </a>
+    </nav>
+
+    <div class="sidebar-footer">
+        <a asp-area="Admin" asp-controller="Auth" asp-action="Logout">
+            <span>🚪</span> Çıkış Yap
+        </a>
+    </div>
+</aside>
+
+<div class="main-wrapper">
+    <header class="topbar">
+        <div class="topbar-title">@(ViewData["Title"] ?? "Dashboard")</div>
+        <div class="topbar-user">
+            <div class="avatar">@(ViewBag.AdminUser?.ToString()?.Substring(0, 1)?.ToUpper() ?? "A")</div>
+            <span>@(ViewBag.AdminUser ?? "Admin")</span>
+        </div>
+    </header>
+
+    <main class="content">
+        @RenderBody()
+    </main>
+</div>
+
+</body>
+</html>

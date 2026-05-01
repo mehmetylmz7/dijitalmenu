@@ -1,0 +1,23 @@
+@{
+    ViewData["Title"] = "Yeni Menü";
+}
+<div class="card" style="max-width:600px;">
+    <div class="card-header"><h5>📋 Yeni Menü Ekle</h5></div>
+    <div class="card-body">
+        <form method="post" asp-action="Create">
+            <div class="form-group">
+                <label class="form-label">Restoran</label>
+                <select name="RestaurantId" class="form-control">
+                    @foreach (var r in ViewBag.Restaurants as List<EntityLayer.Concrete.Restaurant>)
+                    {
+                        <option value="@r.Id">@r.Name</option>
+                    }
+                </select>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:8px;">
+                <button type="submit" class="btn btn-primary">💾 Kaydet</button>
+                <a asp-action="Index" class="btn btn-secondary">İptal</a>
+            </div>
+        </form>
+    </div>
+</div>

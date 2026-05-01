@@ -1,0 +1,32 @@
+@model List<EntityLayer.Concrete.MenuItem>
+@{
+    ViewData["Title"] = "Menü Öğeleri";
+}
+<div class="card">
+    <div class="card-header">
+        <h5>🍕 Menü Öğeleri</h5>
+        <a asp-action="Create" class="btn btn-primary btn-sm">➕ Yeni Ekle</a>
+    </div>
+    <table>
+        <thead>
+            <tr><th>#</th><th>Ad</th><th>Açıklama</th><th>Fiyat</th><th>Kategori ID</th><th>İşlemler</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td><span class="badge badge-purple">@item.Id</span></td>
+                    <td>@item.Name</td>
+                    <td style="color:#8892a4; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">@item.Description</td>
+                    <td style="color:#4ade80; font-weight:600;">@item.Price.ToString("C")</td>
+                    <td>@item.CategoryId</td>
+                    <td style="display:flex;gap:8px;">
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">✏️ Düzenle</a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger"
+                           onclick="return confirm('Silmek istediğinize emin misiniz?')">🗑️ Sil</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

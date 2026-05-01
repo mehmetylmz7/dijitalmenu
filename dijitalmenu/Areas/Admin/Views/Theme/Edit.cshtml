@@ -1,0 +1,20 @@
+@model EntityLayer.Concrete.Theme
+@{
+    ViewData["Title"] = "Tema Düzenle";
+}
+<div class="card" style="max-width:600px;">
+    <div class="card-header"><h5>✏️ Tema Düzenle</h5></div>
+    <div class="card-body">
+        <form method="post" asp-action="Edit">
+            <input type="hidden" name="Id" value="@Model.Id" />
+            <div class="form-group">
+                <label class="form-label">Tema Adı</label>
+                <input type="text" name="Name" value="@Model.Name" class="form-control" required />
+            </div>
+            <div style="display:flex;gap:10px;margin-top:8px;">
+                <button type="submit" class="btn btn-primary">💾 Güncelle</button>
+                <a asp-action="Index" class="btn btn-secondary">İptal</a>
+            </div>
+        </form>
+    </div>
+</div>
