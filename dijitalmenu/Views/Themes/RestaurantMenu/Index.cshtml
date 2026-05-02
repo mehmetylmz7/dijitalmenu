@@ -1,0 +1,196 @@
+@model dijitalmenu.Models.RestaurantMenuViewModel
+@{
+    // ViewData'dan restoran adı/sloganı al — demo veya gerçek restoran için aynı view çalışır
+    var restaurantName   = ViewData["RestaurantName"]   as string ?? "Kocaoğlu Restoran";
+    var restaurantSlogan = ViewData["RestaurantSlogan"] as string ?? "Geleneksel Lezzet Durağı";
+    ViewData["Title"] = restaurantName + " — Menü";
+
+    // Kategori adından URL-safe slug üret (anchor link + section id)
+    Func<string, string> Slug = (string s) =>
+        s.ToLowerInvariant()
+         .Replace(" ", "-")
+         .Replace("ı", "i").Replace("İ", "i")
+         .Replace("ğ", "g").Replace("Ğ", "g")
+         .Replace("ü", "u").Replace("Ü", "u")
+         .Replace("ş", "s").Replace("Ş", "s")
+         .Replace("ö", "o").Replace("Ö", "o")
+         .Replace("ç", "c").Replace("Ç", "c");
+}
+
+<div class="animate-fadeIn">
+
+    @* ─── Hero Section ─── *@
+    <div class="relative h-[40vh] bg-stone-900 flex items-center justify-center overflow-hidden">
+        <img src="https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&q=80&w=1200"
+             class="absolute inset-0 w-full h-full object-cover opacity-60"
+             alt="Kocaoğlu Restoran" />
+        <div class="relative z-10 text-center px-4">
+            <h1 class="text-5xl md:text-7xl font-serif text-white mb-2 drop-shadow-xl">
+                @restaurantName
+            </h1>
+            <p class="text-amber-400 text-lg md:text-xl italic uppercase tracking-[0.3em] font-medium">
+                @restaurantSlogan
+            </p>
+        </div>
+    </div>
+
+    @* ─── Sticky Kategori Bar ─── *@
+    <div class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-stone-200 shadow-sm overflow-x-auto no-scrollbar">
+        <div class="max-w-6xl mx-auto flex justify-center py-4 px-4 gap-4 md:gap-8 min-w-max">
+            @foreach (var cat in Model.Categories)
+            {
+                <a href="#@Slug(cat)"
+                   class="cat-link text-stone-600 hover:text-amber-800 font-semibold text-sm md:text-base transition-colors whitespace-nowrap">
+                    @cat
+                </a>
+            }
+        </div>
+    </div>
+
+    @* ─── Menü İçeriği ─── *@
+    <div class="max-w-6xl mx-auto px-4 py-12">
+
+        @foreach (var cat in Model.Categories)
+        {
+            var items = Model.MenuItems.Where(i => i.Category == cat).ToList();
+            if (!items.Any()) continue;
+
+            <section id="@Slug(cat)" class="mb-20 scroll-mt-24">
+
+                @* Kategori Başlığı *@
+                <div class="flex items-center gap-6 mb-10">
+                    <h2 class="text-3xl md:text-4xl font-serif text-stone-800 shrink-0">@cat</h2>
+                    <div class="h-[1px] bg-stone-200 w-full"></div>
+                </div>
+
+                @* Ürün Grid *@
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    @foreach (var item in items)
+                    {
+                        @await Html.PartialAsync(
+                            "~/Views/Themes/RestaurantMenu/_MenuCard.cshtml",
+                            item)
+                    }
+                </div>
+
+            </section>
+        }
+
+        @* ─── Servis Bilgilendirmesi ─── *@
+        <div class="mt-16 p-10 bg-stone-900 rounded-3xl shadow-2xl relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-8 opacity-10">
+                <i class="fas fa-wine-glass text-8xl text-white"></i>
+            </div>
+            <div class="relative z-10 max-w-2xl">
+                <h3 class="text-amber-400 font-bold uppercase tracking-widest text-sm mb-4">
+                    Servis Bilgilendirmesi
+                </h3>
+                <p class="text-white text-xl md:text-2xl font-serif leading-relaxed mb-4">
+                    "Kendi alkolünü yanında getiren misafirlerimizden kişi başı
+                    <span class="text-amber-400">100 TL</span> servis ücreti alınmaktadır."
+                </p>
+                <p class="text-stone-400 text-sm italic">
+                    Menü fiyatları ve içerikleri mevsimsel olarak değişebilir.
+                </p>
+            </div>
+        </div>
+
+    </div>@* /max-w-6xl *@
+
+    @* ─── Footer ─── *@
+    <footer class="bg-stone-900 text-stone-400 py-20 px-4 mt-auto">
+        <div class="max-w-6xl mx-auto text-center">
+
+            <div class="text-4xl font-serif text-white mb-4">@restaurantName</div>
+            <p class="text-amber-400 text-sm mb-10 uppercase tracking-[0.4em] font-medium">
+                @restaurantSlogan
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16 max-w-4xl mx-auto text-sm">
+                <div>
+                    <h4 class="text-white font-bold mb-4 uppercase tracking-widest">İletişim</h4>
+                    <p>+90 (555) 000 00 00</p>
+                    <p>info@kocaoglurestoran.com</p>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-4 uppercase tracking-widest">Adres</h4>
+                    <p>Atatürk Caddesi, No: 123</p>
+                    <p>Hatay, Türkiye</p>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-4 uppercase tracking-widest">Çalışma Saatleri</h4>
+                    <p>Hafta içi: 11:00 – 23:00</p>
+                    <p>Hafta sonu: 10:00 – 00:00</p>
+                </div>
+            </div>
+
+            <div class="flex justify-center gap-8 mb-12">
+                <a href="#" aria-label="Instagram"
+                   class="w-12 h-12 flex items-center justify-center rounded-full border border-stone-800 hover:border-amber-400 hover:text-amber-400 transition-all">
+                    <i class="fab fa-instagram text-xl"></i>
+                </a>
+                <a href="#" aria-label="Facebook"
+                   class="w-12 h-12 flex items-center justify-center rounded-full border border-stone-800 hover:border-amber-400 hover:text-amber-400 transition-all">
+                    <i class="fab fa-facebook-f text-xl"></i>
+                </a>
+                <a href="#" aria-label="Harita"
+                   class="w-12 h-12 flex items-center justify-center rounded-full border border-stone-800 hover:border-amber-400 hover:text-amber-400 transition-all">
+                    <i class="fas fa-map-marked-alt text-xl"></i>
+                </a>
+            </div>
+
+            <div class="border-t border-stone-800 pt-10 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] uppercase tracking-widest font-medium">
+                <p>© @DateTime.Now.Year @restaurantName | Gururla Hizmetinizdeyiz.</p>
+                <a asp-controller="RestaurantMenu" asp-action="Index"
+                   class="hover:text-white transition-colors flex items-center gap-2">
+                    <i class="fas fa-utensils"></i> Menüye Dön
+                </a>
+            </div>
+        </div>
+    </footer>
+
+</div>@* /animate-fadeIn *@
+
+@section Scripts {
+<script>
+    // React'taki scrollToCategory() → anchor + smooth scroll + aktif link vurgulama
+    document.querySelectorAll('a.cat-link').forEach(link => {
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href'); // "#mezeler" vb.
+            const target   = document.querySelector(targetId);
+            if (!target) return;
+
+            const stickyBar = document.querySelector('.sticky');
+            const offset    = stickyBar ? stickyBar.offsetHeight + 16 : 80;
+            const top       = target.getBoundingClientRect().top + window.scrollY - offset;
+
+            window.scrollTo({ top, behavior: 'smooth' });
+
+            // Aktif link vurgulama
+            document.querySelectorAll('a.cat-link').forEach(l => l.classList.remove('text-amber-800'));
+            this.classList.add('text-amber-800');
+        });
+    });
+
+    // Scroll spy — görünür kategoriye göre aktif linki güncelle
+    const sections = document.querySelectorAll('section[id]');
+    const links    = document.querySelectorAll('a.cat-link');
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const id = entry.target.id;
+                links.forEach(l => {
+                    l.classList.remove('text-amber-800');
+                    if (l.getAttribute('href') === '#' + id) {
+                        l.classList.add('text-amber-800');
+                    }
+                });
+            }
+        });
+    }, { rootMargin: '-25% 0px -65% 0px' });
+
+    sections.forEach(s => observer.observe(s));
+</script>
+}

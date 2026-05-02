@@ -1,0 +1,35 @@
+@model dijitalmenu.Models.MenuItemVM
+
+@{
+    // Partial — Layout yok, doğrudan kart HTML'i döner
+    Layout = null;
+}
+
+<div class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col border border-stone-100">
+
+    @* Görsel *@
+    <div class="relative h-56 overflow-hidden">
+        <img src="@Model.ImageUrl"
+             alt="@Model.Name"
+             loading="lazy"
+             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+             onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=400'" />
+
+        @if (Model.IsSpecial)
+        {
+            <div class="absolute top-4 left-4 bg-amber-600 text-white text-[10px] uppercase font-bold tracking-widest px-3 py-1 rounded-full shadow-lg">
+                Özel Lezzet
+            </div>
+        }
+    </div>
+
+    @* İçerik *@
+    <div class="p-6 flex flex-col flex-1">
+        <div class="flex justify-between items-start gap-4 mb-3">
+            <h3 class="text-xl font-serif text-stone-900 leading-tight">@Model.Name</h3>
+            <span class="text-lg font-bold text-amber-800 whitespace-nowrap">@Model.Price</span>
+        </div>
+        <p class="text-stone-500 text-sm line-clamp-2 leading-relaxed">@Model.Description</p>
+    </div>
+
+</div>

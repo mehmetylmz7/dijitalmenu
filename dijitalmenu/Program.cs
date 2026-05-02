@@ -40,16 +40,20 @@ builder.Services.AddScoped<BusinessLayer.Abstract.IUserService, BusinessLayer.Co
 
 var app = builder.Build();
 
-// ─── Seed: Varsayılan 3 tema yoksa oluştur ───
+// ─── Seed: Eksik temaları ekle (isim bazlı kontrol) ───
 using (var scope = app.Services.CreateScope())
 {
     var themeService = scope.ServiceProvider.GetRequiredService<BusinessLayer.Abstract.IThemeService>();
-    if (!themeService.TGetListAll().Any())
-    {
+    var existing = themeService.TGetListAll();
+
+    if (!existing.Any(t => t.Name == "Doğal Yeşil"))
         themeService.TInsert(new EntityLayer.Concrete.Theme { Name = "Doğal Yeşil" });
+    if (!existing.Any(t => t.Name == "Ateşli Turuncu"))
         themeService.TInsert(new EntityLayer.Concrete.Theme { Name = "Ateşli Turuncu" });
+    if (!existing.Any(t => t.Name == "Okyanus Mavisi"))
         themeService.TInsert(new EntityLayer.Concrete.Theme { Name = "Okyanus Mavisi" });
-    }
+    if (!existing.Any(t => t.Name == "Kocaoğlu Klasik"))
+        themeService.TInsert(new EntityLayer.Concrete.Theme { Name = "Kocaoğlu Klasik" });
 }
 
 // Configure the HTTP request pipeline.
