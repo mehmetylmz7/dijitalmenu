@@ -5,8 +5,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Auth Filter
+// Auth Filters
 builder.Services.AddScoped<dijitalmenu.Filters.AdminAuthFilter>();
+builder.Services.AddScoped<dijitalmenu.Filters.RestaurantAuthFilter>();
 
 builder.Services.AddDbContext<DataAccessLayer.Concrete.Context>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -38,6 +39,18 @@ builder.Services.AddScoped<BusinessLayer.Abstract.IThemeService, BusinessLayer.C
 builder.Services.AddScoped<BusinessLayer.Abstract.IUserService, BusinessLayer.Concrete.UserManager>();
 
 var app = builder.Build();
+
+// ─── Seed: Varsayılan 3 tema yoksa oluştur ───
+using (var scope = app.Services.CreateScope())
+{
+    var themeService = scope.ServiceProvider.GetRequiredService<BusinessLayer.Abstract.IThemeService>();
+    if (!themeService.TGetListAll().Any())
+    {
+        themeService.TInsert(new EntityLayer.Concrete.Theme { Name = "Doğal Yeşil" });
+        themeService.TInsert(new EntityLayer.Concrete.Theme { Name = "Ateşli Turuncu" });
+        themeService.TInsert(new EntityLayer.Concrete.Theme { Name = "Okyanus Mavisi" });
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

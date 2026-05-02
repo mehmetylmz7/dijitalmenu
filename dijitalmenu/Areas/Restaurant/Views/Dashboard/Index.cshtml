@@ -1,0 +1,28 @@
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="stat-grid">
+    <div class="stat-card stat-green">
+        <div class="stat-icon">🏷️</div>
+        <div class="stat-label">Kategori Sayısı</div>
+        <div class="stat-value">@ViewBag.CategoryCount</div>
+    </div>
+    <div class="stat-card stat-blue">
+        <div class="stat-icon">🍕</div>
+        <div class="stat-label">Ürün Sayısı</div>
+        <div class="stat-value">@ViewBag.MenuItemCount</div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5>🚀 Hızlı İşlemler</h5>
+    </div>
+    <div class="card-body" style="display:flex; gap:12px; flex-wrap:wrap;">
+        <a asp-area="Restaurant" asp-controller="Category" asp-action="Create" class="btn btn-primary">➕ Yeni Kategori</a>
+        <a asp-area="Restaurant" asp-controller="MenuItem" asp-action="Create" class="btn btn-primary">➕ Yeni Ürün</a>
+        <a asp-area="Restaurant" asp-controller="Category" asp-action="Index" class="btn btn-secondary">🏷️ Kategorileri Yönet</a>
+        <a asp-area="Restaurant" asp-controller="MenuItem" asp-action="Index" class="btn btn-secondary">🍕 Ürünleri Yönet</a>
+    </div>
+</div>

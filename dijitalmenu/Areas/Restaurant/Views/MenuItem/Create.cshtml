@@ -1,0 +1,36 @@
+@{
+    ViewData["Title"] = "Yeni Ürün";
+    var categories = ViewBag.Categories as List<EntityLayer.Concrete.Category>;
+}
+<div class="card" style="max-width:600px;">
+    <div class="card-header"><h5>🍕 Yeni Ürün Ekle</h5></div>
+    <div class="card-body">
+        <form method="post" asp-action="Create">
+            <div class="form-group">
+                <label class="form-label">Ürün Adı</label>
+                <input type="text" name="Name" class="form-control" placeholder="Örn: Margarita Pizza" required autofocus />
+            </div>
+            <div class="form-group">
+                <label class="form-label">Açıklama <span style="color:#7d8590;font-weight:400;">(opsiyonel)</span></label>
+                <textarea name="Description" class="form-control" rows="3" placeholder="Ürün hakkında kısa bir açıklama..."></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Fiyat (₺)</label>
+                <input type="number" name="Price" class="form-control" placeholder="0.00" step="0.01" min="0" required />
+            </div>
+            <div class="form-group">
+                <label class="form-label">Kategori</label>
+                <select name="CategoryId" class="form-control">
+                    @foreach (var cat in categories!)
+                    {
+                        <option value="@cat.Id">@cat.Name</option>
+                    }
+                </select>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:8px;">
+                <button type="submit" class="btn btn-primary">💾 Kaydet</button>
+                <a asp-action="Index" class="btn btn-secondary">İptal</a>
+            </div>
+        </form>
+    </div>
+</div>

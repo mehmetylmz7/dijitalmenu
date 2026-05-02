@@ -1,0 +1,309 @@
+@{
+    var restaurant = ViewBag.Restaurant as EntityLayer.Concrete.Restaurant;
+    var categories = ViewBag.Categories as List<EntityLayer.Concrete.Category>;
+    var menuItems = ViewBag.MenuItems as List<EntityLayer.Concrete.MenuItem>;
+    ViewData["Title"] = restaurant?.Name + " Menüsü";
+}
+
+@section Styles {
+<style>
+    /* ─── Breadcrumb ─── */
+    .breadcrumb-bar {
+        border-bottom: 1px solid #2d3148;
+        padding: 12px 0;
+    }
+
+    .breadcrumb-bar .inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 24px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: .85rem;
+        color: #8892a4;
+    }
+
+    .breadcrumb-bar a { color: #8892a4; text-decoration: none; transition: color .2s; }
+    .breadcrumb-bar a:hover { color: #a78bfa; }
+    .breadcrumb-bar .sep { opacity: .4; }
+    .breadcrumb-bar .current { color: #e2e8f0; font-weight: 500; }
+
+    /* ─── Restaurant Header ─── */
+    .rest-header {
+        background: radial-gradient(ellipse at 30% 50%, rgba(108,99,255,.2) 0%, transparent 60%);
+        padding: 40px 24px 32px;
+        border-bottom: 1px solid #2d3148;
+    }
+
+    .rest-header .inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .rest-avatar {
+        width: 72px; height: 72px;
+        background: linear-gradient(135deg, #6c63ff, #a78bfa);
+        border-radius: 18px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 2rem; flex-shrink: 0;
+    }
+
+    .rest-info h1 {
+        font-size: 1.8rem;
+        font-weight: 800;
+        margin-bottom: 6px;
+    }
+
+    .rest-info p {
+        color: #8892a4;
+        font-size: .9rem;
+    }
+
+    /* ─── Layout ─── */
+    .menu-layout {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 24px 80px;
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        gap: 32px;
+        align-items: start;
+    }
+
+    /* ─── Category Sidebar ─── */
+    .cat-sidebar {
+        position: sticky;
+        top: 84px;
+    }
+
+    .cat-sidebar h3 {
+        font-size: .75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .1em;
+        color: #8892a4;
+        margin-bottom: 12px;
+    }
+
+    .cat-btn {
+        display: block;
+        width: 100%;
+        padding: 10px 14px;
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 10px;
+        color: #8892a4;
+        font-size: .875rem;
+        font-weight: 500;
+        font-family: inherit;
+        cursor: pointer;
+        text-align: left;
+        transition: all .2s;
+        margin-bottom: 4px;
+    }
+
+    .cat-btn:hover { background: #21253a; color: #e2e8f0; }
+    .cat-btn.active {
+        background: rgba(108,99,255,.15);
+        border-color: rgba(108,99,255,.35);
+        color: #a78bfa;
+    }
+
+    /* ─── Menu Items ─── */
+    .menu-section { margin-bottom: 48px; }
+
+    .menu-section-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #2d3148;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .menu-section-title .cat-badge {
+        font-size: .75rem;
+        background: rgba(108,99,255,.15);
+        color: #a78bfa;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-weight: 500;
+    }
+
+    .items-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 16px;
+    }
+
+    .item-card {
+        background: #1a1d27;
+        border: 1px solid #2d3148;
+        border-radius: 16px;
+        padding: 20px;
+        transition: border-color .2s, transform .2s;
+    }
+
+    .item-card:hover {
+        border-color: rgba(108,99,255,.3);
+        transform: translateY(-2px);
+    }
+
+    .item-card h4 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .item-card p {
+        font-size: .82rem;
+        color: #8892a4;
+        line-height: 1.6;
+        margin-bottom: 16px;
+        min-height: 40px;
+    }
+
+    .item-price {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #4ade80;
+    }
+
+    /* ─── Empty ─── */
+    .empty-menu {
+        text-align: center;
+        padding: 80px 24px;
+        color: #8892a4;
+    }
+
+    .empty-menu .icon { font-size: 3.5rem; display: block; margin-bottom: 16px; }
+    .empty-menu h3 { color: #e2e8f0; font-size: 1.1rem; margin-bottom: 8px; }
+
+    /* ─── Responsive ─── */
+    @@media (max-width: 768px) {
+        .menu-layout { grid-template-columns: 1fr; }
+        .cat-sidebar { position: static; }
+        .cat-sidebar-inner { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; }
+        .cat-btn { white-space: nowrap; }
+    }
+</style>
+}
+
+<div class="breadcrumb-bar">
+    <div class="inner">
+        <a asp-controller="Home" asp-action="Index">Restoranlar</a>
+        <span class="sep">›</span>
+        <span class="current">@restaurant?.Name</span>
+    </div>
+</div>
+
+<div class="rest-header">
+    <div class="inner">
+        <div class="rest-avatar">🍽️</div>
+        <div class="rest-info">
+            <h1>@restaurant?.Name</h1>
+            <p>@(categories?.Count ?? 0) kategori · @(menuItems?.Count ?? 0) ürün</p>
+        </div>
+    </div>
+</div>
+
+@if (categories == null || !categories.Any())
+{
+    <div class="empty-menu" style="max-width:1200px;margin:0 auto;padding:40px 24px;">
+        <span class="icon">📋</span>
+        <h3>Bu restoranın henüz menüsü yok</h3>
+        <p>Admin panelinden kategori ve ürünler ekleyebilirsiniz.</p>
+    </div>
+}
+else
+{
+    <div class="menu-layout">
+        <!-- Kategori Sidebar -->
+        <aside class="cat-sidebar">
+            <h3>🏷️ Kategoriler</h3>
+            <div class="cat-sidebar-inner">
+                @foreach (var cat in categories)
+                {
+                    <button class="cat-btn" onclick="scrollToCategory('@cat.Id')">
+                        @cat.Name
+                    </button>
+                }
+            </div>
+        </aside>
+
+        <!-- Ürünler -->
+        <div class="menu-content">
+            @foreach (var cat in categories)
+            {
+                var catItems = menuItems?.Where(mi => mi.CategoryId == cat.Id).ToList();
+
+                <section class="menu-section" id="cat-@cat.Id">
+                    <div class="menu-section-title">
+                        @cat.Name
+                        <span class="cat-badge">@(catItems?.Count ?? 0) ürün</span>
+                    </div>
+
+                    @if (catItems == null || !catItems.Any())
+                    {
+                        <p style="color:#8892a4; font-size:.875rem;">Bu kategoride henüz ürün yok.</p>
+                    }
+                    else
+                    {
+                        <div class="items-grid">
+                            @foreach (var item in catItems)
+                            {
+                                <div class="item-card">
+                                    <h4>@item.Name</h4>
+                                    <p>@(string.IsNullOrWhiteSpace(item.Description) ? "Açıklama eklenmemiş." : item.Description)</p>
+                                    <div class="item-price">@item.Price.ToString("N2") ₺</div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </section>
+            }
+        </div>
+    </div>
+}
+
+@section Scripts {
+<script>
+    function scrollToCategory(id) {
+        const el = document.getElementById('cat-' + id);
+        if (el) {
+            const offset = 90;
+            const top = el.getBoundingClientRect().top + window.scrollY - offset;
+            window.scrollTo({ top, behavior: 'smooth' });
+        }
+        // aktif buton
+        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+    }
+
+    // Scroll spy — aktif kategori vurgula
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const id = entry.target.id.replace('cat-', '');
+                document.querySelectorAll('.cat-btn').forEach((btn, i) => {
+                    const cats = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(categories?.Select(c => c.Id.ToString()).ToList() ?? new List<string>()));
+                    if (cats[i] === id) btn.classList.add('active');
+                    else btn.classList.remove('active');
+                });
+            }
+        });
+    }, { rootMargin: '-30% 0px -60% 0px' });
+
+    document.querySelectorAll('.menu-section').forEach(s => observer.observe(s));
+
+    // İlk butonu aktif yap
+    const firstBtn = document.querySelector('.cat-btn');
+    if (firstBtn) firstBtn.classList.add('active');
+</script>
+}

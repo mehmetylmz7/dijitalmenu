@@ -1,0 +1,44 @@
+@model List<EntityLayer.Concrete.Category>
+@{
+    ViewData["Title"] = "Kategoriler";
+}
+
+<div class="card">
+    <div class="card-header">
+        <h5>🏷️ Kategorilerim</h5>
+        <a asp-action="Create" class="btn btn-primary btn-sm">➕ Yeni Kategori</a>
+    </div>
+    @if (!Model.Any())
+    {
+        <div style="padding:48px;text-align:center;color:#7d8590;">
+            <div style="font-size:3rem;margin-bottom:12px;">🏷️</div>
+            <p style="font-size:.9rem;">Henüz kategori eklenmemiş. İlk kategorinizi ekleyin!</p>
+        </div>
+    }
+    else
+    {
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Kategori Adı</th>
+                    <th>İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td><span class="badge badge-green">@item.Id</span></td>
+                        <td>@item.Name</td>
+                        <td style="display:flex;gap:8px;">
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">✏️ Düzenle</a>
+                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger"
+                               onclick="return confirm('Bu kategoriyi silmek istediğinize emin misiniz?')">🗑️ Sil</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

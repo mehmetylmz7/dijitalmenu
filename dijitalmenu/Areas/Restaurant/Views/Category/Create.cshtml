@@ -1,0 +1,22 @@
+@{
+    ViewData["Title"] = "Yeni Kategori";
+}
+<div class="card" style="max-width:560px;">
+    <div class="card-header"><h5>🏷️ Yeni Kategori Ekle</h5></div>
+    <div class="card-body">
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert-error">⚠️ @ViewBag.Error</div>
+        }
+        <form method="post" asp-action="Create">
+            <div class="form-group">
+                <label class="form-label">Kategori Adı</label>
+                <input type="text" name="name" class="form-control" placeholder="Örn: Ana Yemekler, Tatlılar, İçecekler" required autofocus />
+            </div>
+            <div style="display:flex;gap:10px;margin-top:8px;">
+                <button type="submit" class="btn btn-primary">💾 Kaydet</button>
+                <a asp-action="Index" class="btn btn-secondary">İptal</a>
+            </div>
+        </form>
+    </div>
+</div>

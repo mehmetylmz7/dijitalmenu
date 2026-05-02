@@ -1,8 +1,183 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model List<EntityLayer.Concrete.Restaurant>
+@{
+    ViewData["Title"] = "Restoranlar";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+@section Styles {
+<style>
+    /* ─── Hero ─── */
+    .hero {
+        background: radial-gradient(ellipse at 40% 0%, rgba(108,99,255,.25) 0%, transparent 60%),
+                    radial-gradient(ellipse at 80% 60%, rgba(167,139,250,.12) 0%, transparent 50%);
+        padding: 80px 24px 60px;
+        text-align: center;
+    }
+
+    .hero h1 {
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        font-weight: 800;
+        line-height: 1.15;
+        margin-bottom: 16px;
+    }
+
+    .hero h1 .gradient {
+        background: linear-gradient(135deg, #6c63ff, #a78bfa, #60a5fa);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .hero p {
+        color: #8892a4;
+        font-size: 1.1rem;
+        max-width: 480px;
+        margin: 0 auto 8px;
+        line-height: 1.7;
+    }
+
+    /* ─── Restaurant Grid ─── */
+    .section {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 48px 24px 80px;
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 28px;
+    }
+
+    .section-header h2 {
+        font-size: 1.4rem;
+        font-weight: 700;
+    }
+
+    .section-header span {
+        font-size: .875rem;
+        color: #8892a4;
+        background: #21253a;
+        padding: 4px 12px;
+        border-radius: 20px;
+    }
+
+    .restaurant-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+    }
+
+    .restaurant-card {
+        background: #1a1d27;
+        border: 1px solid #2d3148;
+        border-radius: 20px;
+        overflow: hidden;
+        transition: transform .25s, border-color .25s, box-shadow .25s;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    .restaurant-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(108,99,255,.5);
+        box-shadow: 0 12px 40px rgba(108,99,255,.15);
+    }
+
+    .card-thumb {
+        height: 140px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3.5rem;
+        background: linear-gradient(135deg, #21253a, #2d3148);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .card-thumb::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to bottom, transparent 50%, rgba(26,29,39,.6));
+    }
+
+    .card-body {
+        padding: 20px;
+    }
+
+    .card-body h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .card-body p {
+        font-size: .8rem;
+        color: #8892a4;
+        margin-bottom: 16px;
+    }
+
+    .card-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: .85rem;
+        font-weight: 600;
+        color: #a78bfa;
+    }
+
+    .card-cta::after { content: '→'; transition: transform .2s; }
+    .restaurant-card:hover .card-cta::after { transform: translateX(4px); }
+
+    /* ─── Empty ─── */
+    .empty-state {
+        text-align: center;
+        padding: 80px 24px;
+        color: #8892a4;
+    }
+
+    .empty-state .icon { font-size: 4rem; margin-bottom: 16px; display: block; }
+    .empty-state h3 { font-size: 1.2rem; font-weight: 600; color: #e2e8f0; margin-bottom: 8px; }
+</style>
+}
+
+<div class="hero">
+    <h1>🍽️ <span class="gradient">Dijital Menü</span></h1>
+    <p>Restoranları keşfedin ve menülerini anında görüntüleyin.</p>
+</div>
+
+<div class="section">
+    <div class="section-header">
+        <h2>Restoranlar</h2>
+        <span>@Model.Count restoran</span>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <span class="icon">🏪</span>
+            <h3>Henüz restoran eklenmemiş</h3>
+            <p>Admin panelinden restoran ekleyebilirsiniz.</p>
+        </div>
+    }
+    else
+    {
+        <div class="restaurant-grid">
+            @foreach (var r in Model)
+            {
+                <a class="restaurant-card" asp-controller="Home" asp-action="Menu" asp-route-id="@r.Id">
+                    <div class="card-thumb">
+                        🍽️
+                    </div>
+                    <div class="card-body">
+                        <h3>@r.Name</h3>
+                        <p>Menüyü görüntülemek için tıklayın</p>
+                        <span class="card-cta">Menüyü Gör</span>
+                    </div>
+                </a>
+            }
+        </div>
+    }
 </div>

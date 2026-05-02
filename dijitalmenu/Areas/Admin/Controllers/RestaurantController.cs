@@ -2,6 +2,8 @@ using BusinessLayer.Abstract;
 using dijitalmenu.Filters;
 using EntityLayer.Concrete;
 using Microsoft.AspNetCore.Mvc;
+using RestaurantEntity = EntityLayer.Concrete.Restaurant;
+
 
 namespace dijitalmenu.Areas.Admin.Controllers
 {
@@ -32,7 +34,7 @@ namespace dijitalmenu.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(Restaurant restaurant)
+        public IActionResult Create(RestaurantEntity restaurant)
         {
             _restaurantService.TInsert(restaurant);
             return RedirectToAction("Index");
@@ -47,7 +49,7 @@ namespace dijitalmenu.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public IActionResult Edit(Restaurant restaurant)
+        public IActionResult Edit(RestaurantEntity restaurant)
         {
             _restaurantService.TUpdate(restaurant);
             return RedirectToAction("Index");

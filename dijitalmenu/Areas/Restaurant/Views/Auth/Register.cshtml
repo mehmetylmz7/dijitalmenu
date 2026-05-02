@@ -1,0 +1,376 @@
+@{
+    Layout = null;
+
+    // 3 sabit tema — Program.cs'te seed edilir (her zaman ID 1, 2, 3)
+    var builtInThemes = new[]
+    {
+        new { Id = 1, Name = "Doğal Yeşil",    Emoji = "🌿", Desc = "Sade ve ferah tasarım",
+              Accent = "#22c55e", Bg1 = "#1a2e1e", Bg2 = "#1c2f1e" },
+        new { Id = 2, Name = "Ateşli Turuncu", Emoji = "🔥", Desc = "Enerjik ve bold görünüm",
+              Accent = "#f97316", Bg1 = "#2e1a0e", Bg2 = "#2f1c0e" },
+        new { Id = 3, Name = "Okyanus Mavisi", Emoji = "🌊", Desc = "Sakin ve zarif his",
+              Accent = "#38bdf8", Bg1 = "#0e1e2e", Bg2 = "#0e1f2f" },
+    };
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Restoran Kaydı — Dijital Menü</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0d1117;
+            color: #e6edf3;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .bg {
+            position: fixed; inset: 0;
+            background: radial-gradient(ellipse at 70% 30%, rgba(34,197,94,.12) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .card {
+            position: relative;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 24px;
+            padding: 48px 44px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 25px 60px rgba(0,0,0,.5);
+        }
+
+        .logo { text-align: center; margin-bottom: 32px; }
+        .logo .emoji { font-size: 3rem; display: block; margin-bottom: 12px; }
+        .logo h1 { font-size: 1.5rem; font-weight: 700; background: linear-gradient(135deg, #22c55e, #4ade80); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .logo p { font-size: .85rem; color: #7d8590; margin-top: 4px; }
+
+        .section-divider {
+            font-size: .7rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: .08em;
+            color: #7d8590; margin: 20px 0 12px;
+            padding-top: 12px; border-top: 1px solid #21262d;
+        }
+
+        .form-group { margin-bottom: 16px; }
+        .form-label { display: block; font-size: .85rem; font-weight: 500; color: #7d8590; margin-bottom: 8px; }
+
+        .form-control {
+            width: 100%; padding: 12px 16px;
+            background: #1c2128; border: 1px solid #30363d;
+            border-radius: 12px; color: #e6edf3;
+            font-size: .9rem; font-family: inherit;
+            outline: none; transition: border-color .2s;
+        }
+        .form-control:focus { border-color: #22c55e; }
+
+        /* ─── Tema Seç Butonu ─── */
+        .theme-picker-btn {
+            width: 100%;
+            padding: 12px 16px;
+            background: #1c2128;
+            border: 1px dashed #30363d;
+            border-radius: 12px;
+            color: #7d8590;
+            font-size: .9rem;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: border-color .2s, color .2s;
+        }
+        .theme-picker-btn:hover { border-color: #22c55e; color: #e6edf3; }
+        .theme-picker-btn .selected-preview {
+            display: flex; align-items: center; gap: 10px;
+            font-weight: 500;
+        }
+        .theme-picker-btn .dot {
+            width: 12px; height: 12px;
+            border-radius: 50%;
+            background: #22c55e;
+            display: none;
+        }
+        .theme-picker-btn.has-selection { border-style: solid; border-color: #22c55e; color: #e6edf3; }
+        .theme-picker-btn.has-selection .dot { display: block; }
+        .theme-picker-btn .arrow { transition: transform .25s; }
+        .theme-picker-btn.open .arrow { transform: rotate(180deg); }
+
+        /* ─── Tema Paneli ─── */
+        .theme-panel {
+            display: none;
+            margin-top: 10px;
+            background: #1c2128;
+            border: 1px solid #30363d;
+            border-radius: 16px;
+            padding: 16px;
+            gap: 12px;
+        }
+        .theme-panel.show { display: flex; flex-direction: column; }
+
+        /* ─── Tema Kartı ─── */
+        .theme-card {
+            border: 2px solid #30363d;
+            border-radius: 14px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: border-color .2s, transform .2s, box-shadow .2s;
+        }
+        .theme-card:hover { border-color: #7d8590; transform: translateY(-2px); }
+        .theme-card.selected { border-color: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,.2); }
+
+        /* Mock menü önizlemesi */
+        .mock-menu {
+            padding: 12px 14px 10px;
+            position: relative;
+        }
+
+        .mock-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+        .mock-dot { width: 6px; height: 6px; border-radius: 50%; }
+        .mock-title { height: 6px; border-radius: 4px; flex: 1; opacity: .6; }
+
+        .mock-cats {
+            display: flex; gap: 5px; margin-bottom: 10px;
+        }
+        .mock-cat {
+            height: 18px; border-radius: 20px;
+            font-size: .6rem; font-weight: 600;
+            display: flex; align-items: center;
+            padding: 0 8px;
+        }
+
+        .mock-items { display: flex; flex-direction: column; gap: 6px; }
+        .mock-item {
+            display: flex; align-items: center;
+            justify-content: space-between;
+            padding: 8px 10px;
+            border-radius: 8px;
+        }
+        .mock-item-left { display: flex; flex-direction: column; gap: 3px; }
+        .mock-item-name { height: 7px; width: 80px; border-radius: 4px; opacity: .7; }
+        .mock-item-desc { height: 5px; width: 55px; border-radius: 4px; opacity: .35; }
+        .mock-item-price { height: 8px; width: 30px; border-radius: 4px; opacity: .8; }
+
+        /* Kart alt bilgi */
+        .theme-card-info {
+            padding: 10px 14px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid rgba(255,255,255,.06);
+            background: rgba(0,0,0,.2);
+        }
+        .theme-card-info .name {
+            font-size: .85rem;
+            font-weight: 600;
+        }
+        .theme-card-info .desc {
+            font-size: .72rem;
+            color: #7d8590;
+            margin-top: 2px;
+        }
+        .theme-card-info .check {
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            border: 2px solid #30363d;
+            display: flex; align-items: center; justify-content: center;
+            font-size: .7rem;
+            transition: all .2s;
+        }
+        .theme-card.selected .check {
+            background: #22c55e;
+            border-color: #22c55e;
+            color: #0d1117;
+        }
+
+        /* ─── Submit ─── */
+        .btn-submit {
+            width: 100%; padding: 13px;
+            background: linear-gradient(135deg, #22c55e, #4ade80);
+            border: none; border-radius: 12px;
+            color: #0d1117; font-size: 1rem; font-weight: 700;
+            font-family: inherit; cursor: pointer; margin-top: 12px;
+            transition: opacity .2s, transform .2s;
+        }
+        .btn-submit:hover { opacity: .9; transform: translateY(-1px); }
+        .btn-submit:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+
+        .alert-error {
+            background: rgba(248,81,73,.1); border: 1px solid rgba(248,81,73,.3);
+            border-radius: 10px; padding: 12px 16px;
+            color: #f85149; font-size: .875rem; margin-bottom: 20px;
+        }
+
+        .footer-link { text-align: center; margin-top: 20px; font-size: .85rem; color: #7d8590; }
+        .footer-link a { color: #4ade80; text-decoration: none; }
+
+        .no-theme-msg {
+            text-align: center; padding: 20px;
+            color: #7d8590; font-size: .85rem;
+        }
+        .no-theme-msg a { color: #4ade80; }
+    </style>
+</head>
+<body>
+    <div class="bg"></div>
+    <div class="card">
+        <div class="logo">
+            <span class="emoji">🍃</span>
+            <h1>Ücretsiz Kaydolun</h1>
+            <p>Restoranınız için dijital menü oluşturun</p>
+        </div>
+
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert-error">⚠️ @ViewBag.Error</div>
+        }
+
+        <form method="post" asp-area="Restaurant" asp-controller="Auth" asp-action="Register" id="registerForm">
+
+            <div class="section-divider">🏪 Restoran Bilgileri</div>
+
+            <div class="form-group">
+                <label class="form-label">Restoran Adı</label>
+                <input type="text" name="restaurantName" class="form-control"
+                       placeholder="Örn: Lezzet Köşesi" required autofocus />
+            </div>
+
+            <!-- Tema Seçimi -->
+            <div class="form-group">
+                <label class="form-label">Tema</label>
+                <input type="hidden" name="themeId" id="selectedThemeId" value="" />
+
+                <button type="button" class="theme-picker-btn" id="themePickerBtn" onclick="toggleThemePanel()">
+                    <div class="selected-preview">
+                        <div class="dot" id="selectedDot"></div>
+                        <span id="selectedThemeLabel">🎨 Tema Seç</span>
+                    </div>
+                    <span class="arrow">▾</span>
+                </button>
+
+                <div class="theme-panel" id="themePanel">
+                    @foreach (var theme in builtInThemes)
+                    {
+                        <div class="theme-card" id="card-@theme.Id"
+                             onclick="selectTheme(@theme.Id, '@theme.Name', '@theme.Emoji', '@theme.Accent')">
+
+                            <!-- Mock Önizleme -->
+                            <div class="mock-menu" style="background: @theme.Bg1;">
+                                <div class="mock-header">
+                                    <div class="mock-dot" style="background: @theme.Accent;"></div>
+                                    <div class="mock-title" style="background: @theme.Accent;"></div>
+                                </div>
+                                <div class="mock-cats">
+                                    <div class="mock-cat" style="background: @theme.Accent; color: @theme.Bg1;">Tümü</div>
+                                    <div class="mock-cat" style="background: @theme.Bg2; color: @theme.Accent; border: 1px solid @theme.Accent;">Ana</div>
+                                    <div class="mock-cat" style="background: @theme.Bg2; color: @theme.Accent; border: 1px solid @theme.Accent;">Tatlı</div>
+                                </div>
+                                <div class="mock-items">
+                                    <div class="mock-item" style="background: @theme.Bg2;">
+                                        <div class="mock-item-left">
+                                            <div class="mock-item-name" style="background: #e6edf3;"></div>
+                                            <div class="mock-item-desc" style="background: #7d8590;"></div>
+                                        </div>
+                                        <div class="mock-item-price" style="background: @theme.Accent;"></div>
+                                    </div>
+                                    <div class="mock-item" style="background: @theme.Bg2;">
+                                        <div class="mock-item-left">
+                                            <div class="mock-item-name" style="background: #e6edf3; width: 60px;"></div>
+                                            <div class="mock-item-desc" style="background: #7d8590;"></div>
+                                        </div>
+                                        <div class="mock-item-price" style="background: @theme.Accent;"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Kart Alt Bilgi -->
+                            <div class="theme-card-info">
+                                <div>
+                                    <div class="name">@theme.Emoji @theme.Name</div>
+                                    <div class="desc">@theme.Desc</div>
+                                </div>
+                                <div class="check" id="check-@theme.Id">✓</div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+            </div>
+
+            <div class="section-divider">🔐 Hesap Bilgileri</div>
+
+            <div class="form-group">
+                <label class="form-label">Kullanıcı Adı</label>
+                <input type="text" name="username" class="form-control"
+                       placeholder="benzersiz_kullanici_adi" required />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Şifre</label>
+                <input type="password" name="password" class="form-control"
+                       placeholder="••••••••" required />
+            </div>
+
+            <button type="submit" class="btn-submit" id="submitBtn">
+                Restoranımı Kur →
+            </button>
+        </form>
+
+        <div class="footer-link">
+            Zaten hesabınız var mı?
+            <a asp-area="Restaurant" asp-controller="Auth" asp-action="Login">Giriş yapın</a>
+        </div>
+    </div>
+
+    <script>
+        function toggleThemePanel() {
+            const panel = document.getElementById('themePanel');
+            const btn   = document.getElementById('themePickerBtn');
+            panel.classList.toggle('show');
+            btn.classList.toggle('open');
+        }
+
+        function selectTheme(id, name, emoji, accent) {
+            // Hidden input güncelle
+            document.getElementById('selectedThemeId').value = id;
+
+            // Tüm kartların seçimini kaldır
+            document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('selected'));
+            // Seçilen kartı aktif yap
+            document.getElementById('card-' + id).classList.add('selected');
+
+            // Buton güncelle
+            const btn = document.getElementById('themePickerBtn');
+            btn.classList.add('has-selection', 'open');
+            document.getElementById('selectedDot').style.background = accent;
+            document.getElementById('selectedThemeLabel').textContent = emoji + ' ' + name + ' seçildi';
+
+            // Submit aktif et
+            document.getElementById('submitBtn').disabled = false;
+
+            // Panel açık kalsın (ya da kapat — kullanıcı seçti)
+            // Paneli kapat
+            setTimeout(() => {
+                document.getElementById('themePanel').classList.remove('show');
+                btn.classList.remove('open');
+            }, 300);
+        }
+    </script>
+</body>
+</html>
+
