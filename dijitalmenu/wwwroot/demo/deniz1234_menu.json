@@ -1,0 +1,366 @@
+{
+  "username": "deniz1234",
+  "restaurantName": "Deniz Restaurant",
+  "categories": [
+    {
+      "name": "Kahvaltılıklar",
+      "items": [
+        { "name": "Serpme Kahvaltı", "price": 500.0, "description": "Kişi Başı Çay kahve dahil" },
+        { "name": "Yetişkin kahvaltı tabağı", "price": 500.0, "description": "" },
+        { "name": "Sıcak kahvaltı tabağı", "price": 450.0, "description": "" },
+        { "name": "Sahanda Omlet", "price": 80.0, "description": "" },
+        { "name": "Sahanda Sucuklu Omlet", "price": 180.0, "description": "" },
+        { "name": "Sahanda Menemen", "price": 150.0, "description": "" },
+        { "name": "Sahanda Sucuk", "price": 220.0, "description": "" },
+        { "name": "Sahanda Sosis", "price": 120.0, "description": "" },
+        { "name": "Sahanda Peynirli Omlet", "price": 140.0, "description": "" },
+        { "name": "Sigara Böreği", "price": 200.0, "description": "" },
+        { "name": "Patates Cips Büyük", "price": 300.0, "description": "" },
+        { "name": "Patates Cips Küçük", "price": 140.0, "description": "" },
+        { "name": "Kızarmış Sosis", "price": 160.0, "description": "" },
+        { "name": "Çıtır Tabak", "price": 280.0, "description": "" },
+        { "name": "Kızarmış peynir 4 adet", "price": 200.0, "description": "2 adet 100₺" },
+        { "name": "Biberli ekmek", "price": 100.0, "description": "" },
+        { "name": "Pankek", "price": 150.0, "description": "" },
+        { "name": "Kavrulmuş tuzlu yoğurt", "price": 120.0, "description": "" },
+        { "name": "Mercimek çorbası", "price": 80.0, "description": "" },
+        { "name": "Çocuk tabağı", "price": 300.0, "description": "" }
+      ]
+    },
+    {
+      "name": "Mezeler",
+      "items": [
+        { "name": "Homus tereyağlı", "price": 250.0, "description": "" },
+        { "name": "Humus", "price": 200.0, "description": "Zeytinyağlı" },
+        { "name": "Ali Nazik", "price": 280.0, "description": "" },
+        { "name": "Babağannuç", "price": 200.0, "description": "" },
+        { "name": "Süzme", "price": 190.0, "description": "" },
+        { "name": "Kekik Salatası", "price": 200.0, "description": "" },
+        { "name": "Tarator", "price": 200.0, "description": "" },
+        { "name": "Prenses", "price": 190.0, "description": "" },
+        { "name": "Patlıcan Yoğurtlama", "price": 200.0, "description": "" },
+        { "name": "Biber Yoğurtlama", "price": 200.0, "description": "" },
+        { "name": "Zengin", "price": 200.0, "description": "" },
+        { "name": "Katı Cacık", "price": 190.0, "description": "" },
+        { "name": "Acılı Atom", "price": 220.0, "description": "" },
+        { "name": "Avokado-Meze", "price": 240.0, "description": "" },
+        { "name": "Shayhuti", "price": 200.0, "description": "" },
+        { "name": "Barbunya", "price": 200.0, "description": "" },
+        { "name": "Zeytin", "price": 150.0, "description": "Siyah veya yeşil" },
+        { "name": "Ordövr Tek", "price": 250.0, "description": "" },
+        { "name": "Ordövr Duble", "price": 340.0, "description": "" },
+        { "name": "Peynir Söğüş", "price": 350.0, "description": "" },
+        { "name": "Söğüş tabağı", "price": 100.0, "description": "Marul salatalık" },
+        { "name": "Ezine Peynir", "price": 350.0, "description": "" },
+        { "name": "Gözlenmiş", "price": 150.0, "description": "Domates, biber, patlıcan, soğan" },
+        { "name": "Mimoza", "price": 100.0, "description": "Havuç veya salatalık" }
+      ]
+    },
+    {
+      "name": "Izgara Çeşitleri",
+      "items": [
+        { "name": "Kıyma Tabak 120 gr", "price": 280.0, "description": "Çift şiş 500₺" },
+        { "name": "Kuşbaşı Tabak 130 gr", "price": 280.0, "description": "Çift şiş 500₺" },
+        { "name": "Şiş Tavuk Tabak 180 gr", "price": 280.0, "description": "Çift şiş 500₺" },
+        { "name": "Tavuk Pirzola", "price": 320.0, "description": "2 parça" },
+        { "name": "Kanat", "price": 300.0, "description": "8 adet incikli" },
+        { "name": "Karışık Izgara", "price": 1050.0, "description": "Kıyma, kuşbaşı, kanat, şiştavuk" },
+        { "name": "Ful karışık ızgara", "price": 1800.0, "description": "Kıyma, kuşbaşı, kanat, şiştavuk, beyti, tavuk pirzola" },
+        { "name": "Kağıt Kebabı", "price": 450.0, "description": "" },
+        { "name": "Ay Beyti Soslu", "price": 350.0, "description": "" },
+        { "name": "Kuzu Pirzola", "price": 600.0, "description": "" },
+        { "name": "Tepsi kebab çömlek", "price": 900.0, "description": "500 gr" },
+        { "name": "Beytizade", "price": 350.0, "description": "" },
+        { "name": "Ay Tost", "price": 220.0, "description": "" },
+        { "name": "Ay Tost Duble", "price": 270.0, "description": "" },
+        { "name": "Ay Tost Kasap Sucuklu", "price": 250.0, "description": "" },
+        { "name": "Ay Tost Kıymalı", "price": 350.0, "description": "" }
+      ]
+    },
+    {
+      "name": "Fastfood & Tava",
+      "items": [
+        { "name": "Çökertme Kebabı", "price": 420.0, "description": "" },
+        { "name": "Kaşarlı Mantarlı Tavuk", "price": 400.0, "description": "Çömlekte" },
+        { "name": "Kremalı Mantarlı Patates", "price": 320.0, "description": "" },
+        { "name": "Köri Soslu Tavuk", "price": 400.0, "description": "" },
+        { "name": "Kremalı Mantarlı tavuk", "price": 400.0, "description": "" },
+        { "name": "Meksika soslu tavuk", "price": 400.0, "description": "" },
+        { "name": "Hünkar beğendi", "price": 350.0, "description": "" },
+        { "name": "Kavurma", "price": 420.0, "description": "" },
+        { "name": "Et Sote", "price": 450.0, "description": "200 gr" },
+        { "name": "Tavuk Sote", "price": 400.0, "description": "200 gr" }
+      ]
+    },
+    {
+      "name": "Hamburger Çeşitleri",
+      "items": [
+        { "name": "Hamburger", "price": 320.0, "description": "Dana eti" },
+        { "name": "Hamburger Menü", "price": 360.0, "description": "Dana eti" },
+        { "name": "Double Köfte Hamburger", "price": 470.0, "description": "Dana eti" },
+        { "name": "Cheese Burger Menü", "price": 380.0, "description": "" },
+        { "name": "Çıtır burger", "price": 300.0, "description": "" },
+        { "name": "Cheese Burger", "price": 340.0, "description": "" },
+        { "name": "Cheese Burger Double Köfte", "price": 500.0, "description": "" },
+        { "name": "Double Köfte Cheese Burger Menü", "price": 530.0, "description": "" },
+        { "name": "Tavuk Burger", "price": 300.0, "description": "" },
+        { "name": "Tavuk Cheese Burger", "price": 320.0, "description": "" },
+        { "name": "Tavuk Cheese Burger Menü", "price": 360.0, "description": "" },
+        { "name": "Double Köfte Tavuk Burger", "price": 450.0, "description": "" }
+      ]
+    },
+    {
+      "name": "MAKARNALAR",
+      "items": [
+        { "name": "Biftekli Alfredo", "price": 450.0, "description": "" },
+        { "name": "Chicken Alfredo penne", "price": 350.0, "description": "" },
+        { "name": "Chicken Alfredo", "price": 350.0, "description": "" },
+        { "name": "Spaghetti", "price": 300.0, "description": "" },
+        { "name": "Polines spaghetti", "price": 380.0, "description": "" },
+        { "name": "Pesto soslu penne", "price": 300.0, "description": "" }
+      ]
+    },
+    {
+      "name": "Pizza & Pide",
+      "items": [
+        { "name": "Karışık Pizza", "price": 280.0, "description": "Büyük boy 380₺" },
+        { "name": "Etli Pizza", "price": 370.0, "description": "Büyük boy 470₺" },
+        { "name": "Vejeteryan Pizza", "price": 280.0, "description": "Büyük boy 380₺" },
+        { "name": "Ballı pizza", "price": 300.0, "description": "" },
+        { "name": "Porsiyon Lahmacun", "price": 250.0, "description": "2 Adet" },
+        { "name": "Fındık Lahmacun", "price": 80.0, "description": "1 Adet" },
+        { "name": "Sucuklu Pizza", "price": 280.0, "description": "" },
+        { "name": "Margarita Pizza", "price": 250.0, "description": "" },
+        { "name": "Kıymalı Pide", "price": 300.0, "description": "" },
+        { "name": "Kuşbaşı pide", "price": 300.0, "description": "" },
+        { "name": "Peynirli Pide", "price": 200.0, "description": "" },
+        { "name": "Zahter Pide", "price": 150.0, "description": "" }
+      ]
+    },
+    {
+      "name": "Atıştırmalar",
+      "items": [
+        { "name": "Çıtır Tabak", "price": 320.0, "description": "" },
+        { "name": "Kaju Tavuk Patates", "price": 330.0, "description": "" },
+        { "name": "Soğan Halkası 8 adet + patates", "price": 250.0, "description": "Sade soğan halkası 12 adet 150₺" },
+        { "name": "Nugget patates (10 Parça)", "price": 250.0, "description": "Patates" },
+        { "name": "Sigara Böreği patates", "price": 250.0, "description": "Patates" },
+        { "name": "Patates Cips Küçük", "price": 200.0, "description": "Patates Büyük 300₺" },
+        { "name": "Elma Dilim Patates Küçük", "price": 200.0, "description": "Elma Dilim Patates Büyük 300₺" },
+        { "name": "Kızarmış Sosis Patates", "price": 250.0, "description": "" }
+      ]
+    },
+    {
+      "name": "(DÜRÜM) WRAP",
+      "items": [
+        { "name": "Kıyma dürüm", "price": 250.0, "description": "" },
+        { "name": "Kuşbaşı dürüm", "price": 250.0, "description": "" },
+        { "name": "Şiştavuk dürüm", "price": 250.0, "description": "" },
+        { "name": "Kaju wrap", "price": 280.0, "description": "Patates" },
+        { "name": "Et wrap", "price": 350.0, "description": "Patates" },
+        { "name": "Köri soslu wrap", "price": 300.0, "description": "Patates" },
+        { "name": "Tavuk wrap", "price": 300.0, "description": "Patates" },
+        { "name": "Meksika soslu wrap", "price": 300.0, "description": "Patates" },
+        { "name": "Kremalı tavuk wrap", "price": 300.0, "description": "Patates" }
+      ]
+    },
+    {
+      "name": "Salatalar",
+      "items": [
+        { "name": "Mevsim Salatası", "price": 270.0, "description": "" },
+        { "name": "Çoban Salatası", "price": 270.0, "description": "" },
+        { "name": "Roka Salatası", "price": 270.0, "description": "" },
+        { "name": "Tavuklu Salata", "price": 360.0, "description": "" },
+        { "name": "Ton Balıklı Salata", "price": 330.0, "description": "" },
+        { "name": "Gavur Dağı( Kaşık Salata)", "price": 270.0, "description": "" },
+        { "name": "Sezar salata tavuklu", "price": 360.0, "description": "Tavuklu" },
+        { "name": "BOWL TAVUK SALATA", "price": 400.0, "description": "" }
+      ]
+    },
+    {
+      "name": "Tatlılar",
+      "items": [
+        { "name": "Waffle", "price": 280.0, "description": "" },
+        { "name": "Fondü", "price": 400.0, "description": "" },
+        { "name": "Waffle salatası", "price": 300.0, "description": "" },
+        { "name": "Bardak waffle", "price": 250.0, "description": "" },
+        { "name": "Dubai çikolata", "price": 350.0, "description": "" },
+        { "name": "Dubai cup", "price": 220.0, "description": "" },
+        { "name": "Fıstıklı Treliche", "price": 200.0, "description": "" },
+        { "name": "Treliche Cake", "price": 180.0, "description": "" },
+        { "name": "Çilekli Magnolya", "price": 200.0, "description": "" },
+        { "name": "Çikolatalı Magnolya", "price": 200.0, "description": "" },
+        { "name": "Ay Sarma", "price": 180.0, "description": "" },
+        { "name": "Tiramisu Pasta", "price": 220.0, "description": "" },
+        { "name": "Şam Tatlısı", "price": 150.0, "description": "" },
+        { "name": "Cheesecake", "price": 200.0, "description": "" },
+        { "name": "Peynirli Künefe", "price": 180.0, "description": "" },
+        { "name": "Mentollü Künefe", "price": 200.0, "description": "" },
+        { "name": "Fıstıkzade", "price": 260.0, "description": "" },
+        { "name": "Muzlu Künefe", "price": 200.0, "description": "" },
+        { "name": "Dondurmalı Künefe", "price": 210.0, "description": "" },
+        { "name": "Haytalı", "price": 200.0, "description": "" },
+        { "name": "Dondurma", "price": 150.0, "description": "" },
+        { "name": "Fırında sütlaç", "price": 160.0, "description": "" }
+      ]
+    },
+    {
+      "name": "Vitamin Bar",
+      "items": [
+        { "name": "Meyve Kokteyl", "price": 220.0, "description": "" },
+        { "name": "Avokado Çerez", "price": 300.0, "description": "" },
+        { "name": "Atom", "price": 250.0, "description": "" },
+        { "name": "Erosun kalbi", "price": 220.0, "description": "" },
+        { "name": "Akdeniz Kokteyl", "price": 200.0, "description": "" },
+        { "name": "Frozen", "price": 200.0, "description": "" },
+        { "name": "Çikolatalı Milkshake", "price": 200.0, "description": "" },
+        { "name": "Çilekli Milkshake", "price": 200.0, "description": "" },
+        { "name": "Limonata", "price": 180.0, "description": "" },
+        { "name": "Portakal Suyu", "price": 180.0, "description": "" },
+        { "name": "Muzlu Milkshake", "price": 200.0, "description": "" },
+        { "name": "Dondurmalı meyve salatası", "price": 280.0, "description": "" },
+        { "name": "Katlı Meyve", "price": 400.0, "description": "" },
+        { "name": "Meyve Tabak", "price": 280.0, "description": "" },
+        { "name": "Dondurma Kase", "price": 180.0, "description": "" },
+        { "name": "Dondurma Külah", "price": 60.0, "description": "" },
+        { "name": "Serpme Meyve", "price": 400.0, "description": "" }
+      ]
+    },
+    {
+      "name": "Soğuk Meşrubatlar",
+      "items": [
+        { "name": "Küçük Su", "price": 30.0, "description": "" },
+        { "name": "Büyük Su", "price": 50.0, "description": "" },
+        { "name": "Churchill", "price": 70.0, "description": "" },
+        { "name": "Sade Soda", "price": 50.0, "description": "" },
+        { "name": "Meyveli Soda", "price": 60.0, "description": "" },
+        { "name": "Ayran", "price": 50.0, "description": "" },
+        { "name": "Kutu Pepsi", "price": 100.0, "description": "" },
+        { "name": "Coca Cola Cam Şişe", "price": 100.0, "description": "" },
+        { "name": "Ankara Gazoz", "price": 70.0, "description": "" },
+        { "name": "Ice Tea", "price": 100.0, "description": "" },
+        { "name": "Sprite", "price": 100.0, "description": "" },
+        { "name": "Redbull", "price": 150.0, "description": "" },
+        { "name": "Şalgam", "price": 150.0, "description": "Şalgam Büyük 60₺" },
+        { "name": "Fanta Cam Şişe", "price": 100.0, "description": "" },
+        { "name": "Meyvesuyu Şeftali", "price": 100.0, "description": "" },
+        { "name": "Meyvesuyu Vişne", "price": 100.0, "description": "" }
+      ]
+    },
+    {
+      "name": "Dünya Kahveleri",
+      "items": [
+        { "name": "Mocha", "price": 170.0, "description": "" },
+        { "name": "Ice Mocha", "price": 170.0, "description": "" },
+        { "name": "Ice Choclate Mocha", "price": 170.0, "description": "" },
+        { "name": "White Choclate Mocha", "price": 170.0, "description": "" },
+        { "name": "Ice White Choclate Mocha", "price": 170.0, "description": "" },
+        { "name": "Ice Caramel Mocha", "price": 170.0, "description": "" },
+        { "name": "Choclate Mocha", "price": 170.0, "description": "" },
+        { "name": "Caramel Mocha", "price": 170.0, "description": "" },
+        { "name": "Latte", "price": 170.0, "description": "" },
+        { "name": "Ice Latte", "price": 170.0, "description": "" },
+        { "name": "Choclate Latte", "price": 170.0, "description": "" },
+        { "name": "Caramel Latte", "price": 170.0, "description": "" },
+        { "name": "Ice Vanilla Latte", "price": 170.0, "description": "" },
+        { "name": "Frappe", "price": 200.0, "description": "" },
+        { "name": "Ice Frappe", "price": 170.0, "description": "" },
+        { "name": "Cappuccino", "price": 170.0, "description": "" },
+        { "name": "Caramel Macchiato", "price": 170.0, "description": "" },
+        { "name": "Dalgona", "price": 170.0, "description": "" },
+        { "name": "Americano", "price": 130.0, "description": "" },
+        { "name": "Ice Americano", "price": 130.0, "description": "" },
+        { "name": "Filtre kahve", "price": 120.0, "description": "" }
+      ]
+    },
+    {
+      "name": "Sıcak İçecekler",
+      "items": [
+        { "name": "Çay", "price": 25.0, "description": "" },
+        { "name": "Double Çay", "price": 40.0, "description": "" },
+        { "name": "Kahve Fincan", "price": 80.0, "description": "" },
+        { "name": "Kahve Süvari", "price": 80.0, "description": "" },
+        { "name": "Nescafe", "price": 100.0, "description": "" },
+        { "name": "Süt", "price": 80.0, "description": "" },
+        { "name": "Taze Sütlü Nescafe", "price": 120.0, "description": "" },
+        { "name": "Sıcak Çikolata", "price": 160.0, "description": "" },
+        { "name": "Sahlep", "price": 150.0, "description": "" },
+        { "name": "Kekik", "price": 150.0, "description": "" },
+        { "name": "Karışık Bitki Çayı", "price": 150.0, "description": "" },
+        { "name": "Zencefil & Limon", "price": 150.0, "description": "" },
+        { "name": "Kuşburnu", "price": 150.0, "description": "" },
+        { "name": "Ihlamur", "price": 160.0, "description": "" },
+        { "name": "Yeşil Çay", "price": 150.0, "description": "" },
+        { "name": "Ada Çayı", "price": 150.0, "description": "" },
+        { "name": "Sıcak Oralet Çeşitleri", "price": 40.0, "description": "Kivi, Limon, Portakal, nane limon" },
+        { "name": "Menengiç kahvesi", "price": 100.0, "description": "" },
+        { "name": "Dibek kahvesi", "price": 100.0, "description": "" }
+      ]
+    },
+    {
+      "name": "Bira Çeşitleri",
+      "items": [
+        { "name": "Tuborg", "price": 200.0, "description": "" },
+        { "name": "Carlsberg siyah", "price": 270.0, "description": "" },
+        { "name": "Tuborg Kırmızı", "price": 220.0, "description": "" },
+        { "name": "Tuborg Filtresiz", "price": 200.0, "description": "" },
+        { "name": "Bomonti Filtresiz", "price": 200.0, "description": "" },
+        { "name": "Carlsberg", "price": 200.0, "description": "" },
+        { "name": "Heineken", "price": 220.0, "description": "" },
+        { "name": "Miller", "price": 210.0, "description": "" },
+        { "name": "Corona", "price": 240.0, "description": "" },
+        { "name": "Sol", "price": 210.0, "description": "" },
+        { "name": "Weihenstephaner", "price": 220.0, "description": "" },
+        { "name": "Weihenstephaner Vitus", "price": 220.0, "description": "" },
+        { "name": "Desperados", "price": 220.0, "description": "" }
+      ]
+    },
+    {
+      "name": "İçki Çeşitleri",
+      "items": [
+        { "name": "Chivas Regal 18 years", "price": 5980.0, "description": "70 CL" },
+        { "name": "Chivas regal", "price": 2720.0, "description": "35 cl 1495₺ / 50 cl 2115₺ / 70 cl 2720₺ / 100 cl 3735₺" },
+        { "name": "Black Label", "price": 2595.0, "description": "35 CL 1425₺ / 50 CL 2010₺ / 70 CL 2595₺ / 100 cl 3545₺" },
+        { "name": "Dimple Golden 70 CL", "price": 2200.0, "description": "" },
+        { "name": "Yeni Rakı", "price": 1785.0, "description": "20 CL 890₺ / 35 CL 1000₺ / 50 CL 1395₺ / 70 CL 1785₺ / 100 CL 2320₺" },
+        { "name": "Tekirdağ", "price": 1915.0, "description": "20 CL 890₺ / 35 CL 1075₺ / 50 CL 1495₺ / 70 CL 1915₺ / 100 CL 2500₺" },
+        { "name": "Tekirdağ Altın Seri", "price": 2300.0, "description": "20 CL 950₺ / 35 CL 1295₺ / 50 CL 1785₺ / 70 CL 2300₺ / 100 cl 2970₺" },
+        { "name": "Beylerbeyi Rakı", "price": 2590.0, "description": "20 cl 1150₺ / 35 cl 1435₺ / 50 cl 1980₺ / 70 cl 2590₺ / 100 cl 3290₺" },
+        { "name": "Wyborowa Votka", "price": 1595.0, "description": "35 CL 800₺ / 50 CL 1200₺ / 70 CL 1595₺ / 100 cl 2200₺" },
+        { "name": "Olmeca Tekila", "price": 2075.0, "description": "35 CL 1140₺ / 50 CL 1595₺ / 70 CL 2075₺ / 100 cl 2895₺" },
+        { "name": "Mojito Alkollü", "price": 500.0, "description": "" }
+      ]
+    },
+    {
+      "name": "Nargile Çeşitleri",
+      "items": [
+        { "name": "Çift Elma El - Fakher", "price": 400.0, "description": "" },
+        { "name": "İzmir Romantik", "price": 400.0, "description": "" },
+        { "name": "Çift Elma Nahle", "price": 400.0, "description": "" },
+        { "name": "Üzüm & Nane", "price": 400.0, "description": "" },
+        { "name": "Moskow", "price": 400.0, "description": "" },
+        { "name": "Lady Killer", "price": 400.0, "description": "" },
+        { "name": "Berlin Geceleri", "price": 400.0, "description": "" },
+        { "name": "Love 66", "price": 400.0, "description": "" },
+        { "name": "Üzüm", "price": 400.0, "description": "" },
+        { "name": "Tatlı cadı", "price": 400.0, "description": "" },
+        { "name": "Infinity", "price": 400.0, "description": "" },
+        { "name": "Zeus", "price": 400.0, "description": "" },
+        { "name": "Moskow çilek", "price": 400.0, "description": "" },
+        { "name": "Love leydi", "price": 400.0, "description": "" },
+        { "name": "Pişmiş Şeftali", "price": 400.0, "description": "" }
+      ]
+    },
+    {
+      "name": "Çerezler",
+      "items": [
+        { "name": "LÜKS ÇEREZ", "price": 500.0, "description": "" },
+        { "name": "Karışık Çerez", "price": 250.0, "description": "" },
+        { "name": "Yer Fıstığı", "price": 150.0, "description": "" },
+        { "name": "Antep Fıstığı", "price": 280.0, "description": "" },
+        { "name": "Patlamış Mısır", "price": 150.0, "description": "" },
+        { "name": "Kavrulmuş Antep", "price": 300.0, "description": "" }
+      ]
+    }
+  ]
+}

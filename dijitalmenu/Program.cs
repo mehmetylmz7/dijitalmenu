@@ -278,9 +278,96 @@ using (var scope = app.Services.CreateScope())
             }
         }
 
-        foreach (var ot in oldThemes)
+    }
+
+    // Seed deniz1234 user & menu
+    var denizUser = context.Users.FirstOrDefault(u => u.Username == "deniz1234");
+    EntityLayer.Concrete.Menu denizMenu = null;
+
+    if (denizUser == null)
+    {
+        var firstTheme = context.Themes.FirstOrDefault();
+        var themeId = firstTheme?.Id ?? 1;
+
+        var restaurant = new EntityLayer.Concrete.Restaurant
         {
-            themeService.TDelete(ot);
+            Name = "Deniz Restaurant",
+            ThemeId = themeId
+        };
+        context.Restaurants.Add(restaurant);
+        context.SaveChanges();
+
+        denizUser = new EntityLayer.Concrete.User
+        {
+            Username = "deniz1234",
+            Password = dijitalmenu.Helpers.PasswordHelper.Hash("deniz1234"),
+            RestaurantId = restaurant.Id
+        };
+        context.Users.Add(denizUser);
+
+        denizMenu = new EntityLayer.Concrete.Menu
+        {
+            RestaurantId = restaurant.Id
+        };
+        context.Menus.Add(denizMenu);
+        context.SaveChanges();
+    }
+    else
+    {
+        denizMenu = context.Menus.FirstOrDefault(m => m.RestaurantId == denizUser.RestaurantId);
+        if (denizMenu == null)
+        {
+            denizMenu = new EntityLayer.Concrete.Menu
+            {
+                RestaurantId = denizUser.RestaurantId
+            };
+            context.Menus.Add(denizMenu);
+            context.SaveChanges();
+        }
+    }
+
+    if (denizMenu != null && !context.Categories.Any(c => c.MenuId == denizMenu.Id))
+    {
+        var jsonPath = Path.Combine(app.Environment.WebRootPath, "demo", "deniz1234_menu.json");
+        if (File.Exists(jsonPath))
+        {
+            var jsonStr = File.ReadAllText(jsonPath);
+            using var doc = System.Text.Json.JsonDocument.Parse(jsonStr);
+            var root = doc.RootElement;
+            if (root.TryGetProperty("categories", out var categoriesElement))
+            {
+                foreach (var catElem in categoriesElement.EnumerateArray())
+                {
+                    var catName = catElem.GetProperty("name").GetString();
+                    var category = new EntityLayer.Concrete.Category
+                    {
+                        Name = catName,
+                        MenuId = denizMenu.Id
+                    };
+                    context.Categories.Add(category);
+                    context.SaveChanges();
+
+                    if (catElem.TryGetProperty("items", out var itemsElement))
+                    {
+                        foreach (var itemElem in itemsElement.EnumerateArray())
+                        {
+                            var itemName = itemElem.GetProperty("name").GetString();
+                            var price = itemElem.GetProperty("price").GetDecimal();
+                            var desc = itemElem.GetProperty("description").GetString() ?? "";
+
+                            var menuItem = new EntityLayer.Concrete.MenuItem
+                            {
+                                Name = itemName,
+                                Price = price,
+                                Description = desc,
+                                CategoryId = category.Id
+                            };
+                            context.MenuItems.Add(menuItem);
+                        }
+                        context.SaveChanges();
+                    }
+                }
+            }
         }
     }
 }
