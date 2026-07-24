@@ -1,0 +1,479 @@
+@{
+    Layout = null;
+    var themes = ViewBag.Themes as List<EntityLayer.Concrete.Theme> ?? new();
+    var selectedThemeId = ViewBag.SelectedThemeId as int? ?? 1;
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tema Canlı Önizleme & Simülatör — Dijital Menü</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg-site: #0b0c10;
+            --bar-bg: #161822;
+            --text-light: #f3f4f6;
+            --text-dark: #9ca3af;
+            --accent: #6c63ff;
+            --accent-glow: rgba(108, 99, 255, 0.25);
+            --border-color: #262938;
+            --phone-bg: #090a0f;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-site);
+            color: var(--text-light);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ─── Control Header ─── */
+        .preview-header {
+            background-color: var(--bar-bg);
+            border-bottom: 1px solid var(--border-color);
+            height: 70px;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 50;
+            flex-shrink: 0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back-btn {
+            color: var(--text-dark);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background-color: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+
+        .back-btn:hover {
+            color: var(--text-light);
+            background-color: rgba(255, 255, 255, 0.08);
+            border-color: var(--text-dark);
+            transform: translateX(-2px);
+        }
+
+        .logo-wrap {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo-wrap h1 {
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+        }
+
+        .logo-wrap span {
+            font-size: 11px;
+            color: var(--text-dark);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-top: 1px;
+        }
+
+        /* ─── Theme Selector ─── */
+        .theme-selector-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dropdown-trigger {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+            padding: 10px 20px;
+            font-size: 13.5px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s ease;
+            min-width: 220px;
+            justify-content: space-between;
+        }
+
+        .dropdown-trigger:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--text-dark);
+        }
+
+        .dropdown-trigger i {
+            color: var(--text-dark);
+            font-size: 12px;
+            transition: transform 0.2s ease;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            background: #1c1e2d;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            width: 240px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .dropdown-menu.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: all;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .dropdown-item {
+            padding: 10px 16px;
+            font-size: 13.5px;
+            color: var(--text-dark);
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .dropdown-item:hover,
+        .dropdown-item.selected {
+            color: var(--text-light);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .dropdown-item.selected {
+            background: var(--accent);
+            color: white;
+        }
+
+        /* ─── Device Toggle Buttons ─── */
+        .device-toggle-wrap {
+            display: flex;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            padding: 4px;
+            border-radius: 12px;
+            gap: 4px;
+        }
+
+        .device-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-dark);
+            width: 44px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 16px;
+        }
+
+        .device-btn:hover {
+            color: var(--text-light);
+        }
+
+        .device-btn.active {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+
+        /* ─── Main Preview Workspace ─── */
+        .workspace {
+            flex: 1;
+            position: relative;
+            background-color: var(--phone-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            transition: background-color 0.3s ease;
+        }
+
+        /* ─── Responsive Phone Mockup ─── */
+        .phone-mockup {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            border-radius: 0;
+            overflow: hidden;
+            border: none;
+            box-shadow: none;
+            background: white;
+        }
+
+        /* Mobile Mode Modifier */
+        .phone-mockup.mode-mobile {
+            width: 414px;
+            height: 844px;
+            border-radius: 44px;
+            border: 12px solid #222533;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.05);
+            background: #fff;
+            position: relative;
+        }
+
+        /* Speaker notch for Mobile Mode */
+        .phone-mockup.mode-mobile::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 140px;
+            height: 24px;
+            background: #222533;
+            border-bottom-left-radius: 18px;
+            border-bottom-right-radius: 18px;
+            z-index: 1000;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .phone-mockup.mode-desktop::before {
+            display: none;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            transition: opacity 0.2s ease;
+            background: #fff;
+        }
+
+        /* Loading indicator overlay */
+        .loader-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(11, 12, 16, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .loader-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(108, 99, 255, 0.1);
+            border-left-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @@keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="preview-header">
+        <div class="header-left">
+            <a href="/" class="back-btn" title="Ana Sayfaya Dön">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <div class="logo-wrap">
+                <h1>DijitalMenü</h1>
+                <span>Canlı Tema Önizleme</span>
+            </div>
+        </div>
+
+        <div class="theme-selector-wrap">
+            @{
+                var activeTheme = themes.FirstOrDefault(t => t.Id == selectedThemeId) ?? themes.FirstOrDefault();
+            }
+            <button class="dropdown-trigger" id="dropdownTriggerBtn">
+                <span id="selectedThemeName">🎨 @(activeTheme?.Name ?? "Tema Seçin")</span>
+                <i class="fa-solid fa-chevron-down"></i>
+            </button>
+            <div class="dropdown-menu" id="dropdownMenu">
+                @foreach (var theme in themes)
+                {
+                    <div class="dropdown-item @(theme.Id == selectedThemeId ? "selected" : "")" 
+                         data-id="@theme.Id" 
+                         data-name="@theme.Name">
+                        <span>@theme.Name</span>
+                        @if (theme.Id == selectedThemeId)
+                        {
+                            <i class="fa-solid fa-check"></i>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="device-toggle-wrap">
+            <button class="device-btn active" id="btnDesktop" title="Masaüstü Görünümü">
+                <i class="fa-solid fa-desktop"></i>
+            </button>
+            <button class="device-btn" id="btnMobile" title="Mobil Görünümü">
+                <i class="fa-solid fa-mobile-screen-button"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="workspace" id="workspaceContainer">
+        <!-- Loader -->
+        <div class="loader-overlay" id="loaderOverlay">
+            <div class="spinner"></div>
+        </div>
+
+        <!-- Simulator Device Frame -->
+        <div class="phone-mockup mode-desktop" id="deviceFrame">
+            @{
+                var initialUrl = $"/Home/Demo?themeId={selectedThemeId}";
+            }
+            <iframe src="@initialUrl" id="previewIframe"></iframe>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            const dropdownBtn = document.getElementById('dropdownTriggerBtn');
+            const dropdownMenu = document.getElementById('dropdownMenu');
+            const dropdownItems = document.querySelectorAll('.dropdown-item');
+            const selectedThemeLabel = document.getElementById('selectedThemeName');
+            
+            const btnDesktop = document.getElementById('btnDesktop');
+            const btnMobile = document.getElementById('btnMobile');
+            const deviceFrame = document.getElementById('deviceFrame');
+            const workspace = document.getElementById('workspaceContainer');
+            
+            const iframe = document.getElementById('previewIframe');
+            const loader = document.getElementById('loaderOverlay');
+
+            // Dropdown Toggle
+            dropdownBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                dropdownMenu.classList.toggle('active');
+                dropdownBtn.querySelector('i').style.transform = dropdownMenu.classList.contains('active') ? 'rotate(180deg)' : 'rotate(0deg)';
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function () {
+                dropdownMenu.classList.remove('active');
+                dropdownBtn.querySelector('i').style.transform = 'rotate(0deg)';
+            });
+
+            // Load iframe with loader
+            function loadTheme(themeId, themeName) {
+                loader.classList.add('active');
+                iframe.style.opacity = '0';
+                
+                // Update selected text
+                selectedThemeLabel.textContent = "🎨 " + themeName;
+
+                // Update selected class in dropdown
+                dropdownItems.forEach(item => {
+                    item.classList.toggle('selected', item.dataset.id == themeId);
+                    const checkIcon = item.querySelector('.fa-check');
+                    if (checkIcon) checkIcon.remove();
+                    if (item.dataset.id == themeId) {
+                        const icon = document.createElement('i');
+                        icon.className = 'fa-solid fa-check';
+                        item.appendChild(icon);
+                    }
+                });
+
+                // Set source
+                iframe.src = "/Home/Demo?themeId=" + themeId;
+            }
+
+            // On iframe load finish
+            iframe.addEventListener('load', function () {
+                loader.classList.remove('active');
+                iframe.style.opacity = '1';
+            });
+
+            // Dropdown Items Click
+            dropdownItems.forEach(item => {
+                item.addEventListener('click', function () {
+                    const themeId = this.dataset.id;
+                    const themeName = this.dataset.name;
+                    loadTheme(themeId, themeName);
+                });
+            });
+
+            // Device switch - Desktop
+            btnDesktop.addEventListener('click', function () {
+                btnMobile.classList.remove('active');
+                this.classList.add('active');
+                
+                deviceFrame.classList.remove('mode-mobile');
+                deviceFrame.classList.add('mode-desktop');
+                workspace.style.backgroundColor = 'var(--phone-bg)';
+            });
+
+            // Device switch - Mobile
+            btnMobile.addEventListener('click', function () {
+                btnDesktop.classList.remove('active');
+                this.classList.add('active');
+                
+                deviceFrame.classList.remove('mode-desktop');
+                deviceFrame.classList.add('mode-mobile');
+                workspace.style.backgroundColor = '#0b0c10'; // Darken workspace to highlight preview phone
+            });
+        })();
+    </script>
+</body>
+</html>

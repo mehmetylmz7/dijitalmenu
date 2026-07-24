@@ -1,0 +1,5 @@
+@model int
+<form asp-action="Delete" asp-route-id="@Model" method="post" style="display:inline"
+      onsubmit="return confirm('Silmek istediğinize emin misiniz?')">
+    <button type="submit" class="btn btn-sm btn-danger">🗑️ Sil</button>
+</form>

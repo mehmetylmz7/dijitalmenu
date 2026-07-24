@@ -1,0 +1,334 @@
+@{
+    var restaurant = ViewBag.Restaurant as EntityLayer.Concrete.Restaurant;
+    var categories = ViewBag.Categories as List<EntityLayer.Concrete.Category> ?? new();
+    var menuItems  = ViewBag.MenuItems  as List<EntityLayer.Concrete.MenuItem>  ?? new();
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    :root {
+        --primary-color: #ff6b6b;
+        --bg-color:      #f8f9fa;
+        --card-bg:       #ffffff;
+        --text-dark:     #2d3436;
+        --text-muted:    #636e72;
+        --border-color:  #f1f2f6;
+    }
+
+    body {
+        background-color: var(--bg-color) !important;
+        color: var(--text-dark);
+        -webkit-font-smoothing: antialiased;
+    }
+
+    .aycafe-wrap {
+        max-width: 480px;
+        margin: 0 auto;
+        background-color: var(--bg-color);
+        min-height: 100vh;
+        position: relative;
+        box-shadow: 0 0 20px rgba(0,0,0,0.05);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    /* ── Header ── */
+    .aycafe-header {
+        background: var(--card-bg);
+        padding: 20px;
+        text-align: center;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .aycafe-header h1 {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .aycafe-header p {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    /* ── Category Nav ── */
+    .aycafe-cat-nav {
+        display: flex;
+        overflow-x: auto;
+        background: var(--card-bg);
+        padding: 10px 15px;
+        gap: 10px;
+        scrollbar-width: none;
+        border-bottom: 1px solid var(--border-color);
+        position: sticky;
+        top: 75px;
+        z-index: 99;
+    }
+
+    .aycafe-cat-nav::-webkit-scrollbar { display: none; }
+
+    .aycafe-cat-btn {
+        background: var(--bg-color);
+        color: var(--text-dark);
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 500;
+        white-space: nowrap;
+        text-decoration: none;
+        border: 1px solid var(--border-color);
+        transition: all 0.2s;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    .aycafe-cat-btn.active,
+    .aycafe-cat-btn:hover {
+        background: var(--primary-color);
+        color: #fff;
+        border-color: var(--primary-color);
+    }
+
+    /* ── Menu Container ── */
+    .aycafe-menu {
+        padding: 15px;
+        padding-bottom: 80px;
+    }
+
+    /* ── Category Section ── */
+    .aycafe-section {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        scroll-margin-top: 140px;
+    }
+
+    .aycafe-section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--bg-color);
+    }
+
+    .aycafe-section-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text-dark);
+    }
+
+    .aycafe-top-link {
+        font-size: 11px;
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    /* ── Menu Item ── */
+    .aycafe-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .aycafe-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .aycafe-item-info {
+        flex: 1;
+        padding-right: 15px;
+    }
+
+    .aycafe-item-name {
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 3px;
+        color: var(--text-dark);
+    }
+
+    .aycafe-item-desc {
+        font-size: 12px;
+        color: var(--text-muted);
+        line-height: 1.4;
+    }
+
+    .aycafe-item-price {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--primary-color);
+        white-space: nowrap;
+    }
+
+    /* ── Footer ── */
+    .aycafe-footer {
+        background: var(--card-bg);
+        padding: 24px 20px;
+        text-align: center;
+        border-top: 1px solid var(--border-color);
+        margin-top: 20px;
+    }
+
+    .aycafe-stars {
+        color: #f1c40f;
+        font-size: 20px;
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: center;
+        gap: 4px;
+    }
+
+    .aycafe-footer > p {
+        font-size: 14px;
+        color: var(--text-dark);
+        font-weight: 500;
+    }
+
+    .aycafe-address {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin: 15px 0;
+        line-height: 1.6;
+    }
+
+    .aycafe-map-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--bg-color);
+        color: var(--text-dark);
+        padding: 10px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 600;
+        border: 1px solid var(--border-color);
+        transition: all 0.2s;
+    }
+
+    .aycafe-map-btn:hover {
+        background: var(--primary-color);
+        color: #fff;
+        border-color: var(--primary-color);
+    }
+</style>
+
+<div class="aycafe-wrap" id="aycafe-top">
+
+    <!-- Header -->
+    <div class="aycafe-header">
+        <h1>@restaurant?.Name</h1>
+        <p>Dijital Menü</p>
+    </div>
+
+    <!-- Kategori Nav -->
+    <div class="aycafe-cat-nav">
+        @foreach (var cat in categories)
+        {
+            <a href="#aycafe-cat-@cat.Id" class="aycafe-cat-btn" data-target="aycafe-cat-@cat.Id">
+                @cat.Name
+            </a>
+        }
+    </div>
+
+    <!-- Menü İçeriği -->
+    <div class="aycafe-menu">
+        @foreach (var cat in categories)
+        {
+            var catItems = menuItems.Where(mi => mi.CategoryId == cat.Id).ToList();
+            if (!catItems.Any()) continue;
+
+            <div class="aycafe-section" id="aycafe-cat-@cat.Id">
+                <div class="aycafe-section-header">
+                    <h2 class="aycafe-section-title">@cat.Name</h2>
+                    <a href="#aycafe-top" class="aycafe-top-link">
+                        <i class="fas fa-arrow-up"></i> Başa Dön
+                    </a>
+                </div>
+
+                @foreach (var item in catItems)
+                {
+                    <div class="aycafe-item">
+                        <div class="aycafe-item-info">
+                            <div class="aycafe-item-name">@item.Name</div>
+                            @if (!string.IsNullOrWhiteSpace(item.Description))
+                            {
+                                <div class="aycafe-item-desc">@item.Description</div>
+                            }
+                        </div>
+                        <div class="aycafe-item-price">@item.Price.ToString("N0") ₺</div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <!-- Footer -->
+    <div class="aycafe-footer">
+        <div class="aycafe-stars">
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+        </div>
+        <p>Hizmetimizden memnun kaldınız mı?</p>
+        <div class="aycafe-address">
+            @restaurant?.Name<br>
+            Dijital Menü Platformu
+        </div>
+        <a href="#" class="aycafe-map-btn">
+            <i class="fas fa-map-marker-alt"></i> Yol Tarifi Al
+        </a>
+    </div>
+
+</div>
+
+<script>
+(function () {
+    const btns = document.querySelectorAll('.aycafe-cat-btn');
+
+    // Aktif kategori chip'i
+    btns.forEach(btn => {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            btns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+
+            const targetId = this.dataset.target;
+            const el = document.getElementById(targetId);
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+        });
+    });
+
+    // Scroll takibi — görünür kategoriye göre chip aktif yap
+    const sections = document.querySelectorAll('.aycafe-section');
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const id = entry.target.id;
+                btns.forEach(b => {
+                    b.classList.toggle('active', b.dataset.target === id);
+                });
+            }
+        });
+    }, { threshold: 0.35 });
+
+    sections.forEach(s => observer.observe(s));
+})();
+</script>

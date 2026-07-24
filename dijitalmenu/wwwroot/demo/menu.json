@@ -1,0 +1,80 @@
+{
+  "restaurantName": "Demo Restoran",
+  "categories": [
+    {
+      "name": "Kahvaltılıklar",
+      "items": [
+        { "name": "Serpme Kahvaltı", "description": "Kişi başı, çay ve kahve dahil.", "price": 500.0 },
+        { "name": "Yetişkin Kahvaltı Tabağı", "description": "", "price": 500.0 },
+        { "name": "Sıcak Kahvaltı Tabağı", "description": "", "price": 450.0 },
+        { "name": "Sahanda Omlet", "description": "", "price": 80.0 },
+        { "name": "Sahanda Sucuklu Omlet", "description": "", "price": 180.0 },
+        { "name": "Sahanda Menemen", "description": "", "price": 150.0 },
+        { "name": "Sahanda Sucuk", "description": "", "price": 220.0 },
+        { "name": "Sahanda Sosis", "description": "", "price": 120.0 },
+        { "name": "Sahanda Peynirli Omlet", "description": "", "price": 140.0 },
+        { "name": "Sigara Böreği", "description": "", "price": 200.0 },
+        { "name": "Patates Cips Küçük", "description": "", "price": 140.0 },
+        { "name": "Patates Cips Büyük", "description": "", "price": 180.0 },
+        { "name": "Kızarmış Sosis", "description": "", "price": 160.0 },
+        { "name": "Çıtır Tabak", "description": "", "price": 280.0 },
+        { "name": "Kızarmış Peynir", "description": "4 adet.", "price": 200.0 },
+        { "name": "Biberli Ekmek", "description": "", "price": 100.0 },
+        { "name": "Pankek", "description": "", "price": 150.0 },
+        { "name": "Kavrulmuş Tuzlu Yoğurt", "description": "", "price": 120.0 },
+        { "name": "Mercimek Çorbası", "description": "", "price": 80.0 },
+        { "name": "Çocuk Tabağı", "description": "", "price": 300.0 }
+      ]
+    },
+    {
+      "name": "Mezeler",
+      "items": [
+        { "name": "Humus Tereyağlı", "description": "", "price": 250.0 },
+        { "name": "Humus", "description": "Zeytinyağlı.", "price": 200.0 },
+        { "name": "Ali Nazik", "description": "", "price": 280.0 },
+        { "name": "Babagannuş", "description": "", "price": 200.0 },
+        { "name": "Süzme", "description": "", "price": 190.0 },
+        { "name": "Kekik Salatası", "description": "", "price": 200.0 },
+        { "name": "Tarator", "description": "", "price": 200.0 },
+        { "name": "Prenses", "description": "", "price": 190.0 },
+        { "name": "Patlıcan Yoğurtlama", "description": "", "price": 200.0 },
+        { "name": "Biber Yoğurtlama", "description": "", "price": 200.0 },
+        { "name": "Zengin", "description": "", "price": 200.0 },
+        { "name": "Katı Cacık", "description": "", "price": 190.0 },
+        { "name": "Acılı Atom", "description": "", "price": 220.0 },
+        { "name": "Avokado Meze", "description": "", "price": 240.0 },
+        { "name": "Shayhuti", "description": "", "price": 200.0 },
+        { "name": "Barbunya", "description": "", "price": 200.0 },
+        { "name": "Zeytin", "description": "Siyah veya yeşil.", "price": 150.0 },
+        { "name": "Ordövr Tek", "description": "", "price": 250.0 },
+        { "name": "Ordövr Duble", "description": "", "price": 340.0 },
+        { "name": "Peynir Söğüş", "description": "", "price": 350.0 },
+        { "name": "Söğüş Tabağı", "description": "Marul, salatalık.", "price": 100.0 },
+        { "name": "Ezine Peynir", "description": "", "price": 350.0 },
+        { "name": "Gözlenmiş", "description": "Domates, biber, patlıcan, soğan.", "price": 150.0 },
+        { "name": "Mimoza", "description": "Havuç veya salatalık.", "price": 100.0 }
+      ]
+    },
+    {
+      "name": "Izgara Çeşitleri",
+      "items": [
+        { "name": "Kıyma Tabak", "description": "120 gr.", "price": 280.0 },
+        { "name": "Kuşbaşı Tabak", "description": "130 gr.", "price": 280.0 },
+        { "name": "Şiş Tavuk Tabak", "description": "180 gr.", "price": 280.0 },
+        { "name": "Tavuk Pirzola", "description": "2 parça.", "price": 320.0 },
+        { "name": "Kanat", "description": "8 adet incikli.", "price": 300.0 },
+        { "name": "Karışık Izgara", "description": "Kıyma, kuşbaşı, kanat, şiş tavuk.", "price": 1050.0 },
+        { "name": "Ful Karışık Izgara", "description": "Kıyma, kuşbaşı, kanat, şiş tavuk, beyti, tavuk pirzola.", "price": 1800.0 },
+        { "name": "Kağıt Kebabı", "description": "", "price": 450.0 },
+        { "name": "Ay Beyti Soslu", "description": "", "price": 350.0 },
+        { "name": "Kuzu Pirzola", "description": "", "price": 600.0 },
+        { "name": "Tepsi Kebap Çömlek", "description": "500 gr.", "price": 900.0 },
+        { "name": "Beytizade", "description": "", "price": 350.0 },
+        { "name": "Ay Tost", "description": "", "price": 220.0 },
+        { "name": "Ay Tost Duble", "description": "", "price": 270.0 },
+        { "name": "Ay Tost Kasap Sucuklu", "description": "", "price": 250.0 },
+        { "name": "Ay Tost Kıymalı", "description": "", "price": 350.0 }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,165 @@
+@{
+    var restaurant = ViewBag.Restaurant as EntityLayer.Concrete.Restaurant;
+    var categories = ViewBag.Categories as List<EntityLayer.Concrete.Category> ?? new();
+    var menuItems  = ViewBag.MenuItems  as List<EntityLayer.Concrete.MenuItem>  ?? new();
+
+    var foodImages = new[]
+    {
+        "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=400",
+        "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&q=80&w=400",
+        "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80&w=400",
+        "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=400",
+    };
+}
+
+<div class="bg-[#fcfcfc] text-[#111111] min-h-screen font-sans selection:bg-black selection:text-white">
+  <!-- Structural Minimal Header -->
+  <header class="border-b border-black py-16 px-6">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-6 text-left">
+      <div>
+        <span class="text-xs uppercase tracking-[0.3em] font-mono block mb-2 text-stone-500">
+          EST. 1978 / HATAY
+        </span>
+        <h1 class="text-6xl md:text-8xl font-black tracking-tight uppercase leading-none">
+          @restaurant?.Name
+        </h1>
+        <h2 class="text-3xl md:text-4xl font-light uppercase tracking-widest text-stone-600 mt-1">
+          KITCHEN
+        </h2>
+      </div>
+      <div class="text-left md:text-right font-mono text-xs text-stone-600">
+        <p>TEL: +90 555 000 00 00</p>
+        <p>ATATURK CAD. NO: 123</p>
+        <p>TURKIYE</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- Categories Bar -->
+  <nav class="sticky top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-black overflow-x-auto no-scrollbar">
+    <div class="max-w-6xl mx-auto flex py-5 px-6 gap-6 md:gap-10 min-w-max font-mono text-xs uppercase tracking-wider">
+      @for (int idx = 0; idx < categories.Count; idx++)
+      {
+        var cat = categories[idx];
+        var numStr = (idx + 1).ToString("D2");
+        <button onclick="scrollToMinimalV2Category('minv2-cat-@cat.Id')"
+                class="hover:text-amber-800 transition-colors flex items-center gap-1 group font-bold bg-transparent border-none cursor-pointer">
+          <span class="text-[10px] text-stone-400 font-normal">@numStr.</span>
+          @cat.Name
+          <i class="fa-solid fa-arrow-up-right-from-square text-[9px] opacity-0 group-hover:opacity-100 transition-opacity"></i>
+        </button>
+      }
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="max-w-6xl mx-auto px-6 py-16">
+    @foreach (var cat in categories)
+    {
+      var items = menuItems.Where(i => i.CategoryId == cat.Id).ToList();
+      if (!items.Any()) continue;
+
+      <section id="minv2-cat-@cat.Id" class="mb-24 scroll-mt-28 text-left">
+        <div class="border-b border-black pb-4 mb-10 flex justify-between items-end">
+          <h3 class="text-3xl font-black uppercase tracking-tight">@cat.Name</h3>
+          <span class="font-mono text-xs text-stone-500">
+            (@items.Count ÜRÜN)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+          @foreach (var item in items)
+          {
+            var img = foodImages[item.Id % foodImages.Length];
+            <div class="border border-black bg-white group hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all duration-200 flex flex-col h-full">
+              <div class="relative h-64 border-b border-black overflow-hidden bg-stone-100">
+                <img src="@img" 
+                     alt="@item.Name" 
+                     class="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition-all duration-300" />
+                @if (item.Price > 400)
+                {
+                  <span class="absolute top-4 left-4 bg-black text-white font-mono text-[9px] uppercase tracking-widest px-3 py-1 font-bold">
+                    ÖZEL TARİF
+                  </span>
+                }
+              </div>
+
+              <div class="p-6 flex flex-col flex-1">
+                <div class="flex justify-between items-baseline gap-4 mb-3">
+                  <h4 class="text-lg font-bold uppercase tracking-tight">
+                    @item.Name
+                  </h4>
+                  <span class="font-mono font-bold text-sm shrink-0">
+                    @item.Price.ToString("N0") ₺
+                  </span>
+                </div>
+                <p class="text-stone-600 text-sm font-light leading-relaxed mb-6 flex-1">
+                  @(string.IsNullOrWhiteSpace(item.Description) ? "Minimalist tarzda hazırlanmış sade tescilli tabağımız." : item.Description)
+                </p>
+                <div class="border-t border-stone-200 pt-4 font-mono text-[10px] text-stone-500 flex justify-between uppercase">
+                  <span>@restaurant?.Name KITCHEN</span>
+                  <span>0@item.Id</span>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Note Section -->
+    <div class="border-2 border-black p-8 md:p-12 bg-white hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-all duration-200 relative text-left">
+      <div class="flex items-start gap-4">
+        <div class="w-6 h-6 shrink-0 text-black mt-1 text-xl">
+          <i class="fa-solid fa-circle-info"></i>
+        </div>
+        <div>
+          <span class="font-mono text-xs uppercase tracking-widest text-stone-500 block mb-2">
+            SERVİS BİLGİLENDİRMESİ
+          </span>
+          <p class="text-2xl font-bold uppercase tracking-tight mb-4">
+            "Kendi alkolünü yanında getiren misafirlerimizden kişi başı <span class="bg-black text-white px-2 py-0.5">100 TL</span> servis ücreti alınmaktadır."
+          </p>
+          <p class="text-stone-500 font-mono text-xs">
+            * Menü fiyatları ve içerikleri mevsimsel olarak değişebilir.
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-black bg-black text-stone-400 py-16 px-6 font-mono text-xs mt-12">
+    <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-12 text-left">
+      <div>
+        <h5 class="text-white font-bold uppercase tracking-widest mb-4">KOCAOĞLU</h5>
+        <p class="font-light text-stone-500 leading-relaxed">
+          Geleneksel lezzetleri modern sunumlarla buluşturan tescilli lezzet durağı.
+        </p>
+      </div>
+      <div>
+        <h5 class="text-white font-bold uppercase tracking-widest mb-4">İLETİŞİM</h5>
+        <p>T: +90 555 000 00 00</p>
+      </div>
+      <div>
+        <h5 class="text-white font-bold uppercase tracking-widest mb-4">ADRES</h5>
+        <p>Atatürk Caddesi, No: 123</p>
+        <p>Hatay, Türkiye</p>
+      </div>
+      <div>
+        <h5 class="text-white font-bold uppercase tracking-widest mb-4">SAATLER</h5>
+        <p>H. İçi: 11:00 - 23:00</p>
+        <p>H. Sonu: 10:00 - 00:00</p>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script>
+function scrollToMinimalV2Category(catId) {
+  const element = document.getElementById(catId);
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+</script>

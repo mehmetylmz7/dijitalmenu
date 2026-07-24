@@ -1,0 +1,83 @@
+@{
+    var restaurant = ViewBag.Restaurant as EntityLayer.Concrete.Restaurant;
+    var categories = ViewBag.Categories as List<EntityLayer.Concrete.Category>;
+    var menuItems = ViewBag.MenuItems as List<EntityLayer.Concrete.MenuItem>;
+}
+
+<div class="bg-[#f0f0f0] text-black min-h-screen font-mono p-4 sm:p-10">
+    <div class="border-[4px] border-black bg-white">
+        
+        <!-- Header -->
+        <header class="border-b-[4px] border-black p-10 bg-yellow-300">
+            <h1 class="text-6xl md:text-8xl font-black uppercase leading-none tracking-tighter mb-4 italic transform -skew-x-6">
+                @restaurant?.Name
+            </h1>
+            <div class="flex flex-wrap gap-4 text-xs font-bold uppercase">
+                <span class="bg-black text-white px-2 py-1">est. 2024</span>
+                <span class="bg-black text-white px-2 py-1">No Reservations</span>
+                <span class="bg-black text-white px-2 py-1">Local Only</span>
+            </div>
+        </header>
+
+        <!-- Categories & Items -->
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 border-b-[4px] border-black">
+            @for (int i = 0; i < categories.Count; i++)
+            {
+                var category = categories[i];
+                var catItems = menuItems?.Where(mi => mi.CategoryId == category.Id).ToList() ?? new List<EntityLayer.Concrete.MenuItem>();
+                var isNotLast = i != categories.Count - 1;
+                
+                <div class="p-8 border-black border-r-[4px] border-b-[4px] last:border-r-0">
+                    <h2 class="text-xl font-black uppercase mb-8 underline decoration-4 decoration-yellow-400 underline-offset-8">
+                        @category.Name
+                    </h2>
+                    
+                    <div class="space-y-12">
+                        @foreach (var item in catItems)
+                        {
+                            var imgIndex = item.Id % 5;
+                            var imageUrl = imgIndex == 0 ? "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=300" :
+                                           imgIndex == 1 ? "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&q=80&w=300" :
+                                           imgIndex == 2 ? "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80&w=300" :
+                                           imgIndex == 3 ? "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=300" :
+                                                           "https://images.unsplash.com/photo-1482049016688-2d3e1b311543?auto=format&fit=crop&q=80&w=300";
+
+                            <div class="group">
+                                <div class="mb-4 border-2 border-black overflow-hidden aspect-video grayscale hover:grayscale-0 transition-all duration-300">
+                                    <img src="@imageUrl" alt="@item.Name" class="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                                </div>
+                                <div class="flex justify-between items-start gap-4 mb-2">
+                                    <h3 class="text-sm font-black uppercase group-hover:bg-yellow-300 transition-colors">
+                                        @item.Name
+                                    </h3>
+                                    <span class="text-sm font-black shrink-0 underline italic">
+                                        @item.Price.ToString("N0") TL
+                                    </span>
+                                </div>
+                                <p class="text-xs font-bold leading-tight uppercase opacity-60">
+                                    @(string.IsNullOrWhiteSpace(item.Description) ? "Klasik lezzet. Taze hazırlanmıştır." : item.Description)
+                                </p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Footer -->
+        <footer class="p-10 grid md:grid-cols-3 gap-10 bg-black text-white">
+            <div>
+                <span class="block text-[10px] font-black uppercase mb-4 text-yellow-300">Target</span>
+                <p class="text-sm font-bold uppercase">Merkez Mahallesi, Gastronomi Sokak No: 7</p>
+            </div>
+            <div>
+                <span class="block text-[10px] font-black uppercase mb-4 text-yellow-300">Status</span>
+                <p class="text-sm font-bold uppercase tracking-widest">11:00 - 23:00</p>
+            </div>
+            <div>
+                <span class="block text-[10px] font-black uppercase mb-4 text-yellow-300">Ping</span>
+                <p class="text-sm font-bold uppercase">+90 (212) 555 01 23</p>
+            </div>
+        </footer>
+    </div>
+</div>

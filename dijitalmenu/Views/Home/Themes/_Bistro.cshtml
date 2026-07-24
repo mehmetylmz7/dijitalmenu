@@ -1,0 +1,330 @@
+@{
+    var restaurant = ViewBag.Restaurant as EntityLayer.Concrete.Restaurant;
+    var categories = ViewBag.Categories as List<EntityLayer.Concrete.Category> ?? new();
+    var menuItems  = ViewBag.MenuItems  as List<EntityLayer.Concrete.MenuItem>  ?? new();
+
+    // Unsplash görsel havuzu (ürün ID'sine göre döngüsel)
+    var foodImages = new[]
+    {
+        "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=200&q=80",
+        "https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=200&q=80",
+        "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=200&q=80",
+        "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=200&q=80",
+        "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=200&q=80",
+        "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=200&q=80",
+        "https://images.unsplash.com/photo-1482049016688-2d3e1b311543?auto=format&fit=crop&w=200&q=80",
+        "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=200&q=80",
+    };
+}
+
+<style>
+    :root {
+        --bg-color:   #f8f9fa;
+        --card-bg:    #ffffff;
+        --text-main:  #2b2d42;
+        --text-muted: #8d99ae;
+        --primary:    #ef233c;
+        --accent:     #edf2f4;
+    }
+
+    body { background-color: #e5e5e5 !important; }
+
+    .bistro-wrap {
+        width: 100%;
+        max-width: 414px;
+        background-color: var(--bg-color);
+        min-height: 100vh;
+        position: relative;
+        margin: 0 auto;
+        box-shadow: 0 0 40px rgba(0,0,0,0.12);
+        padding-bottom: 110px;
+        overflow-x: hidden;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    /* ── Header ── */
+    .bistro-header {
+        padding: 28px 20px 12px;
+        background: var(--bg-color);
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        border-bottom: 1px solid rgba(0,0,0,0.04);
+    }
+
+    .bistro-header h1 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--text-main);
+        letter-spacing: -0.5px;
+    }
+
+    .bistro-header p {
+        margin: 3px 0 0;
+        font-size: 13px;
+        color: var(--text-muted);
+    }
+
+    /* ── Category Chips ── */
+    .chip-scroll {
+        display: flex;
+        gap: 8px;
+        padding: 14px 20px;
+        overflow-x: auto;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+    }
+    .chip-scroll::-webkit-scrollbar { display: none; }
+
+    .bistro-chip {
+        padding: 7px 16px;
+        background: var(--card-bg);
+        border: 1.5px solid #e0e0e0;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-main);
+        white-space: nowrap;
+        cursor: pointer;
+        transition: all 0.2s;
+        flex-shrink: 0;
+    }
+
+    .bistro-chip.active,
+    .bistro-chip:hover {
+        background: var(--text-main);
+        color: #fff;
+        border-color: var(--text-main);
+    }
+
+    /* ── Category Header ── */
+    .bistro-cat-title {
+        padding: 4px 20px 10px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--text-muted);
+    }
+
+    /* ── Item List ── */
+    .bistro-list {
+        padding: 0 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        margin-bottom: 24px;
+    }
+
+    .bistro-item {
+        background: var(--card-bg);
+        border-radius: 16px;
+        padding: 14px;
+        display: flex;
+        gap: 14px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+        border: 1px solid rgba(0,0,0,0.03);
+        transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .bistro-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    }
+
+    .bistro-item-img {
+        width: 78px;
+        height: 78px;
+        border-radius: 12px;
+        object-fit: cover;
+        flex-shrink: 0;
+        background: var(--accent);
+    }
+
+    .bistro-item-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-width: 0;
+    }
+
+    .bistro-item-name {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--text-main);
+        line-height: 1.3;
+    }
+
+    .bistro-item-desc {
+        margin: 4px 0 0;
+        font-size: 12px;
+        color: var(--text-muted);
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        line-height: 1.5;
+    }
+
+    .bistro-item-foot {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+    }
+
+    .bistro-price {
+        font-weight: 700;
+        font-size: 15px;
+        color: var(--primary);
+    }
+
+    .bistro-badge {
+        background: var(--accent);
+        border-radius: 8px;
+        padding: 3px 10px;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text-muted);
+        letter-spacing: 0.02em;
+    }
+
+    /* ── Floating Bottom Nav ── */
+    .bistro-fnav {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: calc(100% - 40px);
+        max-width: 374px;
+        background: rgba(43, 45, 66, 0.96);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-radius: 24px;
+        display: flex;
+        justify-content: space-around;
+        padding: 12px 20px;
+        box-shadow: 0 12px 32px rgba(0,0,0,0.2);
+        z-index: 30;
+    }
+
+    .bistro-nav-item {
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        font-size: 10px;
+        font-weight: 500;
+        opacity: 0.55;
+        cursor: pointer;
+        transition: opacity 0.2s;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    .bistro-nav-item.active { opacity: 1; font-weight: 700; }
+    .bistro-nav-item .bistro-nav-icon { font-size: 18px; }
+
+    /* ── Chip JS aktif sınıfı ── */
+    .bistro-section[data-hidden="true"] { display: none; }
+</style>
+
+<div class="bistro-wrap">
+
+    <!-- Header -->
+    <div class="bistro-header">
+        <h1>@restaurant?.Name</h1>
+        <p>Dijital Menü</p>
+    </div>
+
+    <!-- Category Chips -->
+    <div class="chip-scroll" id="bistro-chips">
+        <div class="bistro-chip active" data-cat="all">Tümü</div>
+        @foreach (var cat in categories)
+        {
+            <div class="bistro-chip" data-cat="cat-@cat.Id">@cat.Name</div>
+        }
+    </div>
+
+    <!-- Items by Category -->
+    @foreach (var cat in categories)
+    {
+        var catItems = menuItems.Where(mi => mi.CategoryId == cat.Id).ToList();
+        if (!catItems.Any()) continue;
+
+        <div class="bistro-section" data-section="cat-@cat.Id">
+            <div class="bistro-cat-title">@cat.Name</div>
+            <div class="bistro-list">
+                @foreach (var item in catItems)
+                {
+                    var img = foodImages[item.Id % foodImages.Length];
+                    var desc = string.IsNullOrWhiteSpace(item.Description) ? "" : item.Description;
+
+                    <div class="bistro-item">
+                        <img class="bistro-item-img" src="@img" alt="@item.Name" loading="lazy" />
+                        <div class="bistro-item-body">
+                            <div>
+                                <h3 class="bistro-item-name">@item.Name</h3>
+                                @if (!string.IsNullOrWhiteSpace(desc))
+                                {
+                                    <p class="bistro-item-desc">@desc</p>
+                                }
+                            </div>
+                            <div class="bistro-item-foot">
+                                <span class="bistro-price">@item.Price.ToString("N0") ₺</span>
+                                <span class="bistro-badge">@cat.Name</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Floating Nav -->
+    <div class="bistro-fnav">
+        <div class="bistro-nav-item active">
+            <span class="bistro-nav-icon">📋</span>
+            <span>Menü</span>
+        </div>
+        <div class="bistro-nav-item">
+            <span class="bistro-nav-icon">🛎️</span>
+            <span>Garson</span>
+        </div>
+        <div class="bistro-nav-item">
+            <span class="bistro-nav-icon">💳</span>
+            <span>Hesap</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const chips    = document.querySelectorAll('.bistro-chip');
+        const sections = document.querySelectorAll('.bistro-section');
+
+        chips.forEach(chip => {
+            chip.addEventListener('click', function () {
+                // Aktif chip
+                chips.forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+
+                const target = this.dataset.cat;
+
+                sections.forEach(sec => {
+                    if (target === 'all' || sec.dataset.section === target) {
+                        sec.removeAttribute('data-hidden');
+                        sec.style.display = '';
+                    } else {
+                        sec.setAttribute('data-hidden', 'true');
+                        sec.style.display = 'none';
+                    }
+                });
+            });
+        });
+    })();
+</script>

@@ -1,5 +1,6 @@
 using BusinessLayer.Abstract;
 using dijitalmenu.Filters;
+using dijitalmenu.Helpers;
 using EntityLayer.Concrete;
 using Microsoft.AspNetCore.Mvc;
 
@@ -34,6 +35,7 @@ namespace dijitalmenu.Areas.Admin.Controllers
         [HttpPost]
         public IActionResult Create(User user)
         {
+            user.Password = PasswordHelper.Hash(user.Password);
             _userService.TInsert(user);
             return RedirectToAction("Index");
         }
@@ -49,14 +51,26 @@ namespace dijitalmenu.Areas.Admin.Controllers
         [HttpPost]
         public IActionResult Edit(User user)
         {
-            _userService.TUpdate(user);
+            var existing = _userService.TGetByID(user.Id);
+            if (existing == null)
+                return RedirectToAction("Index");
+
+            existing.Username = user.Username;
+            existing.RestaurantId = user.RestaurantId;
+
+            if (!string.IsNullOrWhiteSpace(user.Password))
+                existing.Password = PasswordHelper.Hash(user.Password);
+
+            _userService.TUpdate(existing);
             return RedirectToAction("Index");
         }
 
+        [HttpPost]
         public IActionResult Delete(int id)
         {
             var user = _userService.TGetByID(id);
-            _userService.TDelete(user);
+            if (user != null)
+                _userService.TDelete(user);
             return RedirectToAction("Index");
         }
     }

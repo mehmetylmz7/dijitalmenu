@@ -1,0 +1,76 @@
+@{
+    var restaurant = ViewBag.Restaurant as EntityLayer.Concrete.Restaurant;
+    var categories = ViewBag.Categories as List<EntityLayer.Concrete.Category>;
+    var menuItems = ViewBag.MenuItems as List<EntityLayer.Concrete.MenuItem>;
+}
+
+<div class="bg-[#050505] text-[#00ff9f] min-h-screen font-mono py-20 px-6 sm:px-12 selection:bg-[#ff003c] selection:text-white">
+    <div class="max-w-5xl mx-auto border-l border-[#ff003c]/30 pl-8 md:pl-16 relative">
+        <div class="absolute -left-1 top-0 h-20 w-2 bg-[#ff003c] shadow-[0_0_20px_#ff003c]"></div>
+        
+        <!-- Header -->
+        <header class="mb-32 relative">
+            <div class="flex items-center gap-4 text-[#ff003c] mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-zap animate-pulse"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46L12.6 9h7.8a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46L11.4 15Z"/></svg>
+                <span class="text-xs font-black uppercase tracking-[0.5em] bg-[#ff003c]/20 px-2 py-1">SYS_ONLINE // v.7.0</span>
+            </div>
+            <h1 class="text-7xl md:text-9xl font-black uppercase tracking-tighter leading-none mb-4 text-[#00f0ff] drop-shadow-[0_0_15px_rgba(0,240,255,0.5)]">
+                @restaurant?.Name
+            </h1>
+            <p class="text-xl font-bold uppercase tracking-[0.2em] text-[#ff003c] italic">
+                &gt; Yöresel Lezzetlerin Modern Buluşma Noktası
+            </p>
+        </header>
+
+        <!-- Categories & Items -->
+        <div class="grid lg:grid-cols-2 gap-x-24 gap-y-32">
+            @foreach (var category in categories)
+            {
+                var catItems = menuItems?.Where(mi => mi.CategoryId == category.Id).ToList() ?? new List<EntityLayer.Concrete.MenuItem>();
+
+                <div class="space-y-16">
+                    <div class="relative">
+                        <h2 class="text-4xl font-black uppercase tracking-[0.1em] text-white flex items-center gap-4">
+                            <span class="text-[#ff003c] opacity-50">[</span>
+                            @category.Name
+                            <span class="text-[#ff003c] opacity-50">]</span>
+                        </h2>
+                        <div class="absolute -bottom-4 left-0 w-32 h-1 bg-gradient-to-r from-[#00f0ff] to-transparent"></div>
+                    </div>
+                    
+                    <div class="space-y-16">
+                        @foreach (var item in catItems)
+                        {
+                            <div class="group relative pl-4">
+                                <div class="absolute left-0 top-0 bottom-0 w-[2px] bg-[#00ff9f]/10 group-hover:bg-[#00f0ff] transition-colors"></div>
+                                <div class="flex justify-between items-start gap-4 mb-4">
+                                    <h3 class="text-2xl font-black uppercase tracking-tight text-white group-hover:text-[#00f0ff] transition-colors">
+                                        @item.Name
+                                    </h3>
+                                    <span class="text-2xl font-black tabular-nums text-[#ff00c3] drop-shadow-[0_0_10px_rgba(255,0,195,0.4)] shrink-0">
+                                        @item.Price.ToString("N0") TL
+                                    </span>
+                                </div>
+                                <p class="text-sm font-medium text-[#00ff9f]/60 leading-relaxed uppercase pr-12">
+                                    // @(string.IsNullOrWhiteSpace(item.Description) ? "Veri akışı tamamlandı. Özel lezzet." : item.Description)
+                                </p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-40 py-20 border-t border-white/10 flex flex-col md:flex-row justify-between items-end gap-12 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all">
+            <div class="space-y-2 text-[10px] font-black uppercase tracking-widest">
+                <p class="text-[#00f0ff] underline decoration-[#ff003c] underline-offset-4">Location: Merkez Mahallesi, Gastronomi Sokak No: 7</p>
+                <p>Access: 24/7.00</p>
+            </div>
+            <div class="space-y-2 text-right text-[10px] font-black uppercase tracking-widest">
+                <p>COMMS: +90 (212) 555 01 23</p>
+                <p class="text-[#ff003c] font-black italic">No refunds in the afterlife.</p>
+            </div>
+        </footer>
+    </div>
+</div>

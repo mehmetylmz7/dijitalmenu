@@ -1,0 +1,147 @@
+@{
+    var restaurant = ViewBag.Restaurant as EntityLayer.Concrete.Restaurant;
+    var categories = ViewBag.Categories as List<EntityLayer.Concrete.Category> ?? new();
+    var menuItems  = ViewBag.MenuItems  as List<EntityLayer.Concrete.MenuItem>  ?? new();
+
+    var foodImages = new[]
+    {
+        "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=400",
+        "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&q=80&w=400",
+        "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80&w=400",
+        "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=400",
+    };
+}
+
+<div class="bg-[#fcfcff] text-[#1e293b] min-h-screen font-sans selection:bg-[#0284c7] selection:text-white">
+  <!-- Breeze Seaside Header -->
+  <header class="relative pt-24 pb-20 px-6 text-center bg-gradient-to-b from-[#e0f2fe] to-[#fcfcff] overflow-hidden border-b-4 border-[#0284c7]/20">
+    <div class="absolute inset-0 bg-[radial-gradient(#0284c7_1px,transparent_1px)] [background-size:24px_24px] opacity-10"></div>
+    <div class="max-w-xl mx-auto relative z-10">
+      <div class="w-12 h-12 text-[#0284c7] mx-auto mb-4 flex items-center justify-center text-3xl animate-bounce">
+        <i class="fa-solid fa-anchor"></i>
+      </div>
+      <h1 class="text-4xl md:text-5xl font-serif font-black text-[#0369a1] uppercase tracking-wide">
+        @restaurant?.Name MEZE &amp; BALIK
+      </h1>
+      <p class="text-[#0ea5e9] text-xs uppercase tracking-[0.3em] font-bold mt-2">
+        Akdeniz &amp; Ege Rüzgarları
+      </p>
+    </div>
+  </header>
+
+  <!-- Aegean Navigation Bar -->
+  <nav class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b-2 border-[#e2e8f0] shadow-sm overflow-x-auto no-scrollbar">
+    <div class="max-w-4xl mx-auto flex justify-center py-4 px-6 gap-3 md:gap-6 min-w-max">
+      @foreach (var cat in categories)
+      {
+        <button onclick="scrollToAegeanCategory('aegean-cat-@cat.Id')"
+                class="px-4 py-2 border-2 border-[#0284c7]/20 hover:border-[#0284c7] text-[#0369a1] hover:bg-[#f0f9ff] font-bold text-xs md:text-sm rounded-full tracking-wider uppercase transition-all duration-300 bg-transparent cursor-pointer">
+          @cat.Name
+        </button>
+      }
+    </div>
+  </nav>
+
+  <main class="max-w-5xl mx-auto px-6 py-16">
+    @foreach (var cat in categories)
+    {
+      var items = menuItems.Where(i => i.CategoryId == cat.Id).ToList();
+      if (!items.Any()) continue;
+
+      <section id="aegean-cat-@cat.Id" class="mb-20 scroll-mt-24 text-left">
+        <div class="text-center mb-10">
+          <h3 class="text-2xl md:text-3xl font-serif font-bold text-[#0369a1] uppercase tracking-wide inline-block relative py-2 px-6">
+            @cat.Name
+            <span class="absolute bottom-0 left-0 right-0 h-[2px] bg-[#0284c7]"></span>
+          </h3>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          @foreach (var item in items)
+          {
+            var img = foodImages[item.Id % foodImages.Length];
+            <div class="bg-white rounded-3xl overflow-hidden border border-[#e2e8f0] shadow-sm hover:shadow-lg hover:border-[#0284c7]/40 transition-all duration-300 flex flex-col">
+              <div class="relative h-56 overflow-hidden bg-sky-50">
+                <img src="@img" 
+                     alt="@item.Name" 
+                     class="w-full h-full object-cover" />
+                @if (item.Price > 300)
+                {
+                  <div class="absolute top-4 left-4 bg-sky-600 text-white text-[9px] uppercase font-bold tracking-widest px-3 py-1 rounded-full shadow-lg">
+                    Günlük Meze
+                  </div>
+                }
+              </div>
+              <div class="p-6 flex flex-col flex-1">
+                <div class="flex justify-between items-start gap-4 mb-3">
+                  <h4 class="text-lg font-serif font-bold text-[#1e293b] leading-tight">
+                    @item.Name
+                  </h4>
+                  <span class="text-base font-black text-[#0284c7] whitespace-nowrap">
+                    @item.Price.ToString("N0") ₺
+                  </span>
+                </div>
+                <p class="text-[#64748b] text-xs leading-relaxed line-clamp-2">
+                  @(string.IsNullOrWhiteSpace(item.Description) ? "Ege zeytinyağı ve taze otlarla marina edilmiş deniz spesiyalimiz." : item.Description)
+                </p>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Note Section -->
+    <div class="mt-16 p-8 md:p-12 bg-gradient-to-br from-[#0369a1] to-[#0284c7] rounded-3xl text-white shadow-xl relative overflow-hidden text-left">
+      <div class="absolute right-0 bottom-0 p-8 opacity-10">
+        <i class="fa-solid fa-ship text-[10rem]"></i>
+      </div>
+      <div class="relative z-10 max-w-xl">
+        <span class="text-[#e0f2fe] font-bold uppercase tracking-widest text-[10px] block mb-2">
+          Liman Bilgilendirmesi
+        </span>
+        <p class="text-xl md:text-2xl font-serif leading-relaxed mb-4">
+          "Kendi alkolünü yanında getiren misafirlerimizden kişi başı <span class="text-[#e0f2fe] font-bold bg-white/10 px-2.5 py-1.0 rounded-lg">100 TL</span> servis ücreti alınmaktadır."
+        </p>
+        <p class="text-sky-100 text-xs italic">
+          * Deniz ürünlerimiz Hatay kıyılarından taze olarak günlük temin edilmektedir.
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Aegean Footer -->
+  <footer class="bg-[#0f172a] text-[#94a3b8] py-16 px-6 text-xs border-t border-[#f3e1d3]">
+    <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-12 text-left">
+      <div>
+        <h5 class="text-white font-serif text-lg mb-4">KOCAOĞLU TAHT</h5>
+        <p class="text-[#64748b] leading-relaxed">
+          Tarihi lezzetleri, Ege ve Akdeniz'in taze deniz esintileri ile harmanlayarak şık masalara sunuyoruz.
+        </p>
+      </div>
+      <div>
+        <h5 class="text-white font-bold uppercase tracking-wider mb-4">REZERVASYON</h5>
+        <p>Tel: +90 555 000 00 00</p>
+      </div>
+      <div>
+        <h5 class="text-white font-bold uppercase tracking-wider mb-4">LİMAN</h5>
+        <p>Atatürk Caddesi, No: 123</p>
+        <p>Hatay, Türkiye</p>
+      </div>
+      <div>
+        <h5 class="text-white font-bold uppercase tracking-wider mb-4">AÇILIŞ-KAPANIŞ</h5>
+        <p>H. İçi: 11:00 - 23:00</p>
+        <p>H. Sonu: 10:00 - 00:00</p>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script>
+function scrollToAegeanCategory(catId) {
+  const element = document.getElementById(catId);
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+</script>

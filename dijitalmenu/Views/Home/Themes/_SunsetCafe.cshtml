@@ -1,0 +1,147 @@
+@{
+    var restaurant = ViewBag.Restaurant as EntityLayer.Concrete.Restaurant;
+    var categories = ViewBag.Categories as List<EntityLayer.Concrete.Category> ?? new();
+    var menuItems  = ViewBag.MenuItems  as List<EntityLayer.Concrete.MenuItem>  ?? new();
+
+    var foodImages = new[]
+    {
+        "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=400",
+        "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&q=80&w=400",
+        "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80&w=400",
+        "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=400",
+    };
+}
+
+<div class="bg-gradient-to-br from-[#fffdfa] via-[#fffbf7] to-[#fffcfc] text-[#4d3a34] min-h-screen font-sans selection:bg-[#ff793f] selection:text-white">
+  <!-- Sunlit warm Header -->
+  <header class="relative pt-24 pb-20 px-6 text-center border-b border-[#f3e1d3]">
+    <div class="absolute inset-0 bg-[radial-gradient(#ff793f_1px,transparent_1px)] [background-size:32px_32px] opacity-[0.03]"></div>
+    <div class="max-w-xl mx-auto relative z-10">
+      <div class="w-12 h-12 bg-[#ffe8d6] text-[#e15f41] rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+        <i class="fa-solid fa-mug-hot text-xl"></i>
+      </div>
+      <h1 class="text-4xl md:text-5xl font-black text-[#4d3a34] uppercase tracking-tight">
+        @restaurant?.Name
+      </h1>
+      <p class="text-[#ff793f] text-xs uppercase tracking-[0.25em] font-bold mt-2">
+        Günlük Sıcak &amp; Taze Sohbet Noktası
+      </p>
+    </div>
+  </header>
+
+  <!-- Warm Categories Bar -->
+  <nav class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-[#f3e1d3] overflow-x-auto no-scrollbar">
+    <div class="max-w-4xl mx-auto flex justify-center py-4 px-6 gap-3 md:gap-5 min-w-max">
+      @foreach (var cat in categories)
+      {
+        <button onclick="scrollToSunsetCategory('sunset-cat-@cat.Id')"
+                class="px-5 py-2.5 bg-[#ffe8d6]/50 hover:bg-[#ff793f] text-[#4d3a34] hover:text-white font-bold text-xs rounded-full tracking-wide uppercase transition-all duration-300 border-none cursor-pointer">
+          @cat.Name
+        </button>
+      }
+    </div>
+  </nav>
+
+  <main class="max-w-5xl mx-auto px-6 py-16">
+    @foreach (var cat in categories)
+    {
+      var items = menuItems.Where(i => i.CategoryId == cat.Id).ToList();
+      if (!items.Any()) continue;
+
+      <section id="sunset-cat-@cat.Id" class="mb-20 scroll-mt-24">
+        <div class="flex items-center gap-4 mb-10">
+          <h3 class="text-2xl md:text-3xl font-black text-[#4d3a34] uppercase tracking-tight shrink-0">
+            @cat.Name
+          </h3>
+          <div class="h-[2px] bg-gradient-to-r from-[#f3e1d3] to-transparent w-full"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          @foreach (var item in items)
+          {
+            var img = foodImages[item.Id % foodImages.Length];
+            <div class="bg-white rounded-[2.25rem] overflow-hidden border border-[#f3e1d3] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col">
+              <div class="relative h-56 overflow-hidden bg-[#fffdfa]">
+                <img src="@img" 
+                     alt="@item.Name" 
+                     class="w-full h-full object-cover" />
+                @if (item.Price > 400)
+                {
+                  <div class="absolute top-4 left-4 bg-[#ff793f] text-white text-[9px] uppercase font-bold tracking-widest px-3 py-1 rounded-full shadow-md">
+                    En Çok Satan
+                  </div>
+                }
+              </div>
+              <div class="p-7 flex flex-col flex-1">
+                <div class="flex justify-between items-start gap-4 mb-3">
+                  <h4 class="text-lg font-bold text-[#4d3a34] leading-tight">
+                    @item.Name
+                  </h4>
+                  <span class="text-base font-black text-[#e15f41] whitespace-nowrap">
+                    @item.Price.ToString("N0") ₺
+                  </span>
+                </div>
+                <p class="text-stone-500 text-xs leading-relaxed line-clamp-2">
+                  @(string.IsNullOrWhiteSpace(item.Description) ? "Günlük taze çekilmiş çekirdekler ve şefimizin pastacılık spesiyaliyle." : item.Description)
+                </p>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Notes Block -->
+    <div class="mt-16 p-8 md:p-12 bg-gradient-to-br from-[#ff793f] to-[#e15f41] rounded-[2.5rem] text-white shadow-lg relative overflow-hidden">
+      <div class="absolute right-0 bottom-0 p-8 opacity-10">
+        <i class="fa-solid fa-sun text-[10rem]"></i>
+      </div>
+      <div class="relative z-10 max-w-xl text-left">
+        <span class="text-amber-100 font-bold uppercase tracking-widest text-[10px] block mb-2">
+          KÜÇÜK BİR NOT
+        </span>
+        <p class="text-xl md:text-2xl font-semibold leading-relaxed mb-4">
+          "Kendi alkolünü yanında getiren misafirlerimizden kişi başı <span class="bg-white text-[#e15f41] px-2.5 py-1.0 rounded-xl font-bold">100 TL</span> servis ücreti alınmaktadır."
+        </p>
+        <p class="text-amber-100/80 text-xs italic">
+          * Kahvelerimiz taze kavrulmuş çekirdeklerden öğütülmektedir.
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Sunset Footer -->
+  <footer class="bg-[#3a2c27] text-[#9c847c] py-16 px-6 text-xs border-t border-[#f3e1d3]">
+    <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-12 text-left">
+      <div>
+        <h5 class="text-white font-bold text-base mb-4">@restaurant?.Name</h5>
+        <p class="text-[#846b63] leading-relaxed">
+          Taptaze fırın ürünleri, zengin Hatay mezeleri ve güler yüzümüzle günün her saati buradayız.
+        </p>
+      </div>
+      <div>
+        <h5 class="text-white font-bold uppercase tracking-wider mb-4">İLETİŞİM</h5>
+        <p>Tel: +90 555 000 00 00</p>
+      </div>
+      <div>
+        <h5 class="text-white font-bold uppercase tracking-wider mb-4">ADRESİMİZ</h5>
+        <p>Atatürk Caddesi, No: 123</p>
+        <p>Hatay, Türkiye</p>
+      </div>
+      <div>
+        <h5 class="text-white font-bold uppercase tracking-wider mb-4">SAATLERİMİZ</h5>
+        <p>H. İçi: 11:00 - 23:00</p>
+        <p>H. Sonu: 10:00 - 00:00</p>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script>
+function scrollToSunsetCategory(catId) {
+  const element = document.getElementById(catId);
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+</script>

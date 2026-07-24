@@ -1,0 +1,162 @@
+@{
+    var restaurant = ViewBag.Restaurant as EntityLayer.Concrete.Restaurant;
+    var categories = ViewBag.Categories as List<EntityLayer.Concrete.Category> ?? new();
+    var menuItems  = ViewBag.MenuItems  as List<EntityLayer.Concrete.MenuItem>  ?? new();
+}
+
+<div class="animate-fadeIn min-h-screen bg-[#fafaf9]">
+  <!-- Hero Section -->
+  <div class="relative h-[40vh] bg-stone-900 flex items-center justify-center overflow-hidden">
+    <img src="https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&q=80&w=1200" 
+         class="absolute inset-0 w-full h-full object-cover opacity-60" 
+         alt="Restaurant Background" />
+    <div class="relative z-10 text-center px-4">
+      <h1 class="text-5xl md:text-7xl font-serif text-white mb-2 drop-shadow-xl">@restaurant?.Name</h1>
+      <p class="text-amber-400 text-lg md:text-xl italic uppercase tracking-[0.3em] font-medium">Geleneksel Lezzet Durağı</p>
+    </div>
+  </div>
+
+  <!-- Sticky Category Bar -->
+  <div class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-stone-200 shadow-sm overflow-x-auto no-scrollbar">
+    <div class="max-w-6xl mx-auto flex justify-center py-4 px-4 gap-4 md:gap-8 min-w-max">
+      @foreach (var cat in categories)
+      {
+        <button onclick="scrollToAnadoluCategory('anadolu-cat-@cat.Id')"
+                class="text-stone-600 hover:text-amber-800 font-semibold text-sm md:text-base transition-colors whitespace-nowrap">
+          @cat.Name
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="max-w-6xl mx-auto px-4 py-12">
+    @foreach (var cat in categories)
+    {
+      var items = menuItems.Where(i => i.CategoryId == cat.Id).ToList();
+      if (!items.Any()) continue;
+
+      <section id="anadolu-cat-@cat.Id" class="mb-20 scroll-mt-32">
+        <div class="flex items-center gap-6 mb-10">
+          <h2 class="text-3xl md:text-4xl font-serif text-stone-800 shrink-0">@cat.Name</h2>
+          <div class="h-[1px] bg-stone-200 w-full"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          @foreach (var item in items)
+          {
+            var imgIndex = item.Id % 8;
+            var imageUrl = imgIndex == 0 ? "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=400" :
+                           imgIndex == 1 ? "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&q=80&w=400" :
+                           imgIndex == 2 ? "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80&w=400" :
+                           imgIndex == 3 ? "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=400" :
+                           imgIndex == 4 ? "https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&q=80&w=400" :
+                           imgIndex == 5 ? "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&q=80&w=400" :
+                           imgIndex == 6 ? "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&q=80&w=400" :
+                                           "https://images.unsplash.com/photo-1482049016688-2d3e1b311543?auto=format&fit=crop&q=80&w=400";
+            
+            <div class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col border border-stone-100">
+              <div class="relative h-56 overflow-hidden">
+                <img src="@imageUrl" 
+                     alt="@item.Name" 
+                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                @if (item.Price > 400)
+                {
+                  <div class="absolute top-4 left-4 bg-amber-600 text-white text-[10px] uppercase font-bold tracking-widest px-3 py-1 rounded-full shadow-lg">
+                    Özel Lezzet
+                  </div>
+                }
+              </div>
+              <div class="p-6 flex flex-col flex-1">
+                <div class="flex justify-between items-start gap-4 mb-3">
+                  <h3 class="text-xl font-serif text-stone-900 leading-tight">@item.Name</h3>
+                  <span class="text-lg font-bold text-amber-800 whitespace-nowrap">@item.Price.ToString("N0") ₺</span>
+                </div>
+                <p class="text-stone-500 text-sm line-clamp-2 leading-relaxed mb-4">
+                  @(string.IsNullOrWhiteSpace(item.Description) ? "Bu enfes lezzetimizi denemelisiniz." : item.Description)
+                </p>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Note Section -->
+    <div class="mt-16 p-10 bg-stone-900 rounded-3xl shadow-2xl relative overflow-hidden">
+      <div class="absolute top-0 right-0 p-8 opacity-10">
+        <i class="fas fa-wine-glass text-8xl text-white"></i>
+      </div>
+      <div class="relative z-10 max-w-2xl text-left">
+        <h3 class="text-amber-400 font-bold uppercase tracking-widest text-sm mb-4">Servis Bilgilendirmesi</h3>
+        <p class="text-white text-xl md:text-2xl font-serif leading-relaxed mb-4">
+          "Kendi alkolünü yanında getiren misafirlerimizden kişi başı <span className="text-amber-400">100 TL</span> servis ücreti alınmaktadır."
+        </p>
+        <p class="text-stone-400 text-sm italic">Menü fiyatları ve içerikleri mevsimsel olarak değişebilir.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-stone-900 text-stone-400 py-20 px-4 mt-20">
+    <div class="max-w-6xl mx-auto text-center">
+      <div class="text-4xl font-serif text-white mb-4">@restaurant?.Name</div>
+      <p class="text-amber-400 text-sm mb-10 uppercase tracking-[0.4em] font-medium">Geleneksel Anadolu Mutfağı</p>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16 max-w-4xl mx-auto text-sm">
+        <div>
+          <h4 class="text-white font-bold mb-4 uppercase tracking-widest">İletişim</h4>
+          <p>+90 (555) 000 00 00</p>
+          <p>info@dijitalmenu.com</p>
+        </div>
+        <div>
+          <h4 class="text-white font-bold mb-4 uppercase tracking-widest">Adres</h4>
+          <p>Atatürk Caddesi, No: 123</p>
+          <p>Hatay, Türkiye</p>
+        </div>
+        <div>
+          <h4 class="text-white font-bold mb-4 uppercase tracking-widest">Çalışma Saatleri</h4>
+          <p>Hafta içi: 11:00 - 23:00</p>
+          <p>Hafta sonu: 10:00 - 00:00</p>
+        </div>
+      </div>
+
+      <div class="flex justify-center gap-8 mb-12">
+        <a href="#" class="w-12 h-12 flex items-center justify-center rounded-full border border-stone-800 hover:border-amber-400 hover:text-amber-400 transition-all"><i class="fab fa-instagram text-xl"></i></a>
+        <a href="#" class="w-12 h-12 flex items-center justify-center rounded-full border border-stone-800 hover:border-amber-400 hover:text-amber-400 transition-all"><i class="fab fa-facebook-f text-xl"></i></a>
+        <a href="#" class="w-12 h-12 flex items-center justify-center rounded-full border border-stone-800 hover:border-amber-400 hover:text-amber-400 transition-all"><i class="fas fa-map-marked-alt text-xl"></i></a>
+      </div>
+
+      <div class="border-t border-stone-800 pt-10 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] uppercase tracking-widest font-medium">
+        <p>© @DateTime.Now.Year @restaurant?.Name | Gururla Hizmetinizdeyiz.</p>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script>
+function scrollToAnadoluCategory(catId) {
+  const element = document.getElementById(catId);
+  if (element) {
+    const offset = 120;
+    const bodyRect = document.body.getBoundingClientRect().top;
+    const elementRect = element.getBoundingClientRect().top;
+    const elementPosition = elementRect - bodyRect;
+    const offsetPosition = elementPosition - offset;
+
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: 'smooth'
+    });
+  }
+}
+</script>
+
+<style>
+  @@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fadeIn { animation: fadeIn 0.8s cubic-bezier(0.2, 0, 0.2, 1) forwards; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+</style>

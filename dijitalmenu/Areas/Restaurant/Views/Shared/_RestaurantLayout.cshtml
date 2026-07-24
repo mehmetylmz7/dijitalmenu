@@ -263,6 +263,7 @@
             margin-bottom: 20px;
         }
     </style>
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
 
@@ -288,12 +289,22 @@
            asp-area="Restaurant" asp-controller="MenuItem" asp-action="Index">
             <span class="icon">🍕</span> Ürünler
         </a>
+        <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Builder" ? "active" : "")"
+           asp-area="Restaurant" asp-controller="Builder" asp-action="Index">
+            <span class="icon">✨</span> Menü Oluşturucu
+        </a>
     </nav>
 
     <div class="sidebar-footer">
-        <a class="public-link" asp-controller="Home" asp-action="Index" asp-area="">
-            <span>🌐</span> Public Menüye Dön
-        </a>
+        @{
+            var restaurantId = Context.Session.GetString("RestaurantId");
+        }
+        @if (!string.IsNullOrEmpty(restaurantId))
+        {
+            <a class="public-link" href="/Home/Menu/@restaurantId" target="_blank" rel="noopener">
+                <span>🌐</span> Menümü Görüntüle
+            </a>
+        }
         <a asp-area="Restaurant" asp-controller="Auth" asp-action="Logout">
             <span>🚪</span> Çıkış Yap
         </a>
@@ -318,5 +329,6 @@
     </main>
 </div>
 
+@await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

@@ -1,5 +1,5 @@
 using BusinessLayer.Abstract;
-using EntityLayer.Concrete;
+using dijitalmenu.Helpers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace dijitalmenu.Areas.Admin.Controllers
@@ -27,10 +27,16 @@ namespace dijitalmenu.Areas.Admin.Controllers
         public IActionResult Login(string username, string password)
         {
             var admin = _adminService.TGetListAll()
-                .FirstOrDefault(a => a.Username == username && a.Password == password);
+                .FirstOrDefault(a => a.Username == username);
 
-            if (admin != null)
+            if (admin != null && PasswordHelper.Verify(password, admin.Password))
             {
+                if (PasswordHelper.NeedsRehash(admin.Password))
+                {
+                    admin.Password = PasswordHelper.Hash(password);
+                    _adminService.TUpdate(admin);
+                }
+
                 HttpContext.Session.SetString("AdminUser", admin.Username);
                 return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
             }

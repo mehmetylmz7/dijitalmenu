@@ -1,0 +1,148 @@
+@{
+    var restaurant = ViewBag.Restaurant as EntityLayer.Concrete.Restaurant;
+    var categories = ViewBag.Categories as List<EntityLayer.Concrete.Category> ?? new();
+    var menuItems  = ViewBag.MenuItems  as List<EntityLayer.Concrete.MenuItem>  ?? new();
+
+    var foodImages = new[]
+    {
+        "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=400",
+        "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&q=80&w=400",
+        "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80&w=400",
+        "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=400",
+    };
+}
+
+<div class="bg-[#f9f3eb] text-[#3e342f] min-h-screen font-sans selection:bg-[#d07b5c] selection:text-white">
+  <!-- Warm Organic Header -->
+  <header class="relative pt-20 pb-16 px-6 text-center bg-[#f0e3d4] border-b-2 border-[#dfccb7]">
+    <div class="max-w-xl mx-auto">
+      <div class="inline-flex p-3 bg-[#e8dac7] text-[#c0603d] rounded-2xl mb-4 text-2xl">
+        <i class="fa-solid fa-fire animate-pulse"></i>
+      </div>
+      <h1 class="text-4xl md:text-5xl font-serif font-black text-[#5c3e31] tracking-tight">
+        @restaurant?.Name Ocağı
+      </h1>
+      <p class="text-[#c0603d] text-xs uppercase tracking-[0.25em] font-bold mt-2">
+        Odun Ateşinde Geleneksel Lezzetler
+      </p>
+    </div>
+  </header>
+
+  <!-- Earthy Categories Bar -->
+  <nav class="sticky top-0 z-30 bg-[#f9f3eb]/95 backdrop-blur-md border-b-2 border-[#dfccb7] overflow-x-auto no-scrollbar">
+    <div class="max-w-4xl mx-auto flex justify-center py-4 px-6 gap-4 md:gap-8 min-w-max">
+      @foreach (var cat in categories)
+      {
+        <button onclick="scrollToRusticCategory('rustic-cat-@cat.Id')"
+                class="px-4 py-2 bg-[#f0e3d4]/40 hover:bg-[#c0603d] hover:text-white rounded-xl text-xs md:text-sm font-bold tracking-wider uppercase transition-all duration-200 border-none cursor-pointer">
+          @cat.Name
+        </button>
+      }
+    </div>
+  </nav>
+
+  <main class="max-w-5xl mx-auto px-6 py-16">
+    @foreach (var cat in categories)
+    {
+      var items = menuItems.Where(i => i.CategoryId == cat.Id).ToList();
+      if (!items.Any()) continue;
+
+      <section id="rustic-cat-@cat.Id" class="mb-20 scroll-mt-24 text-left">
+        <div class="flex items-center gap-4 mb-8">
+          <h3 class="text-2xl md:text-3xl font-serif font-bold text-[#5c3e31] shrink-0">
+            @cat.Name
+          </h3>
+          <div class="h-0.5 bg-dashed border-t border-[#dfccb7] w-full"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          @foreach (var item in items)
+          {
+            var img = foodImages[item.Id % foodImages.Length];
+            <div class="bg-[#f0e3d4]/30 rounded-[2rem] p-5 border border-[#dfccb7]/60 hover:border-[#c0603d] transition-all duration-300 flex flex-col">
+              <div class="relative h-48 rounded-[1.5rem] overflow-hidden mb-4 bg-stone-100">
+                <img src="@img" 
+                     alt="@item.Name" 
+                     class="w-full h-full object-cover" />
+                @if (item.Price > 400)
+                {
+                  <span class="absolute top-3 left-3 bg-[#c0603d] text-white text-[9px] uppercase font-bold tracking-widest px-3 py-1 rounded-xl shadow-md">
+                    Fırından Yeni
+                  </span>
+                }
+              </div>
+              <div class="flex-1 flex flex-col justify-between">
+                <div>
+                  <div class="flex justify-between items-baseline gap-4 mb-2">
+                    <h4 class="text-lg font-serif font-bold text-[#5c3e31]">
+                      @item.Name
+                    </h4>
+                    <span class="text-base font-black text-[#c0603d]">
+                      @item.Price.ToString("N0") ₺
+                    </span>
+                  </div>
+                  <p class="text-[#605249] text-xs leading-relaxed line-clamp-2">
+                    @(string.IsNullOrWhiteSpace(item.Description) ? "Toprak güveçte veya odun ateşinde pişirilmiş otantik spesiyalimiz." : item.Description)
+                  </p>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Note Section -->
+    <div class="mt-16 p-8 md:p-10 bg-[#5c3e31] rounded-[2.5rem] text-white shadow-xl relative overflow-hidden text-left">
+      <div class="absolute -right-12 -bottom-12 opacity-5 text-stone-200">
+        <i class="fa-solid fa-bowl-rice text-[10rem]"></i>
+      </div>
+      <div class="relative z-10 max-w-xl">
+        <h4 class="text-[#df9e84] font-bold uppercase tracking-wider text-xs mb-3">
+          Köyümüzden Sofranıza
+        </h4>
+        <p class="text-xl md:text-2xl font-serif leading-relaxed mb-4">
+          "Kendi alkolünü yanında getiren misafirlerimizden kişi başı <span class="text-[#df9e84] font-bold">100 TL</span> servis ücreti alınmaktadır."
+        </p>
+        <p class="text-[#dfccb7] text-xs italic">
+          * El yapımı ekmeklerimiz ve yayık tereyağımız ikramımızdır.
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Rustic Footer -->
+  <footer class="bg-[#483025] text-[#b39e95] py-16 px-6 text-xs border-t border-[#dfccb7]">
+    <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-12 text-left">
+      <div>
+        <h5 class="text-white font-serif text-lg mb-4">KOCAOĞLU OCAĞI</h5>
+        <p class="text-[#968075] leading-relaxed">
+          Kuşaktan kuşağa aktarılan sırlarımızla, Hatay'ın nefis odun fırını lezzetlerini sunuyoruz.
+        </p>
+      </div>
+      <div>
+        <h5 class="text-white font-bold uppercase tracking-wider mb-4">OCAK BAŞI</h5>
+        <p>Tel: +90 555 000 00 00</p>
+      </div>
+      <div>
+        <h5 class="text-white font-bold uppercase tracking-wider mb-4">ADRESİMİZ</h5>
+        <p>Atatürk Caddesi, No: 123</p>
+        <p>Hatay, Türkiye</p>
+      </div>
+      <div>
+        <h5 class="text-white font-bold uppercase tracking-wider mb-4">KAPILARIMIZ</h5>
+        <p>H. İçi: 11:00 - 23:00</p>
+        <p>H. Sonu: 10:00 - 00:00</p>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script>
+function scrollToRusticCategory(catId) {
+  const element = document.getElementById(catId);
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+</script>

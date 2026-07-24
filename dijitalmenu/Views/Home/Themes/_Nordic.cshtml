@@ -1,0 +1,94 @@
+@{
+    var restaurant = ViewBag.Restaurant as EntityLayer.Concrete.Restaurant;
+    var categories = ViewBag.Categories as List<EntityLayer.Concrete.Category>;
+    var menuItems = ViewBag.MenuItems as List<EntityLayer.Concrete.MenuItem>;
+}
+
+<div class="bg-[#f2efe9] text-[#2c2c2c] min-h-screen py-16 px-6 sm:px-12 font-sans">
+    <div class="max-w-5xl mx-auto grid lg:grid-cols-[1fr_2fr] gap-16">
+        
+        <!-- Left Column: Branding & Info -->
+        <div class="lg:sticky lg:top-16 self-start space-y-12">
+            <header>
+                <h1 class="text-6xl font-black tracking-tighter text-[#1a1a1a] mb-6 lowercase">
+                    @restaurant?.Name<span class="text-orange-500">.</span>
+                </h1>
+                <p class="text-xl font-medium leading-tight text-neutral-600">
+                    Yöresel Lezzetlerin Modern Buluşma Noktası
+                </p>
+            </header>
+
+            <div class="space-y-6 text-sm">
+                <div class="p-6 bg-white/50 backdrop-blur rounded-3xl border border-white/50 space-y-4 shadow-sm">
+                    <div class="flex flex-col">
+                        <span class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider mb-1">Adresimiz</span>
+                        <span class="font-medium text-neutral-800">Merkez Mahallesi, Gastronomi Sokak No: 7</span>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider mb-1">Telefon</span>
+                        <span class="font-medium text-neutral-800">+90 (212) 555 01 23</span>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider mb-1">Çalışma Saatleri</span>
+                        <span class="font-medium italic text-neutral-800">Pazartesi - Pazar: 11:00 - 23:00</span>
+                    </div>
+                </div>
+                
+                <div class="relative aspect-square rounded-3xl overflow-hidden bg-neutral-200 shadow-sm hidden lg:block">
+                    <div class="absolute inset-0 bg-gradient-to-br from-orange-200 to-amber-100 opacity-60"></div>
+                    <div class="absolute inset-0 flex items-center justify-center p-8 text-center italic text-neutral-600 text-sm font-medium">
+                        Taze ve mevsimlik ürünlerle hazırlanan yerel lezzetler.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Menu List -->
+        <div class="space-y-20 py-8 lg:py-0">
+            @foreach (var category in categories)
+            {
+                var catItems = menuItems?.Where(mi => mi.CategoryId == category.Id).ToList() ?? new List<EntityLayer.Concrete.MenuItem>();
+                
+                <section>
+                    <h2 class="text-4xl font-black mb-10 tracking-tight flex items-baseline gap-2 text-neutral-800">
+                        @category.Name
+                        <span class="h-1.5 w-1.5 rounded-full bg-orange-500"></span>
+                    </h2>
+                    
+                    <div class="grid gap-12">
+                        @foreach (var item in catItems)
+                        {
+                            var imgIndex = item.Id % 5;
+                            var imageUrl = imgIndex == 0 ? "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=300" :
+                                           imgIndex == 1 ? "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&q=80&w=300" :
+                                           imgIndex == 2 ? "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80&w=300" :
+                                           imgIndex == 3 ? "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=300" :
+                                                           "https://images.unsplash.com/photo-1482049016688-2d3e1b311543?auto=format&fit=crop&q=80&w=300";
+
+                            <div class="grid grid-cols-[1fr_auto] gap-x-8 items-start group">
+                                <div class="flex gap-6">
+                                    <div class="w-20 h-20 shrink-0 rounded-2xl overflow-hidden bg-stone-100 ring-4 ring-white shadow-inner">
+                                        <img src="@imageUrl" alt="@item.Name" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                                    </div>
+                                    <div class="space-y-2">
+                                        <div class="flex items-center gap-2">
+                                            <h3 class="text-lg font-bold group-hover:text-orange-600 transition-colors text-neutral-800">
+                                                @item.Name
+                                            </h3>
+                                        </div>
+                                        <p class="text-neutral-500 text-sm leading-relaxed font-medium">
+                                            @(string.IsNullOrWhiteSpace(item.Description) ? "Bu lezzetli yemek için henüz açıklama girilmedi." : item.Description)
+                                        </p>
+                                    </div>
+                                </div>
+                                <span class="text-lg font-black tabular-nums bg-white px-4 py-2 rounded-2xl shadow-sm border border-neutral-100 text-neutral-800 shrink-0">
+                                    @item.Price.ToString("N0") TL
+                                </span>
+                            </div>
+                        }
+                    </div>
+                </section>
+            }
+        </div>
+    </div>
+</div>

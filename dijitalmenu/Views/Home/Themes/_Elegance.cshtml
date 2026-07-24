@@ -1,0 +1,297 @@
+@{
+    var restaurant = ViewBag.Restaurant as EntityLayer.Concrete.Restaurant;
+    var categories = ViewBag.Categories as List<EntityLayer.Concrete.Category> ?? new();
+    var menuItems  = ViewBag.MenuItems  as List<EntityLayer.Concrete.MenuItem>  ?? new();
+}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #FAF9F6;
+    --ink: #1C1B18;
+    --ink-soft: #6B6659;
+    --line: #DEDACE;
+    --accent: #37463B;      /* koyu çam yeşili */
+    --gold: #A9824C;        /* mat altın */
+    --card: #FFFFFF;
+  }
+
+  body {
+    background: var(--bg) !important;
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- HERO ---------- */
+  .elegance-hero {
+    padding: 56px 24px 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    background: var(--accent);
+    color: #F3EFE6;
+  }
+  .elegance-hero::before {
+    content: "";
+    position: absolute; inset: 0;
+    background-image:
+      radial-gradient(circle at 18% 20%, rgba(255,255,255,0.05) 0, transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(255,255,255,0.04) 0, transparent 455%);
+    pointer-events: none;
+  }
+  .elegance-hero-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin: 0 0 14px;
+    font-weight: 600;
+  }
+  .elegance-hero h1 {
+    font-family: 'Fraunces', serif;
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-size: clamp(34px, 9vw, 52px);
+    line-height: 1.05;
+    margin: 0 0 12px;
+    letter-spacing: -0.01em;
+  }
+  .elegance-hero p.tag {
+    margin: 0;
+    font-size: 14px;
+    color: #C9C2B2;
+    font-style: italic;
+    font-family: 'Fraunces', serif;
+  }
+  .elegance-hero-rule {
+    width: 46px; height: 1px;
+    background: var(--gold);
+    margin: 22px auto 0;
+    opacity: .8;
+  }
+
+  /* ---------- STICKY TABS ---------- */
+  .elegance-tabs-wrap {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+  }
+  .elegance-tabs {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    padding: 12px 16px;
+    scrollbar-width: none;
+  }
+  .elegance-tabs::-webkit-scrollbar { display: none; }
+  .elegance-tab {
+    flex: 0 0 auto;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--ink-soft);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all .2s ease;
+  }
+  .elegance-tab.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #F3EFE6;
+  }
+
+  /* ---------- SECTIONS ---------- */
+  .elegance-main {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 8px 20px 80px;
+  }
+  .elegance-section {
+    padding-top: 40px;
+    scroll-margin-top: 80px;
+    opacity: 0;
+    transform: translateY(8px);
+    animation: rise-anim .5s ease forwards;
+  }
+  .elegance-section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+  .elegance-section-head h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 26px;
+    margin: 0;
+    color: var(--accent);
+  }
+  .elegance-section-head .count {
+    font-size: 12px;
+    color: var(--ink-soft);
+    letter-spacing: .04em;
+  }
+  .elegance-section-head::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+    transform: translateY(2px);
+  }
+
+  .elegance-dish {
+    padding: 16px 0;
+    border-bottom: 1px dashed var(--line);
+  }
+  .elegance-dish:last-child { border-bottom: none; }
+
+  .elegance-dish-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .elegance-dish-name {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 17px;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .elegance-dish-leader {
+    flex: 1;
+    border-bottom: 1px dotted #C7C2B3;
+    height: 0;
+    margin-bottom: 4px;
+  }
+  .elegance-dish-price {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--gold);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .elegance-dish-desc {
+    margin: 6px 0 0;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    max-width: 92%;
+  }
+
+  /* ---------- FOOTER ---------- */
+  .elegance-footer {
+    text-align: center;
+    padding: 36px 24px 48px;
+    color: var(--ink-soft);
+    font-size: 12px;
+    border-top: 1px solid var(--line);
+    background: var(--bg);
+  }
+  .elegance-footer .fname {
+    font-family: 'Fraunces', serif;
+    font-size: 15px;
+    color: var(--accent);
+    margin-bottom: 4px;
+    display: block;
+  }
+
+  @@keyframes rise-anim {
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+
+<div class="elegance-hero" id="elegance-top">
+  <p class="elegance-hero-eyebrow">Hoş Geldiniz</p>
+  <h1>@restaurant?.Name</h1>
+  <p class="tag">Mevsiminde, ocaktan sofraya</p>
+  <div class="elegance-rule"></div>
+</div>
+
+<div class="elegance-tabs-wrap">
+  <div class="elegance-tabs" id="elegance-tabs">
+    @foreach (var cat in categories)
+    {
+      <button class="elegance-tab" data-target="elegance-cat-@cat.Id">@cat.Name</button>
+    }
+  </div>
+</div>
+
+<main class="elegance-main">
+  @foreach (var cat in categories)
+  {
+    var catItems = menuItems.Where(mi => mi.CategoryId == cat.Id).ToList();
+    if (!catItems.Any()) continue;
+    var countStr = catItems.Count.ToString("D2");
+
+    <section class="elegance-section" id="elegance-cat-@cat.Id">
+      <div class="elegance-section-head">
+        <h2>@cat.Name</h2>
+        <span class="count">@countStr</span>
+      </div>
+
+      @foreach (var item in catItems)
+      {
+        <div class="elegance-dish">
+          <div class="elegance-dish-row">
+            <span class="elegance-dish-name">@item.Name</span>
+            <span class="elegance-dish-leader"></span>
+            <span class="elegance-dish-price">₺@item.Price.ToString("N0")</span>
+          </div>
+          @if (!string.IsNullOrWhiteSpace(item.Description))
+          {
+            <p class="elegance-dish-desc">@item.Description</p>
+          }
+        </div>
+      }
+    </section>
+  }
+</main>
+
+<footer class="elegance-footer">
+  <span class="fname">@restaurant?.Name</span>
+  Geleneksel ve Modern Lezzetler
+</footer>
+
+<script>
+(function () {
+  const tabs = document.querySelectorAll('.elegance-tab');
+  const sections = document.querySelectorAll('.elegance-section');
+
+  if (tabs.length > 0) {
+    tabs[0].classList.add('active');
+  }
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const target = document.getElementById(tab.dataset.target);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
+  const setActive = (id) => {
+    tabs.forEach(t => t.classList.toggle('active', t.dataset.target === id));
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        setActive(entry.target.id);
+      }
+    });
+  }, { rootMargin: '-30% 0px -55% 0px', threshold: 0 });
+
+  sections.forEach(s => observer.observe(s));
+})();
+</script>

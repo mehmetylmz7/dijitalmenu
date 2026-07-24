@@ -30,29 +30,29 @@
             flex-direction: column;
         }
 
-        /* ─── Navbar ─── */
+        /* ─── Header (Static, not sticky, links on the left) ─── */
         header {
-            background: rgba(26,29,39,0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            background: var(--surface);
             border-bottom: 1px solid var(--border);
-            position: sticky; top: 0; z-index: 100;
+            width: 100%;
         }
 
         nav {
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 24px;
-            height: 64px;
+            height: 70px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-start; /* Sola hizalama */
+            gap: 40px; /* Logo ile linkler arası boşluk */
+            flex-wrap: wrap;
         }
 
         .nav-brand {
             display: flex; align-items: center; gap: 10px;
             text-decoration: none; color: var(--text);
-            font-size: 1.2rem; font-weight: 700;
+            font-size: 1.25rem; font-weight: 700;
         }
 
         .nav-brand span {
@@ -62,14 +62,15 @@
         }
 
         .nav-links {
-            display: flex; align-items: center; gap: 8px;
+            display: flex; align-items: center; gap: 10px;
+            flex-wrap: wrap;
         }
 
         .nav-links a {
             text-decoration: none;
             color: var(--text-muted);
             font-size: .875rem;
-            font-weight: 500;
+            font-weight: 600;
             padding: 8px 14px;
             border-radius: 8px;
             transition: all .2s;
@@ -78,25 +79,28 @@
         .nav-links a:hover { background: var(--surface2); color: var(--text); }
 
         .nav-links .btn-restaurant {
-            background: rgba(34,197,94,.15);
+            background: rgba(34,197,94,.12);
             color: #4ade80 !important;
-            padding: 8px 18px;
+            padding: 8px 16px;
             border-radius: 10px;
-            border: 1px solid rgba(34,197,94,.25);
+            border: 1px solid rgba(34,197,94,.20);
         }
-        .nav-links .btn-restaurant:hover { background: rgba(34,197,94,.25); }
+        .nav-links .btn-restaurant:hover { background: rgba(34,197,94,.22); }
 
         .nav-links .btn-admin {
             background: linear-gradient(135deg, var(--accent), var(--accent-light));
             color: #fff !important;
-            padding: 8px 18px;
+            padding: 8px 16px;
             border-radius: 10px;
         }
 
-        .nav-links .btn-admin:hover { opacity: .9; transform: translateY(-1px); background: linear-gradient(135deg, var(--accent), var(--accent-light)); }
+        .nav-links .btn-admin:hover { opacity: .95; transform: translateY(-1px); }
 
         /* ─── Main ─── */
-        main { flex: 1; }
+        main { 
+            flex: 1; 
+            width: 100%;
+        }
 
         /* ─── Footer ─── */
         footer {
@@ -106,9 +110,24 @@
             text-align: center;
             color: var(--text-muted);
             font-size: .85rem;
+            width: 100%;
         }
 
         footer a { color: var(--accent-light); text-decoration: none; }
+
+        @@media (max-width: 768px) {
+            nav {
+                height: auto;
+                padding: 16px;
+                gap: 16px;
+                justify-content: center;
+                text-align: center;
+            }
+            .nav-links {
+                justify-content: center;
+                width: 100%;
+            }
+        }
     </style>
     @await RenderSectionAsync("Styles", required: false)
 </head>
@@ -137,4 +156,3 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
-

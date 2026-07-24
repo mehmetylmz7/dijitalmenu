@@ -33,8 +33,7 @@
                         <td>@item.Name</td>
                         <td style="display:flex;gap:8px;">
                             <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">✏️ Düzenle</a>
-                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger"
-                               onclick="return confirm('Bu kategoriyi silmek istediğinize emin misiniz?')">🗑️ Sil</a>
+                            <partial name="~/Views/Shared/_DeleteButton.cshtml" model="item.Id" />
                         </td>
                     </tr>
                 }

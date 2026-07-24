@@ -1,0 +1,76 @@
+@{
+    var restaurant = ViewBag.Restaurant as EntityLayer.Concrete.Restaurant;
+    var categories = ViewBag.Categories as List<EntityLayer.Concrete.Category>;
+    var menuItems = ViewBag.MenuItems as List<EntityLayer.Concrete.MenuItem>;
+}
+
+<div class="bg-[#0c0c0e] text-zinc-300 min-h-screen py-24 px-6 flex flex-col items-center font-serif">
+    <div class="w-full max-w-3xl border border-zinc-800 p-8 md:p-16 rounded-2xl bg-gradient-to-tr from-zinc-900/50 to-transparent shadow-2xl">
+        
+        <!-- Header -->
+        <header class="mb-20 text-center relative">
+            <div class="absolute -top-10 left-1/2 -translate-x-1/2 text-amber-500/10">
+                <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z"/><path d="m5 3 1 2.5L8.5 6 6 7 5 9.5 4 7 1.5 6 4 5.5Z"/><path d="m19 17 1 2.5 2.5.5-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1Z"/></svg>
+            </div>
+            <h1 class="text-6xl text-white mb-4 tracking-tight font-serif italic">
+                @restaurant?.Name
+            </h1>
+            <p class="text-amber-500/80 font-mono text-xs uppercase tracking-[0.3em]">
+                est. 2024 • premium experience
+            </p>
+        </header>
+
+        <!-- Menu Categories -->
+        <div class="space-y-20">
+            @foreach (var category in categories)
+            {
+                var catItems = menuItems?.Where(mi => mi.CategoryId == category.Id).ToList() ?? new List<EntityLayer.Concrete.MenuItem>();
+
+                <section>
+                    <div class="flex items-center gap-6 mb-10 overflow-hidden">
+                        <h2 class="text-2xl font-serif italic text-amber-500 shrink-0">
+                            @category.Name
+                        </h2>
+                        <div class="h-px w-full bg-zinc-800 opacity-50"></div>
+                    </div>
+                    
+                    <div class="space-y-12">
+                        @foreach (var item in catItems)
+                        {
+                            <div class="relative group">
+                                <div class="flex justify-between items-end mb-2 gap-4">
+                                    <div class="border-b border-zinc-800 border-dotted group-hover:border-amber-500/30 transition-colors flex-1 pb-1">
+                                        <h3 class="text-xl text-white font-serif group-hover:text-amber-500 transition-colors">
+                                            @item.Name
+                                        </h3>
+                                    </div>
+                                    <span class="text-amber-500 font-mono text-lg tabular-nums shrink-0">
+                                        @item.Price.ToString("N0") TL
+                                    </span>
+                                </div>
+                                <p class="text-zinc-500 text-sm leading-relaxed max-w-xl font-sans">
+                                    @(string.IsNullOrWhiteSpace(item.Description) ? "Seçkin malzemeler ile hazırlanan özel sunum." : item.Description)
+                                </p>
+                            </div>
+                        }
+                    </div>
+                </section>
+            }
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-24 pt-12 border-t border-zinc-800 text-center space-y-6">
+            <p class="text-zinc-500 text-sm font-light italic">
+                "Yöresel Lezzetlerin Modern Buluşma Noktası"
+            </p>
+            <div class="grid grid-cols-2 gap-4 text-[10px] uppercase font-mono tracking-widest text-zinc-600">
+                <div class="text-right border-r border-zinc-800 pr-4">
+                    Merkez Mahallesi, Gastronomi Sokak No: 7
+                </div>
+                <div class="text-left pl-4">
+                    11:00 - 23:00
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>

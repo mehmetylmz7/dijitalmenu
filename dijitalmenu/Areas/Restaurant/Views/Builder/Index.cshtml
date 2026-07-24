@@ -1,0 +1,955 @@
+@using EntityLayer.Concrete
+@{
+    ViewData["Title"] = "Canli Menu Olusturucu";
+    Layout = "~/Areas/Restaurant/Views/Shared/_RestaurantLayout.cshtml";
+    var restaurant = ViewBag.Restaurant as Restaurant;
+    var categories = ViewBag.Categories as List<Category>;
+    var menuItems = ViewBag.MenuItems as List<MenuItem>;
+    var themes = ViewBag.Themes as List<Theme>;
+    var suggestions = ViewBag.Suggestions as List<string>;
+    var currentThemeId = restaurant?.ThemeId ?? 0;
+}
+
+@section Styles {
+<style>
+    .content { padding: 0 !important; overflow: hidden; }
+
+    .builder-shell {
+        display: flex;
+        height: calc(100vh - 65px);
+        overflow: hidden;
+        background: #0d1117;
+    }
+
+    /* LEFT PANEL */
+    .builder-panel {
+        width: 420px;
+        min-width: 420px;
+        background: #161b22;
+        border-right: 1px solid #30363d;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .panel-header {
+        padding: 20px 24px 16px;
+        border-bottom: 1px solid #30363d;
+        background: #161b22;
+        flex-shrink: 0;
+    }
+
+    .panel-header h2 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #e6edf3;
+        margin: 0 0 2px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .panel-header p {
+        font-size: 0.75rem;
+        color: #7d8590;
+        margin: 0;
+    }
+
+    .panel-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px;
+        scrollbar-width: thin;
+        scrollbar-color: #30363d transparent;
+    }
+
+    .panel-body::-webkit-scrollbar { width: 4px; }
+    .panel-body::-webkit-scrollbar-track { background: transparent; }
+    .panel-body::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
+
+    .section-card {
+        background: #1c2128;
+        border: 1px solid #30363d;
+        border-radius: 12px;
+        margin-bottom: 10px;
+        overflow: hidden;
+        transition: border-color 0.2s;
+    }
+
+    .section-card.open { border-color: rgba(34,197,94,0.25); }
+
+    .section-trigger {
+        width: 100%;
+        padding: 14px 16px;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #e6edf3;
+        text-align: left;
+        transition: background 0.15s;
+    }
+
+    .section-trigger:hover { background: #21262d; }
+
+    .step-badge {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: rgba(34,197,94,0.12);
+        color: #4ade80;
+        font-size: 0.7rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        border: 1px solid rgba(34,197,94,0.25);
+    }
+
+    .step-title {
+        font-size: 0.875rem;
+        font-weight: 600;
+        flex: 1;
+    }
+
+    .step-desc {
+        font-size: 0.72rem;
+        color: #7d8590;
+        font-weight: 400;
+        margin-top: 1px;
+    }
+
+    .chevron {
+        color: #7d8590;
+        font-size: 0.75rem;
+        transition: transform 0.25s ease;
+        flex-shrink: 0;
+    }
+
+    .section-card.open .chevron { transform: rotate(180deg); }
+
+    .section-body {
+        display: none;
+        padding: 4px 16px 16px;
+        border-top: 1px solid #30363d;
+        background: #161b22;
+    }
+
+    .section-body.open {
+        display: block;
+        animation: slideDown 0.2s ease;
+    }
+
+    @@keyframes slideDown {
+        from { opacity: 0; transform: translateY(-6px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .theme-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 12px;
+    }
+
+    .theme-tile {
+        border: 1.5px solid #30363d;
+        border-radius: 10px;
+        padding: 10px;
+        cursor: pointer;
+        transition: all 0.2s;
+        background: #21262d;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .theme-tile:hover {
+        border-color: #4ade80;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(34,197,94,0.12);
+    }
+
+    .theme-tile.active {
+        border-color: #22c55e;
+        background: #1a2e1a;
+        box-shadow: 0 0 0 3px rgba(34,197,94,0.15);
+    }
+
+    .theme-palette {
+        display: flex;
+        height: 18px;
+        border-radius: 5px;
+        overflow: hidden;
+        margin-bottom: 8px;
+        border: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .theme-palette span { flex: 1; }
+
+    .theme-tile-name {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #c9d1d9;
+        line-height: 1.3;
+    }
+
+    .theme-tile-badge {
+        font-size: 0.62rem;
+        color: #7d8590;
+        margin-top: 2px;
+    }
+
+    .check-icon {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        color: #22c55e;
+        font-size: 0.8rem;
+        opacity: 0;
+        transition: opacity 0.15s;
+    }
+
+    .theme-tile.active .check-icon { opacity: 1; }
+
+    .builder-input {
+        width: 100%;
+        padding: 9px 12px;
+        background: #21262d;
+        border: 1px solid #30363d;
+        border-radius: 8px;
+        color: #e6edf3;
+        font-size: 0.8rem;
+        font-family: inherit;
+        transition: border-color 0.2s;
+        outline: none;
+        resize: none;
+    }
+
+    .builder-input:focus { border-color: #22c55e; }
+    .builder-input::placeholder { color: #4d5566; }
+
+    .builder-label {
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: #8b949e;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 6px;
+        margin-top: 12px;
+        display: block;
+    }
+
+    .btn-builder-primary {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 9px 16px;
+        background: #22c55e;
+        color: #0d1117;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-family: inherit;
+        width: 100%;
+        justify-content: center;
+        margin-top: 12px;
+    }
+
+    .btn-builder-primary:hover {
+        background: #4ade80;
+        transform: translateY(-1px);
+    }
+
+    .pill-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 10px;
+        margin-bottom: 4px;
+    }
+
+    .suggestion-pill {
+        padding: 4px 10px;
+        background: #21262d;
+        border: 1px solid #30363d;
+        border-radius: 20px;
+        color: #8b949e;
+        font-size: 0.72rem;
+        cursor: pointer;
+        transition: all 0.15s;
+        font-family: inherit;
+    }
+
+    .suggestion-pill:hover {
+        border-color: #4ade80;
+        color: #4ade80;
+        background: #1a2e1a;
+    }
+
+    .builder-toast {
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%) translateY(60px);
+        background: #1c2128;
+        border: 1px solid #30363d;
+        border-radius: 10px;
+        padding: 10px 20px;
+        font-size: 0.8rem;
+        color: #e6edf3;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        z-index: 9999;
+        transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+
+    .builder-toast.show { transform: translateX(-50%) translateY(0); }
+    .toast-icon { color: #4ade80; font-size: 1rem; }
+
+    /* RIGHT PANEL */
+    .preview-panel {
+        flex: 1;
+        background: #13161c;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .preview-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 24px;
+        background: #161b22;
+        border-bottom: 1px solid #30363d;
+        flex-shrink: 0;
+        gap: 16px;
+    }
+
+    .preview-toolbar-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .preview-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #8b949e;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    .view-toggle {
+        display: flex;
+        background: #21262d;
+        border: 1px solid #30363d;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .view-btn {
+        padding: 6px 14px;
+        background: transparent;
+        border: none;
+        color: #7d8590;
+        font-size: 0.8rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.15s;
+        font-family: inherit;
+        white-space: nowrap;
+    }
+
+    .view-btn.active {
+        background: #30363d;
+        color: #e6edf3;
+    }
+
+    .view-btn:hover:not(.active) { color: #c9d1d9; }
+
+    .preview-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-preview-open {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 14px;
+        background: #21262d;
+        border: 1px solid #30363d;
+        border-radius: 8px;
+        color: #8b949e;
+        font-size: 0.78rem;
+        text-decoration: none;
+        transition: all 0.15s;
+    }
+
+    .btn-preview-open:hover {
+        background: #30363d;
+        color: #e6edf3;
+    }
+
+    .preview-live-badge {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.72rem;
+        color: #4ade80;
+        font-weight: 600;
+    }
+
+    .live-dot {
+        width: 6px;
+        height: 6px;
+        background: #22c55e;
+        border-radius: 50%;
+        animation: pulseLive 2s infinite;
+    }
+
+    @@keyframes pulseLive {
+        0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
+        50% { box-shadow: 0 0 0 5px rgba(34,197,94,0); }
+    }
+
+    .preview-stage {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 28px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .preview-stage::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+            radial-gradient(ellipse at 30% 20%, rgba(34,197,94,0.04) 0%, transparent 50%),
+            radial-gradient(ellipse at 80% 80%, rgba(59,130,246,0.03) 0%, transparent 50%);
+        pointer-events: none;
+    }
+
+    .desktop-frame {
+        width: 100%;
+        max-width: 860px;
+        height: 100%;
+        max-height: 640px;
+        background: #0d1117;
+        border-radius: 12px;
+        border: 1px solid #30363d;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        position: relative;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .desktop-chrome {
+        background: #21262d;
+        border-bottom: 1px solid #30363d;
+        padding: 10px 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-shrink: 0;
+    }
+
+    .chrome-dots {
+        display: flex;
+        gap: 5px;
+    }
+
+    .chrome-dots span {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+    }
+
+    .chrome-dots span:nth-child(1) { background: #f85149; }
+    .chrome-dots span:nth-child(2) { background: #e3b341; }
+    .chrome-dots span:nth-child(3) { background: #3fb950; }
+
+    .chrome-bar {
+        flex: 1;
+        background: #30363d;
+        border-radius: 6px;
+        padding: 4px 10px;
+        font-size: 0.7rem;
+        color: #7d8590;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .desktop-frame iframe {
+        flex: 1;
+        width: 100%;
+        border: none;
+        background: #fff;
+    }
+
+    .mobile-frame-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+    }
+
+    .phone-outer {
+        width: 290px;
+        background: #1c2128;
+        border-radius: 44px;
+        padding: 14px;
+        box-shadow:
+            0 0 0 1px #30363d,
+            0 20px 60px rgba(0,0,0,0.6),
+            inset 0 1px 0 rgba(255,255,255,0.05);
+        position: relative;
+    }
+
+    .phone-inner {
+        background: #0d1117;
+        border-radius: 32px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .phone-notch-bar {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 110px;
+        height: 28px;
+        background: #1c2128;
+        border-radius: 0 0 18px 18px;
+        z-index: 10;
+    }
+
+    .phone-inner iframe {
+        width: 100%;
+        height: 560px;
+        border: none;
+        display: block;
+    }
+
+    .phone-side-btn {
+        position: absolute;
+        right: -3px;
+        top: 100px;
+        width: 3px;
+        height: 50px;
+        background: #30363d;
+        border-radius: 0 3px 3px 0;
+    }
+
+    .preview-loading {
+        position: absolute;
+        inset: 0;
+        background: rgba(13,17,23,0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 5;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s;
+        border-radius: inherit;
+    }
+
+    .preview-loading.visible { opacity: 1; pointer-events: auto; }
+
+    .spinner {
+        width: 28px;
+        height: 28px;
+        border: 2px solid #30363d;
+        border-top-color: #22c55e;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+    }
+
+    @@keyframes spin { to { transform: rotate(360deg); } }
+
+    select.builder-input {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237d8590' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        padding-right: 32px;
+    }
+
+    select.builder-input option {
+        background: #21262d;
+        color: #e6edf3;
+    }
+</style>
+}
+
+<div class="builder-shell">
+
+    <!-- LEFT PANEL -->
+    <div class="builder-panel">
+        <div class="panel-header">
+            <h2>&#10024; Menu Olusturucu</h2>
+            <p>Degisiklikler sagda aninda yansiyor</p>
+        </div>
+
+        <div class="panel-body">
+
+            <!-- 1. Tema -->
+            <div class="section-card open" id="sec-theme">
+                <button class="section-trigger" onclick="toggleSection('sec-theme')">
+                    <span class="step-badge">1</span>
+                    <span>
+                        <div class="step-title">Sablon Secimi</div>
+                        <div class="step-desc">Gorunum ve renk paleti</div>
+                    </span>
+                    <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body open" id="body-theme">
+                    <div class="theme-grid">
+                        @foreach (var t in themes)
+                        {
+                            var isSelected = t.Id == currentThemeId;
+                            var layoutLabel = t.Layout == LayoutType.List ? "Liste" :
+                                             t.Layout == LayoutType.Grid ? "Grid" : "Gorselli";
+                            <div class="theme-tile @(isSelected ? "active" : "")"
+                                 id="theme-@t.Id"
+                                 onclick="selectTheme(@t.Id)">
+                                <span class="check-icon">&#10003;</span>
+                                <div class="theme-palette">
+                                    <span style="background:@t.BackgroundColor"></span>
+                                    <span style="background:@t.PrimaryColor"></span>
+                                    <span style="background:@t.SecondaryColor"></span>
+                                </div>
+                                <div class="theme-tile-name">@t.Name</div>
+                                <div class="theme-tile-badge">@layoutLabel</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Kategoriler -->
+            <div class="section-card" id="sec-cat">
+                <button class="section-trigger" onclick="toggleSection('sec-cat')">
+                    <span class="step-badge">2</span>
+                    <span>
+                        <div class="step-title">Kategori Ekle</div>
+                        <div class="step-desc">Ornek: Baslangicllar, Ana Yemekler</div>
+                    </span>
+                    <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="body-cat">
+                    @if (suggestions != null && suggestions.Any())
+                    {
+                        <label class="builder-label" style="margin-top:12px;">&#128161; Oneriler</label>
+                        <div class="pill-row" id="suggestion-pills">
+                            @foreach (var sug in suggestions)
+                            {
+                                <button class="suggestion-pill" onclick="quickAddCategory('@sug')">+ @sug</button>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div id="suggestion-pills" style="margin-top:12px;"></div>
+                    }
+
+                    <label class="builder-label">Kategori Adi</label>
+                    <div style="display:flex;gap:6px;">
+                        <input type="text" id="categoryName" class="builder-input"
+                               placeholder="Ornek: Tatlilar, Icecekler..."
+                               onkeydown="if(event.key==='Enter'){event.preventDefault();addCategoryFromInput()}" />
+                        <button onclick="addCategoryFromInput()"
+                                style="padding:9px 14px;background:#22c55e;border:none;border-radius:8px;color:#0d1117;font-weight:700;cursor:pointer;font-size:1rem;flex-shrink:0;transition:background 0.15s;"
+                                onmouseenter="this.style.background='#4ade80'"
+                                onmouseleave="this.style.background='#22c55e'">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Urun -->
+            <div class="section-card" id="sec-item">
+                <button class="section-trigger" onclick="toggleSection('sec-item')">
+                    <span class="step-badge">3</span>
+                    <span>
+                        <div class="step-title">Urun Ekle</div>
+                        <div class="step-desc">Yemek, icecek, tatli...</div>
+                    </span>
+                    <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="body-item">
+                    <label class="builder-label">Urun Adi</label>
+                    <input type="text" id="itemName" class="builder-input"
+                           placeholder="Ornek: Urfa Kebabi, Firin Sutlac" />
+
+                    <label class="builder-label">Kategori</label>
+                    <select id="itemCategory" class="builder-input">
+                        <option value="">Kategori secin...</option>
+                        @foreach (var cat in categories)
+                        {
+                            <option value="@cat.Id">@cat.Name</option>
+                        }
+                    </select>
+
+                    <label class="builder-label">Aciklama</label>
+                    <textarea id="itemDescription" class="builder-input" rows="2"
+                              placeholder="Ornek: 200gr kuzu eti, kozlenmis biber esliginde..."></textarea>
+
+                    <label class="builder-label">Fiyat (TL)</label>
+                    <input type="number" id="itemPrice" class="builder-input"
+                           step="0.01" min="0" placeholder="0.00" />
+
+                    <button class="btn-builder-primary" onclick="submitMenuItemFn()">
+                        &#10003; Menuye Ekle
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL - PREVIEW -->
+    <div class="preview-panel">
+        <div class="preview-toolbar">
+            <div class="preview-toolbar-left">
+                <span class="preview-label">Onizleme</span>
+                <div class="view-toggle">
+                    <button class="view-btn active" id="btn-desktop" onclick="switchView('desktop')">
+                        &#128421; Masaustu
+                    </button>
+                    <button class="view-btn" id="btn-mobile" onclick="switchView('mobile')">
+                        &#128241; Mobil
+                    </button>
+                </div>
+            </div>
+
+            <div class="preview-live-badge">
+                <span class="live-dot"></span>
+                Canli
+            </div>
+
+            <div class="preview-actions">
+                <a href="/Home/Menu/@restaurant?.Id" target="_blank" class="btn-preview-open">
+                    &#8599; Yeni Sekmede Ac
+                </a>
+            </div>
+        </div>
+
+        <div class="preview-stage" id="preview-stage">
+
+            <!-- Desktop View -->
+            <div class="desktop-frame" id="view-desktop">
+                <div class="desktop-chrome">
+                    <div class="chrome-dots">
+                        <span></span><span></span><span></span>
+                    </div>
+                    <div class="chrome-bar">
+                        &#128274; localhost:5218/Home/Menu/@restaurant?.Id
+                    </div>
+                </div>
+                <div class="preview-loading" id="loading-desktop">
+                    <div class="spinner"></div>
+                </div>
+                <iframe id="previewIframe-desktop"
+                        src="/Home/Menu/@restaurant?.Id?previewThemeId=@currentThemeId"
+                        onload="hideLoading('desktop')">
+                </iframe>
+            </div>
+
+            <!-- Mobile View -->
+            <div class="mobile-frame-wrap" id="view-mobile" style="display:none;">
+                <div class="phone-outer">
+                    <div class="phone-inner">
+                        <div class="phone-notch-bar"></div>
+                        <div class="preview-loading" id="loading-mobile">
+                            <div class="spinner"></div>
+                        </div>
+                        <iframe id="previewIframe-mobile"
+                                src="/Home/Menu/@restaurant?.Id?previewThemeId=@currentThemeId"
+                                onload="hideLoading('mobile')">
+                        </iframe>
+                    </div>
+                    <div class="phone-side-btn"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="builder-toast" id="toast">
+    <span class="toast-icon">&#10003;</span>
+    <span id="toast-msg">Islem basarili!</span>
+</div>
+
+@Html.AntiForgeryToken()
+
+@section Scripts {
+<script>
+    const restaurantId  = '@restaurant?.Id';
+    let currentThemeId  = '@currentThemeId';
+    let currentViewMode = 'desktop';
+
+    function postForm(url, params) {
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+        const body = new URLSearchParams(params);
+        if (token) body.append('__RequestVerificationToken', token);
+        return fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body
+        });
+    }
+
+    function toggleSection(id) {
+        const card = document.getElementById(id);
+        const bodyId = 'body-' + id.replace('sec-', '');
+        const body = document.getElementById(bodyId);
+        const isOpen = card.classList.contains('open');
+        card.classList.toggle('open', !isOpen);
+        body.classList.toggle('open', !isOpen);
+    }
+
+    function switchView(mode) {
+        currentViewMode = mode;
+        document.getElementById('view-desktop').style.display = mode === 'desktop' ? 'flex' : 'none';
+        document.getElementById('view-mobile').style.display  = mode === 'mobile'  ? 'flex' : 'none';
+        document.getElementById('btn-desktop').classList.toggle('active', mode === 'desktop');
+        document.getElementById('btn-mobile').classList.toggle('active',  mode === 'mobile');
+    }
+
+    function showLoading() {
+        document.getElementById('loading-desktop').classList.add('visible');
+        document.getElementById('loading-mobile').classList.add('visible');
+    }
+
+    function hideLoading(which) {
+        document.getElementById('loading-' + which).classList.remove('visible');
+    }
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        document.getElementById('toast-msg').textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2800);
+    }
+
+    function refreshPreview() {
+        const ts = new Date().getTime();
+        const url = `/Home/Menu/${restaurantId}?previewThemeId=${currentThemeId}&t=${ts}`;
+        showLoading();
+        document.getElementById('previewIframe-desktop').src = url;
+        document.getElementById('previewIframe-mobile').src  = url;
+    }
+
+    function selectTheme(themeId) {
+        document.querySelectorAll('.theme-tile').forEach(t => t.classList.remove('active'));
+        document.getElementById('theme-' + themeId).classList.add('active');
+        currentThemeId = themeId;
+
+        postForm('/Restaurant/Builder/SelectTheme', { themeId })
+        .then(r => r.json())
+        .then(d => {
+            if (d.success) { refreshPreview(); showToast('Tema guncellendi!'); }
+            else alert(d.message || 'Tema secilirken hata olustu.');
+        })
+        .catch(e => console.error(e));
+    }
+
+    function addCategoryFromInput() {
+        const input = document.getElementById('categoryName');
+        const name  = input.value.trim();
+        if (!name) return;
+        addCategory(name);
+        input.value = '';
+    }
+
+    function quickAddCategory(name) { addCategory(name); }
+
+    function addCategory(name) {
+        postForm('/Restaurant/Builder/AddCategory', { name })
+        .then(r => r.json())
+        .then(d => {
+            if (d.success) {
+                const sel = document.getElementById('itemCategory');
+                const opt = document.createElement('option');
+                opt.value = d.category.id;
+                opt.textContent = d.category.name;
+                sel.appendChild(opt);
+                updateSuggestions(d.suggestions);
+                refreshPreview();
+                showToast('"' + name + '" kategorisi eklendi!');
+                const sec = document.getElementById('sec-item');
+                const body = document.getElementById('body-item');
+                if (!sec.classList.contains('open')) {
+                    sec.classList.add('open');
+                    body.classList.add('open');
+                }
+            } else {
+                alert(d.message || 'Kategori eklenirken hata olustu.');
+            }
+        })
+        .catch(e => console.error(e));
+    }
+
+    function updateSuggestions(suggestions) {
+        const container = document.getElementById('suggestion-pills');
+        container.innerHTML = '';
+        if (suggestions && suggestions.length > 0) {
+            suggestions.forEach(sug => {
+                const btn = document.createElement('button');
+                btn.className = 'suggestion-pill';
+                btn.textContent = '+ ' + sug;
+                btn.onclick = () => quickAddCategory(sug);
+                container.appendChild(btn);
+            });
+        }
+    }
+
+    function submitMenuItemFn() {
+        const name        = document.getElementById('itemName').value.trim();
+        const description = document.getElementById('itemDescription').value.trim();
+        const price       = parseFloat(document.getElementById('itemPrice').value);
+        const categoryId  = parseInt(document.getElementById('itemCategory').value);
+
+        if (!name || isNaN(price) || isNaN(categoryId)) {
+            showToast('Lutfen tum zorunlu alanlari doldurun.');
+            return;
+        }
+
+        postForm('/Restaurant/Builder/AddMenuItem', { name, description, price, categoryId })
+        .then(r => r.json())
+        .then(d => {
+            if (d.success) {
+                document.getElementById('itemName').value        = '';
+                document.getElementById('itemDescription').value = '';
+                document.getElementById('itemPrice').value       = '';
+                refreshPreview();
+                showToast('"' + name + '" menuye eklendi!');
+            } else {
+                alert(d.message || 'Urun eklenirken hata olustu.');
+            }
+        })
+        .catch(e => console.error(e));
+    }
+</script>
+}

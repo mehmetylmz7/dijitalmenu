@@ -87,6 +87,7 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             return RedirectToAction("Index");
         }
 
+        [HttpPost]
         public IActionResult Delete(int id)
         {
             var menu = GetMyMenu();

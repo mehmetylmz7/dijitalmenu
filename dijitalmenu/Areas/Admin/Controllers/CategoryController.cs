@@ -53,10 +53,12 @@ namespace dijitalmenu.Areas.Admin.Controllers
             return RedirectToAction("Index");
         }
 
+        [HttpPost]
         public IActionResult Delete(int id)
         {
             var category = _categoryService.TGetByID(id);
-            _categoryService.TDelete(category);
+            if (category != null)
+                _categoryService.TDelete(category);
             return RedirectToAction("Index");
         }
     }

@@ -1,0 +1,155 @@
+@{
+    var restaurant = ViewBag.Restaurant as EntityLayer.Concrete.Restaurant;
+    var categories = ViewBag.Categories as List<EntityLayer.Concrete.Category> ?? new();
+    var menuItems  = ViewBag.MenuItems  as List<EntityLayer.Concrete.MenuItem>  ?? new();
+}
+
+<div class="bg-[#0b0908] text-[#f4f2f0] min-h-screen font-sans selection:bg-amber-500 selection:text-black">
+  <!-- Cinematic Dark Hero -->
+  <header class="relative h-[45vh] flex items-center justify-center overflow-hidden border-b border-amber-500/20">
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(194,155,90,0.15),transparent_70%)]"></div>
+    <img src="https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&q=80&w=1200" 
+         class="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-luminosity" 
+         alt="Luxury Restaurant Background" />
+    <div class="relative z-10 text-center px-4">
+      <span class="text-amber-500 text-xs tracking-[0.5em] uppercase font-bold mb-4 block animate-pulse">
+        PREMIUM EXPERIENCE
+      </span>
+      <h1 class="text-5xl md:text-7xl font-serif text-white mb-3 tracking-wide">
+        @restaurant?.Name
+      </h1>
+      <p class="text-amber-400 text-sm md:text-base tracking-[0.3em] font-light uppercase">
+        BİSTRO &amp; GOURMET
+      </p>
+    </div>
+  </header>
+
+  <!-- Floating Category Bar -->
+  <div class="sticky top-0 z-30 bg-[#0b0908]/90 backdrop-blur-md border-b border-stone-800 shadow-2xl overflow-x-auto no-scrollbar">
+    <div class="max-w-6xl mx-auto flex justify-center py-5 px-6 gap-6 md:gap-10 min-w-max">
+      @foreach (var cat in categories)
+      {
+        <button onclick="scrollToMidnightCategory('midnight-cat-@cat.Id')"
+                class="text-stone-400 hover:text-amber-400 font-medium text-xs md:text-sm tracking-widest uppercase transition-all duration-300 hover:scale-105 bg-transparent border-none cursor-pointer">
+          @cat.Name
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="max-w-6xl mx-auto px-6 py-16">
+    @foreach (var cat in categories)
+    {
+      var items = menuItems.Where(i => i.CategoryId == cat.Id).ToList();
+      if (!items.Any()) continue;
+
+      <section id="midnight-cat-@cat.Id" class="mb-24 scroll-mt-28 text-left">
+        <div class="flex items-center gap-6 mb-12">
+          <h2 class="text-2xl md:text-3xl font-serif tracking-wide text-white uppercase shrink-0">
+            @cat.Name
+          </h2>
+          <div class="h-[1px] bg-gradient-to-r from-amber-500/30 to-transparent flex-1"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          @foreach (var item in items)
+          {
+            var imgIndex = item.Id % 4;
+            var imageUrl = imgIndex == 0 ? "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=400" :
+                           imgIndex == 1 ? "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&q=80&w=400" :
+                           imgIndex == 2 ? "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80&w=400" :
+                                           "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=400";
+            
+            <div class="group bg-stone-900/40 rounded-2xl border border-stone-800/80 hover:border-amber-500/30 overflow-hidden transition-all duration-300 flex flex-col hover:shadow-[0_0_30px_rgba(245,158,11,0.05)]">
+              <div class="relative h-56 overflow-hidden">
+                <img src="@imageUrl" 
+                     alt="@item.Name" 
+                     class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" />
+                @if (item.Price > 400)
+                {
+                  <div class="absolute top-4 left-4 bg-gradient-to-r from-amber-500 to-amber-600 text-black text-[9px] uppercase font-bold tracking-widest px-3 py-1 rounded-full shadow-lg flex items-center gap-1">
+                    <i class="fa-solid fa-award"></i> Özel Lezzet
+                  </div>
+                }
+              </div>
+              <div class="p-6 flex flex-col flex-1 bg-gradient-to-b from-stone-900/20 to-stone-950/40">
+                <div class="flex justify-between items-start gap-4 mb-3">
+                  <h3 class="text-lg font-bold text-white group-hover:text-amber-400 transition-colors">
+                    @item.Name
+                  </h3>
+                  <span class="text-base font-bold text-amber-500 whitespace-nowrap">
+                    @item.Price.ToString("N0") ₺
+                  </span>
+                </div>
+                <p class="text-stone-400 text-xs leading-relaxed line-clamp-2">
+                  @(string.IsNullOrWhiteSpace(item.Description) ? "Gastronomi mirasımızı yansıtan özenle seçilmiş reçetemiz." : item.Description)
+                </p>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Notes -->
+    <div class="mt-20 p-10 bg-stone-900/30 rounded-3xl border border-amber-500/10 shadow-2xl relative overflow-hidden text-center max-w-4xl mx-auto text-left">
+      <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(245,158,11,0.03),transparent_60%)]"></div>
+      <div class="relative z-10 max-w-2xl mx-auto text-center">
+        <i class="fa-solid fa-wine-glass text-3xl text-amber-500 mb-4 opacity-80 animate-pulse"></i>
+        <h3 class="text-amber-500 font-bold uppercase tracking-widest text-xs mb-3">
+          SERVİS NOTU
+        </h3>
+        <p class="text-xl md:text-2xl font-serif leading-relaxed mb-4 text-stone-200">
+          "Kendi alkolünü yanında getiren misafirlerimizden kişi başı <span class="text-amber-400 font-bold">100 TL</span> servis ücreti alınmaktadır."
+        </p>
+        <p class="text-stone-500 text-xs italic">
+          Menü fiyatları mevsimsel hammadde tedariğine göre değişiklik gösterebilir.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dark Luxury Footer -->
+  <footer class="bg-stone-950 text-stone-500 py-16 px-6 border-t border-stone-900 text-xs">
+    <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-12 text-left">
+      <div>
+        <h5 class="text-white font-serif text-lg mb-4">KOCAOĞLU</h5>
+        <p class="text-stone-600 leading-relaxed">
+          Özel reçetelerle hazırlanan zengin menümüz ve büyüleyici ambiyansımızla sizleri ağırlamaktan mutluluk duyuyoruz.
+        </p>
+      </div>
+      <div>
+        <h5 class="text-white uppercase tracking-widest mb-4">REZERVASYON</h5>
+        <p>+90 555 000 00 00</p>
+      </div>
+      <div>
+        <h5 class="text-white uppercase tracking-widest mb-4">KONUM</h5>
+        <p>Atatürk Caddesi, No: 123</p>
+        <p>Hatay, Türkiye</p>
+      </div>
+      <div>
+        <h5 class="text-white uppercase tracking-widest mb-4">SAATLER</h5>
+        <p>Hafta içi: 11:00 - 23:00</p>
+        <p>Hafta sonu: 10:00 - 00:00</p>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script>
+function scrollToMidnightCategory(catId) {
+  const element = document.getElementById(catId);
+  if (element) {
+    const offset = 100;
+    const bodyRect = document.body.getBoundingClientRect().top;
+    const elementRect = element.getBoundingClientRect().top;
+    const elementPosition = elementRect - bodyRect;
+    const offsetPosition = elementPosition - offset;
+
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: 'smooth'
+    });
+  }
+}
+</script>

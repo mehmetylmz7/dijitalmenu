@@ -3,7 +3,10 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add(new Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute());
+});
 
 // Auth Filters
 builder.Services.AddScoped<dijitalmenu.Filters.AdminAuthFilter>();
@@ -37,24 +40,251 @@ builder.Services.AddScoped<BusinessLayer.Abstract.IMenuItemService, BusinessLaye
 builder.Services.AddScoped<BusinessLayer.Abstract.IRestaurantService, BusinessLayer.Concrete.RestaurantManager>();
 builder.Services.AddScoped<BusinessLayer.Abstract.IThemeService, BusinessLayer.Concrete.ThemeManager>();
 builder.Services.AddScoped<BusinessLayer.Abstract.IUserService, BusinessLayer.Concrete.UserManager>();
+builder.Services.AddScoped<BusinessLayer.Abstract.ICategorySuggestionService, BusinessLayer.Concrete.CategorySuggestionManager>();
 
 var app = builder.Build();
 
-// ─── Seed: Eksik temaları ekle (isim bazlı kontrol) ───
+// ─── Migration + Seed ───
 using (var scope = app.Services.CreateScope())
 {
+    var context = scope.ServiceProvider.GetRequiredService<DataAccessLayer.Concrete.Context>();
+    context.Database.Migrate();
+
+    // Admin bootstrap seed
+    var adminService = scope.ServiceProvider.GetRequiredService<BusinessLayer.Abstract.IAdminService>();
+    if (!adminService.TGetListAll().Any())
+    {
+        var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+        var username = config["Seed:AdminUsername"] ?? "admin";
+        var password = config["Seed:AdminPassword"] ?? "Admin123!";
+        adminService.TInsert(new EntityLayer.Concrete.Admin
+        {
+            Username = username,
+            Password = dijitalmenu.Helpers.PasswordHelper.Hash(password)
+        });
+    }
+
     var themeService = scope.ServiceProvider.GetRequiredService<BusinessLayer.Abstract.IThemeService>();
+    var restaurantService = scope.ServiceProvider.GetRequiredService<BusinessLayer.Abstract.IRestaurantService>();
     var existing = themeService.TGetListAll();
 
-    if (!existing.Any(t => t.Name == "Doğal Yeşil"))
-        themeService.TInsert(new EntityLayer.Concrete.Theme { Name = "Doğal Yeşil" });
-    if (!existing.Any(t => t.Name == "Ateşli Turuncu"))
-        themeService.TInsert(new EntityLayer.Concrete.Theme { Name = "Ateşli Turuncu" });
-    if (!existing.Any(t => t.Name == "Okyanus Mavisi"))
-        themeService.TInsert(new EntityLayer.Concrete.Theme { Name = "Okyanus Mavisi" });
-    if (!existing.Any(t => t.Name == "Kocaoğlu Klasik"))
-        themeService.TInsert(new EntityLayer.Concrete.Theme { Name = "Kocaoğlu Klasik" });
+    var premiumThemes = new List<EntityLayer.Concrete.Theme>
+    {
+        new EntityLayer.Concrete.Theme 
+        { 
+            Name = "Modern Minimalist", 
+            PrimaryColor = "#18181b", 
+            SecondaryColor = "#71717a", 
+            BackgroundColor = "#ffffff", 
+            FontFamily = "Inter, sans-serif", 
+            Layout = EntityLayer.Concrete.LayoutType.List 
+        },
+        new EntityLayer.Concrete.Theme 
+        { 
+            Name = "Sıcak & Rustik", 
+            PrimaryColor = "#78350f", 
+            SecondaryColor = "#b45309", 
+            BackgroundColor = "#fdf8f6", 
+            FontFamily = "Playfair Display, serif", 
+            Layout = EntityLayer.Concrete.LayoutType.CardWithImage 
+        },
+        new EntityLayer.Concrete.Theme 
+        { 
+            Name = "Koyu & Lüks", 
+            PrimaryColor = "#d4af37", 
+            SecondaryColor = "#aa7c11", 
+            BackgroundColor = "#121212", 
+            FontFamily = "Cinzel, serif", 
+            Layout = EntityLayer.Concrete.LayoutType.Grid 
+        },
+        new EntityLayer.Concrete.Theme 
+        { 
+            Name = "Renkli & Eğlenceli", 
+            PrimaryColor = "#ec4899", 
+            SecondaryColor = "#f59e0b", 
+            BackgroundColor = "#fffbeb", 
+            FontFamily = "Outfit, sans-serif", 
+            Layout = EntityLayer.Concrete.LayoutType.CardWithImage 
+        },
+        new EntityLayer.Concrete.Theme 
+        { 
+            Name = "Editöryal & Kalın Tipografi", 
+            PrimaryColor = "#000000", 
+            SecondaryColor = "#ef4444", 
+            BackgroundColor = "#fafafa", 
+            FontFamily = "DM Serif Display, serif", 
+            Layout = EntityLayer.Concrete.LayoutType.Grid 
+        },
+        new EntityLayer.Concrete.Theme 
+        { 
+            Name = "Mobil Bistro", 
+            PrimaryColor = "#ef233c", 
+            SecondaryColor = "#2b2d42", 
+            BackgroundColor = "#f8f9fa", 
+            FontFamily = "-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif", 
+            Layout = EntityLayer.Concrete.LayoutType.List 
+        },
+        new EntityLayer.Concrete.Theme 
+        { 
+            Name = "Ay Cafe", 
+            PrimaryColor = "#ff6b6b", 
+            SecondaryColor = "#2d3436", 
+            BackgroundColor = "#f8f9fa", 
+            FontFamily = "-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif", 
+            Layout = EntityLayer.Concrete.LayoutType.List 
+        },
+        new EntityLayer.Concrete.Theme 
+        { 
+            Name = "Klasik Elegance", 
+            PrimaryColor = "#37463b", 
+            SecondaryColor = "#a9824c", 
+            BackgroundColor = "#faf9f6", 
+            FontFamily = "Fraunces, serif", 
+            Layout = EntityLayer.Concrete.LayoutType.List 
+        },
+        new EntityLayer.Concrete.Theme 
+        { 
+            Name = "Anadolu Klasik", 
+            PrimaryColor = "#78350f", 
+            SecondaryColor = "#d97706", 
+            BackgroundColor = "#fafaf9", 
+            FontFamily = "Georgia, serif", 
+            Layout = EntityLayer.Concrete.LayoutType.Grid 
+        },
+        new EntityLayer.Concrete.Theme 
+        { 
+            Name = "Eski Gazete Kültürü", 
+            PrimaryColor = "#2d1e10", 
+            SecondaryColor = "#5c4033", 
+            BackgroundColor = "#f4eedb", 
+            FontFamily = "Georgia, serif", 
+            Layout = EntityLayer.Concrete.LayoutType.List 
+        },
+        new EntityLayer.Concrete.Theme 
+        { 
+            Name = "Uzak Doğu Esintisi", 
+            PrimaryColor = "#d4af37", 
+            SecondaryColor = "#022312", 
+            BackgroundColor = "#022312", 
+            FontFamily = "Georgia, serif", 
+            Layout = EntityLayer.Concrete.LayoutType.List 
+        },
+        new EntityLayer.Concrete.Theme 
+        { 
+            Name = "Pastel Günbatımı", 
+            PrimaryColor = "#ff793f", 
+            SecondaryColor = "#e15f41", 
+            BackgroundColor = "#fffdfa", 
+            FontFamily = "system-ui, sans-serif", 
+            Layout = EntityLayer.Concrete.LayoutType.Grid 
+        },
+        new EntityLayer.Concrete.Theme 
+        { 
+            Name = "Bento Düzeni", 
+            PrimaryColor = "#b45309", 
+            SecondaryColor = "#78350f", 
+            BackgroundColor = "#f8fafc", 
+            FontFamily = "system-ui, sans-serif", 
+            Layout = EntityLayer.Concrete.LayoutType.Grid 
+        },
+        new EntityLayer.Concrete.Theme 
+        { 
+            Name = "Ege Rüzgarı", 
+            PrimaryColor = "#0284c7", 
+            SecondaryColor = "#0369a1", 
+            BackgroundColor = "#fcfcff", 
+            FontFamily = "Georgia, serif", 
+            Layout = EntityLayer.Concrete.LayoutType.Grid 
+        },
+        new EntityLayer.Concrete.Theme 
+        { 
+            Name = "Fütüristik Neon Diner", 
+            PrimaryColor = "#00f0ff", 
+            SecondaryColor = "#ff007f", 
+            BackgroundColor = "#030008", 
+            FontFamily = "monospace", 
+            Layout = EntityLayer.Concrete.LayoutType.Grid 
+        },
+        new EntityLayer.Concrete.Theme 
+        { 
+            Name = "Sıcak Odun Ateşi", 
+            PrimaryColor = "#c0603d", 
+            SecondaryColor = "#5c3e31", 
+            BackgroundColor = "#f9f3eb", 
+            FontFamily = "Georgia, serif", 
+            Layout = EntityLayer.Concrete.LayoutType.Grid 
+        },
+        new EntityLayer.Concrete.Theme 
+        { 
+            Name = "Lüks Akşam Yemeği", 
+            PrimaryColor = "#f59e0b", 
+            SecondaryColor = "#c29b5a", 
+            BackgroundColor = "#0b0908", 
+            FontFamily = "Georgia, serif", 
+            Layout = EntityLayer.Concrete.LayoutType.Grid 
+        },
+        new EntityLayer.Concrete.Theme 
+        { 
+            Name = "Endüstriyel Minimalist", 
+            PrimaryColor = "#111111", 
+            SecondaryColor = "#78350f", 
+            BackgroundColor = "#fcfcfc", 
+            FontFamily = "system-ui, sans-serif", 
+            Layout = EntityLayer.Concrete.LayoutType.Grid 
+        }
+    };
+
+    foreach (var pt in premiumThemes)
+    {
+        var existingTheme = existing.FirstOrDefault(t => t.Name == pt.Name);
+        if (existingTheme == null)
+        {
+            themeService.TInsert(pt);
+        }
+        else
+        {
+            existingTheme.PrimaryColor = pt.PrimaryColor;
+            existingTheme.SecondaryColor = pt.SecondaryColor;
+            existingTheme.BackgroundColor = pt.BackgroundColor;
+            existingTheme.FontFamily = pt.FontFamily;
+            existingTheme.Layout = pt.Layout;
+            themeService.TUpdate(existingTheme);
+        }
+    }
+
+    var updatedThemes = themeService.TGetListAll();
+    var defaultTheme = updatedThemes.FirstOrDefault(t => t.Name == "Modern Minimalist") ?? updatedThemes.FirstOrDefault();
+    var oldThemeNames = new HashSet<string> { "Doğal Yeşil", "Ateşli Turuncu", "Okyanus Mavisi", "Kocaoğlu Klasik" };
+    var oldThemes = existing.Where(t => oldThemeNames.Contains(t.Name)).ToList();
+
+    if (oldThemes.Any() && defaultTheme != null)
+    {
+        var oldThemeIds = oldThemes.Select(t => t.Id).ToHashSet();
+        var restaurants = restaurantService.TGetListAll();
+        
+        foreach (var r in restaurants)
+        {
+            if (oldThemeIds.Contains(r.ThemeId))
+            {
+                var oldTheme = oldThemes.First(ot => ot.Id == r.ThemeId);
+                var targetThemeName = "Modern Minimalist";
+                if (oldTheme.Name == "Ateşli Turuncu") targetThemeName = "Renkli & Eğlenceli";
+                if (oldTheme.Name == "Okyanus Mavisi") targetThemeName = "Sıcak & Rustik";
+                if (oldTheme.Name == "Kocaoğlu Klasik") targetThemeName = "Koyu & Lüks";
+
+                var targetTheme = updatedThemes.FirstOrDefault(ut => ut.Name == targetThemeName) ?? defaultTheme;
+                r.ThemeId = targetTheme.Id;
+                restaurantService.TUpdate(r);
+            }
+        }
+
+        foreach (var ot in oldThemes)
+        {
+            themeService.TDelete(ot);
+        }
+    }
 }
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

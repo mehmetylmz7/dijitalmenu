@@ -49,10 +49,12 @@ namespace dijitalmenu.Areas.Admin.Controllers
             return RedirectToAction("Index");
         }
 
+        [HttpPost]
         public IActionResult Delete(int id)
         {
             var theme = _themeService.TGetByID(id);
-            _themeService.TDelete(theme);
+            if (theme != null)
+                _themeService.TDelete(theme);
             return RedirectToAction("Index");
         }
     }

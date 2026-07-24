@@ -1,4 +1,5 @@
 using BusinessLayer.Abstract;
+using dijitalmenu.Helpers;
 using EntityLayer.Concrete;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,7 +22,6 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             _themeService = themeService;
         }
 
-        // GET: /Restaurant/Auth/Login
         [HttpGet]
         public IActionResult Login()
         {
@@ -31,16 +31,20 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             return View();
         }
 
-
-        // POST: /Restaurant/Auth/Login
         [HttpPost]
         public IActionResult Login(string username, string password)
         {
             var user = _userService.TGetListAll()
-                .FirstOrDefault(u => u.Username == username && u.Password == password);
+                .FirstOrDefault(u => u.Username == username);
 
-            if (user != null)
+            if (user != null && PasswordHelper.Verify(password, user.Password))
             {
+                if (PasswordHelper.NeedsRehash(user.Password))
+                {
+                    user.Password = PasswordHelper.Hash(password);
+                    _userService.TUpdate(user);
+                }
+
                 HttpContext.Session.SetString("RestaurantUserId", user.Id.ToString());
                 HttpContext.Session.SetString("RestaurantId", user.RestaurantId.ToString());
                 HttpContext.Session.SetString("RestaurantUsername", user.Username);
@@ -51,29 +55,33 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             return View();
         }
 
-        // GET: /Restaurant/Auth/Register
         [HttpGet]
         public IActionResult Register()
         {
             if (!string.IsNullOrEmpty(HttpContext.Session.GetString("RestaurantUserId")))
                 return RedirectToAction("Index", "Dashboard", new { area = "Restaurant" });
 
+            ViewBag.Themes = _themeService.TGetListAll().OrderBy(t => t.Id).ToList();
             return View();
         }
 
-        // POST: /Restaurant/Auth/Register
         [HttpPost]
-        public IActionResult Register(string restaurantName, string username, string password, int themeId)
+        public IActionResult Register(string restaurantName, string username, string password, int themeId = 0)
         {
-            // Kullanıcı adı kontrolü
             var existing = _userService.TGetListAll().FirstOrDefault(u => u.Username == username);
             if (existing != null)
             {
                 ViewBag.Error = "Bu kullanıcı adı zaten alınmış.";
+                ViewBag.Themes = _themeService.TGetListAll().OrderBy(t => t.Id).ToList();
                 return View();
             }
 
-            // 1. Restoran oluştur
+            if (themeId <= 0)
+            {
+                var firstTheme = _themeService.TGetListAll().OrderBy(t => t.Id).FirstOrDefault();
+                themeId = firstTheme?.Id ?? 1;
+            }
+
             var restaurant = new EntityLayer.Concrete.Restaurant
             {
                 Name = restaurantName,
@@ -81,20 +89,17 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             };
             _restaurantService.TInsert(restaurant);
 
-            // 2. Kullanıcı oluştur
             var user = new User
             {
                 Username = username,
-                Password = password,
+                Password = PasswordHelper.Hash(password),
                 RestaurantId = restaurant.Id
             };
             _userService.TInsert(user);
 
-            // 3. Boş menü oluştur
             var menu = new Menu { RestaurantId = restaurant.Id };
             _menuService.TInsert(menu);
 
-            // 4. Otomatik giriş
             HttpContext.Session.SetString("RestaurantUserId", user.Id.ToString());
             HttpContext.Session.SetString("RestaurantId", restaurant.Id.ToString());
             HttpContext.Session.SetString("RestaurantUsername", user.Username);
@@ -102,7 +107,6 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             return RedirectToAction("Index", "Dashboard", new { area = "Restaurant" });
         }
 
-        // GET: /Restaurant/Auth/Logout
         public IActionResult Logout()
         {
             HttpContext.Session.Remove("RestaurantUserId");
