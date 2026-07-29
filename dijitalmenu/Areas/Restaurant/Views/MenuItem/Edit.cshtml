@@ -6,7 +6,7 @@
 <div class="card" style="max-width:600px;">
     <div class="card-header"><h5>✏️ Ürün Düzenle</h5></div>
     <div class="card-body">
-        <form method="post" asp-action="Edit">
+        <form method="post" asp-action="Edit" enctype="multipart/form-data">
             <input type="hidden" name="Id" value="@Model.Id" />
             <div class="form-group">
                 <label class="form-label">Ürün Adı</label>
@@ -36,7 +36,24 @@
                     }
                 </select>
             </div>
-            <div style="display:flex;gap:10px;margin-top:8px;">
+            @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
+            {
+                <div class="form-group">
+                    <label class="form-label">Mevcut Fotoğraf</label>
+                    <div style="margin-bottom:8px;">
+                        <img src="@Model.ImageUrl" alt="@Model.Name" style="max-height:120px;border-radius:8px;object-fit:cover;" />
+                    </div>
+                </div>
+            }
+            <div class="form-group">
+                <label class="form-label">📸 Yeni Fotoğraf Yükle <span style="color:#7d8590;font-weight:400;">(Dosya Seç)</span></label>
+                <input type="file" name="photoFile" class="form-control" accept="image/*" />
+            </div>
+            <div class="form-group">
+                <label class="form-label">🔗 veya Fotoğraf Bağlantısı (URL)</label>
+                <input type="text" name="ImageUrl" value="@Model.ImageUrl" class="form-control" placeholder="https://example.com/gorsel.jpg" />
+            </div>
+            <div style="display:flex;gap:10px;margin-top:16px;">
                 <button type="submit" class="btn btn-primary">💾 Güncelle</button>
                 <a asp-action="Index" class="btn btn-secondary">İptal</a>
             </div>

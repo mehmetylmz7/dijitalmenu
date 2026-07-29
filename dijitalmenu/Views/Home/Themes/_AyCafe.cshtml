@@ -240,6 +240,9 @@
     <div class="aycafe-cat-nav">
         @foreach (var cat in categories)
         {
+            var catItems = menuItems.Where(mi => mi.CategoryId == cat.Id).ToList();
+            if (!catItems.Any()) continue;
+
             <a href="#aycafe-cat-@cat.Id" class="aycafe-cat-btn" data-target="aycafe-cat-@cat.Id">
                 @cat.Name
             </a>
@@ -289,12 +292,29 @@
         </div>
         <p>Hizmetimizden memnun kaldınız mı?</p>
         <div class="aycafe-address">
-            @restaurant?.Name<br>
-            Dijital Menü Platformu
+            <strong>@restaurant?.Name</strong><br>
+            @(string.IsNullOrWhiteSpace(restaurant?.Address) ? "Atatürk Caddesi, Hatay" : restaurant.Address)
+            @if (!string.IsNullOrWhiteSpace(restaurant?.Phone))
+            {
+                <br><span>📞 @restaurant.Phone</span>
+            }
         </div>
-        <a href="#" class="aycafe-map-btn">
-            <i class="fas fa-map-marker-alt"></i> Yol Tarifi Al
-        </a>
+        @if (!string.IsNullOrWhiteSpace(restaurant?.GoogleMapsUrl))
+        {
+            var mapsUrl = restaurant.GoogleMapsUrl;
+            if (mapsUrl.Contains("embed"))
+            {
+                <div style="margin-top:15px;border-radius:14px;overflow:hidden;border:1px solid var(--border-color);box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                    <iframe src="@mapsUrl" width="100%" height="220" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                </div>
+            }
+            else
+            {
+                <a href="@mapsUrl" target="_blank" rel="noopener" class="aycafe-map-btn">
+                    <i class="fas fa-map-marker-alt"></i> Google Haritalar'da Aç & Yol Tarifi
+                </a>
+            }
+        }
     </div>
 
 </div>
@@ -302,32 +322,62 @@
 <script>
 (function () {
     const btns = document.querySelectorAll('.aycafe-cat-btn');
+    let isClickScrolling = false;
+    let clickTimeout;
 
-    // Aktif kategori chip'i
+    const setActive = (id) => {
+        btns.forEach(b => {
+            const isActive = b.dataset.target === id;
+            b.classList.toggle('active', isActive);
+            if (isActive) {
+                b.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            }
+        });
+    };
+
+    // İlk buton aktif olsun
+    if (btns.length > 0) {
+        btns[0].classList.add('active');
+    }
+
+    // Aktif kategori chip'i tıklama
     btns.forEach(btn => {
         btn.addEventListener('click', function (e) {
             e.preventDefault();
-            btns.forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-
             const targetId = this.dataset.target;
+
+            isClickScrolling = true;
+            clearTimeout(clickTimeout);
+            setActive(targetId);
+
             const el = document.getElementById(targetId);
-            if (el) el.scrollIntoView({ behavior: 'smooth' });
+            if (el) {
+                const headerOffset = 135;
+                const elementPosition = el.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.scrollY - headerOffset;
+
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
+                });
+            }
+
+            clickTimeout = setTimeout(() => {
+                isClickScrolling = false;
+            }, 850);
         });
     });
 
-    // Scroll takibi — görünür kategoriye göre chip aktif yap
+    // Scroll takibi — görünür kategoriye göre chip aktif yap ve ortala
     const sections = document.querySelectorAll('.aycafe-section');
     const observer = new IntersectionObserver(entries => {
+        if (isClickScrolling) return;
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                const id = entry.target.id;
-                btns.forEach(b => {
-                    b.classList.toggle('active', b.dataset.target === id);
-                });
+                setActive(entry.target.id);
             }
         });
-    }, { threshold: 0.35 });
+    }, { rootMargin: '-20% 0px -60% 0px', threshold: 0 });
 
     sections.forEach(s => observer.observe(s));
 })();

@@ -23,6 +23,22 @@ namespace DataAccessLayer.Concrete
         public DbSet<Theme> Themes { get; set; }
         public DbSet<User> Users { get; set; }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<User>()
+                .HasIndex(user => user.Username)
+                .IsUnique();
+
+            modelBuilder.Entity<Admin>()
+                .HasIndex(admin => admin.Username)
+                .IsUnique();
+
+            modelBuilder.Entity<Category>()
+                .HasIndex(category => new { category.MenuId, category.Name })
+                .IsUnique();
+        }
 
         }
 }

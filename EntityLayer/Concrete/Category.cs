@@ -12,7 +12,8 @@ namespace EntityLayer.Concrete
         [Key]
 
         public int Id { get; set; }
-        public string Name { get; set; }
+        [Required, StringLength(100, MinimumLength = 1)]
+        public string Name { get; set; } = string.Empty;
 
         public int MenuId { get; set; }
         public Menu Menu { get; set; }

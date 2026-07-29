@@ -12,6 +12,8 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
     [ServiceFilter(typeof(RestaurantAuthFilter))]
     public class BuilderController : Controller
     {
+        private const int MaxAddressLength = 500;
+        private const int MaxPhoneLength = 25;
         private readonly IRestaurantService _restaurantService;
         private readonly IMenuService _menuService;
         private readonly ICategoryService _categoryService;
@@ -89,6 +91,10 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
         [HttpPost]
         public IActionResult AddCategory(string name)
         {
+            name = name?.Trim() ?? string.Empty;
+            if (name.Length > 100)
+                return Json(new { success = false, message = "Kategori adı en fazla 100 karakter olabilir." });
+
             if (string.IsNullOrWhiteSpace(name))
                 return Json(new { success = false, message = "Kategori adı boş olamaz." });
 
@@ -123,10 +129,15 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
         [HttpPost]
         public IActionResult AddMenuItem(string name, string description, decimal price, int categoryId)
         {
+            name = name?.Trim() ?? string.Empty;
+            description = description?.Trim() ?? string.Empty;
+            if (name.Length > 150 || description.Length > 1000)
+                return Json(new { success = false, message = "Ürün adı veya açıklaması izin verilen uzunluğu aşıyor." });
+
             if (string.IsNullOrWhiteSpace(name))
                 return Json(new { success = false, message = "Ürün adı boş olamaz." });
 
-            if (price < 0)
+            if (price < 0 || price > 999999.99m)
                 return Json(new { success = false, message = "Fiyat negatif olamaz." });
 
             var rid = GetRestaurantId();
@@ -150,6 +161,60 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 success = true, 
                 item = new { id = item.Id, name = item.Name, description = item.Description, price = item.Price, categoryId = item.CategoryId }
             });
+        }
+
+        [HttpPost]
+        public IActionResult UpdateLocation(string googleMapsUrl, string? address, string? phone)
+        {
+            var rid = GetRestaurantId();
+            var restaurant = _restaurantService.TGetByID(rid);
+            if (restaurant == null)
+                return Json(new { success = false, message = "Restoran bulunamadı." });
+
+            // Kullanıcı <iframe src="..."> yapıştırdıysa src URL'sini temizle
+            if (!string.IsNullOrWhiteSpace(googleMapsUrl) && googleMapsUrl.Contains("<iframe"))
+            {
+                var match = System.Text.RegularExpressions.Regex.Match(googleMapsUrl, @"src=[""']([^""']+)[""']");
+                if (match.Success)
+                {
+                    googleMapsUrl = match.Groups[1].Value;
+                }
+            }
+
+            if (!TryNormalizeGoogleMapsUrl(googleMapsUrl, out var normalizedMapsUrl) ||
+                (address?.Length ?? 0) > MaxAddressLength ||
+                (phone?.Length ?? 0) > MaxPhoneLength ||
+                (!string.IsNullOrWhiteSpace(phone) && !System.Text.RegularExpressions.Regex.IsMatch(phone, @"^[0-9+()\-\s]{7,25}$")))
+            {
+                return Json(new { success = false, message = "Konum, adres veya telefon bilgisi geçersiz." });
+            }
+
+            restaurant.GoogleMapsUrl = normalizedMapsUrl;
+            restaurant.Address = address?.Trim();
+            restaurant.Phone = phone?.Trim();
+
+            _restaurantService.TUpdate(restaurant);
+
+            return Json(new { success = true, message = "Konum ve iletişim bilgileri kaydedildi." });
+        }
+
+        private static bool TryNormalizeGoogleMapsUrl(string? value, out string? normalizedUrl)
+        {
+            normalizedUrl = null;
+            if (string.IsNullOrWhiteSpace(value))
+                return true;
+
+            if (!Uri.TryCreate(value.Trim(), UriKind.Absolute, out var uri) || uri.Scheme != Uri.UriSchemeHttps)
+                return false;
+
+            var host = uri.Host.ToLowerInvariant();
+            var isGoogleMapsHost = host == "maps.google.com" || host == "www.google.com" ||
+                                   host.EndsWith(".google.com", StringComparison.Ordinal);
+            if (!isGoogleMapsHost)
+                return false;
+
+            normalizedUrl = uri.AbsoluteUri;
+            return true;
         }
     }
 }

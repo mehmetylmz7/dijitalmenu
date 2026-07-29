@@ -21,21 +21,18 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
         private int GetRestaurantId() =>
             int.Parse(HttpContext.Session.GetString("RestaurantId")!);
 
-        private Menu? GetMyMenu()
-        {
-            var rid = GetRestaurantId();
-            return _menuService.TGetListAll().FirstOrDefault(m => m.RestaurantId == rid);
-        }
+        private Menu? GetMyMenu() =>
+            _menuService.TGetListAll().FirstOrDefault(menu => menu.RestaurantId == GetRestaurantId());
 
         public IActionResult Index()
         {
             var menu = GetMyMenu();
-            var list = menu == null
+            var categories = menu == null
                 ? new List<Category>()
-                : _categoryService.TGetListAll().Where(c => c.MenuId == menu.Id).ToList();
+                : _categoryService.TGetListAll().Where(category => category.MenuId == menu.Id).ToList();
 
             ViewBag.RestaurantUsername = HttpContext.Session.GetString("RestaurantUsername");
-            return View(list);
+            return View(categories);
         }
 
         [HttpGet]
@@ -55,7 +52,14 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 return View();
             }
 
-            _categoryService.TInsert(new Category { Name = name, MenuId = menu.Id });
+            if (!TryNormalizeCategoryName(name, menu.Id, null, out var normalizedName, out var error))
+            {
+                ViewBag.Error = error;
+                ViewBag.RestaurantUsername = HttpContext.Session.GetString("RestaurantUsername");
+                return View();
+            }
+
+            _categoryService.TInsert(new Category { Name = normalizedName, MenuId = menu.Id });
             return RedirectToAction("Index");
         }
 
@@ -65,7 +69,6 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             var menu = GetMyMenu();
             var category = _categoryService.TGetByID(id);
 
-            // Güvenlik: Başkasının kategorisi değilse engelle
             if (category == null || menu == null || category.MenuId != menu.Id)
                 return RedirectToAction("Index");
 
@@ -78,11 +81,16 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
         {
             var menu = GetMyMenu();
             var category = _categoryService.TGetByID(id);
-
             if (category == null || menu == null || category.MenuId != menu.Id)
                 return RedirectToAction("Index");
 
-            category.Name = name;
+            if (!TryNormalizeCategoryName(name, menu.Id, category.Id, out var normalizedName, out var error))
+            {
+                TempData["Error"] = error;
+                return RedirectToAction("Edit", new { id });
+            }
+
+            category.Name = normalizedName;
             _categoryService.TUpdate(category);
             return RedirectToAction("Index");
         }
@@ -97,6 +105,29 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 _categoryService.TDelete(category);
 
             return RedirectToAction("Index");
+        }
+
+        private bool TryNormalizeCategoryName(string? name, int menuId, int? currentCategoryId, out string normalizedName, out string error)
+        {
+            normalizedName = name?.Trim() ?? string.Empty;
+            if (normalizedName.Length is < 1 or > 100)
+            {
+                error = "Kategori adı 1 ile 100 karakter arasında olmalıdır.";
+                return false;
+            }
+
+            var categoryNameToCheck = normalizedName;
+            var alreadyExists = _categoryService.TGetListAll().Any(category =>
+                category.MenuId == menuId && category.Id != currentCategoryId &&
+                category.Name.Equals(categoryNameToCheck, StringComparison.OrdinalIgnoreCase));
+            if (alreadyExists)
+            {
+                error = "Bu kategori zaten mevcut.";
+                return false;
+            }
+
+            error = string.Empty;
+            return true;
         }
     }
 }

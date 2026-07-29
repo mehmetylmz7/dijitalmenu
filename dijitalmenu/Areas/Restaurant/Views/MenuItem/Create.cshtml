@@ -5,7 +5,7 @@
 <div class="card" style="max-width:600px;">
     <div class="card-header"><h5>🍕 Yeni Ürün Ekle</h5></div>
     <div class="card-body">
-        <form method="post" asp-action="Create">
+        <form method="post" asp-action="Create" enctype="multipart/form-data">
             <div class="form-group">
                 <label class="form-label">Ürün Adı</label>
                 <input type="text" name="Name" class="form-control" placeholder="Örn: Margarita Pizza" required autofocus />
@@ -27,7 +27,15 @@
                     }
                 </select>
             </div>
-            <div style="display:flex;gap:10px;margin-top:8px;">
+            <div class="form-group">
+                <label class="form-label">📸 Ürün Fotoğrafı Yükle <span style="color:#7d8590;font-weight:400;">(Dosya Seç)</span></label>
+                <input type="file" name="photoFile" class="form-control" accept="image/*" />
+            </div>
+            <div class="form-group">
+                <label class="form-label">🔗 veya Fotoğraf Bağlantısı (URL)</label>
+                <input type="text" name="ImageUrl" class="form-control" placeholder="https://example.com/gorsel.jpg" />
+            </div>
+            <div style="display:flex;gap:10px;margin-top:16px;">
                 <button type="submit" class="btn btn-primary">💾 Kaydet</button>
                 <a asp-action="Index" class="btn btn-secondary">İptal</a>
             </div>

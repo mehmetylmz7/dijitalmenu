@@ -36,11 +36,11 @@
 
     @* ─── Sticky Kategori Bar ─── *@
     <div class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-stone-200 shadow-sm overflow-x-auto no-scrollbar">
-        <div class="max-w-6xl mx-auto flex justify-center py-4 px-4 gap-4 md:gap-8 min-w-max">
+        <div class="max-w-6xl mx-auto flex justify-start md:justify-center py-4 px-4 gap-4 md:gap-8 min-w-max">
             @foreach (var cat in Model.Categories)
             {
                 <a href="#@Slug(cat)"
-                   class="cat-link text-stone-600 hover:text-amber-800 font-semibold text-sm md:text-base transition-colors whitespace-nowrap">
+                   class="cat-link text-stone-600 hover:text-amber-800 font-semibold text-sm md:text-base transition-colors whitespace-nowrap px-3 py-1 rounded-full">
                     @cat
                 </a>
             }
@@ -124,7 +124,7 @@
                 </div>
             </div>
 
-            <div class="flex justify-center gap-8 mb-12">
+            <div class="flex justify-center gap-8 mb-8">
                 <a href="#" aria-label="Instagram"
                    class="w-12 h-12 flex items-center justify-center rounded-full border border-stone-800 hover:border-amber-400 hover:text-amber-400 transition-all">
                     <i class="fab fa-instagram text-xl"></i>
@@ -133,11 +133,33 @@
                    class="w-12 h-12 flex items-center justify-center rounded-full border border-stone-800 hover:border-amber-400 hover:text-amber-400 transition-all">
                     <i class="fab fa-facebook-f text-xl"></i>
                 </a>
-                <a href="#" aria-label="Harita"
+                <a href="#map-section" aria-label="Harita"
                    class="w-12 h-12 flex items-center justify-center rounded-full border border-stone-800 hover:border-amber-400 hover:text-amber-400 transition-all">
                     <i class="fas fa-map-marked-alt text-xl"></i>
                 </a>
             </div>
+
+            @{
+                var mapsUrl = ViewData["GoogleMapsUrl"] as string;
+            }
+            @if (!string.IsNullOrWhiteSpace(mapsUrl))
+            {
+                <div id="map-section" class="max-w-4xl mx-auto mb-12 overflow-hidden rounded-2xl border border-stone-800 shadow-2xl">
+                    @if (mapsUrl.Contains("embed"))
+                    {
+                        <iframe src="@mapsUrl" class="w-full h-72 border-0" allowfullscreen="" loading="lazy"></iframe>
+                    }
+                    else
+                    {
+                        <div class="p-6 bg-stone-800/80 text-center">
+                            <a href="@mapsUrl" target="_blank" rel="noopener"
+                               class="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 hover:bg-amber-600 text-stone-950 font-bold rounded-xl text-sm transition-all shadow-lg">
+                                <i class="fas fa-map-marked-alt text-lg"></i> Google Haritalar'da Konumu Aç & Yol Tarifi Al
+                            </a>
+                        </div>
+                    }
+                </div>
+            }
 
             <div class="border-t border-stone-800 pt-10 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] uppercase tracking-widest font-medium">
                 <p>© @DateTime.Now.Year @restaurantName | Gururla Hizmetinizdeyiz.</p>
@@ -153,12 +175,24 @@
 
 @section Scripts {
 <script>
-    // React'taki scrollToCategory() → anchor + smooth scroll + aktif link vurgulama
+    function centerCategoryLink(link) {
+        if (link) {
+            link.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }
+    }
+
+    // React'taki scrollToCategory() → anchor + smooth scroll + aktif link vurgulama & ortalama
     document.querySelectorAll('a.cat-link').forEach(link => {
         link.addEventListener('click', function (e) {
             e.preventDefault();
             const targetId = this.getAttribute('href'); // "#mezeler" vb.
             const target   = document.querySelector(targetId);
+
+            // Aktif link vurgulama ve yatayda ortalama
+            document.querySelectorAll('a.cat-link').forEach(l => l.classList.remove('text-amber-800', 'bg-amber-50'));
+            this.classList.add('text-amber-800', 'bg-amber-50');
+            centerCategoryLink(this);
+
             if (!target) return;
 
             const stickyBar = document.querySelector('.sticky');
@@ -166,14 +200,10 @@
             const top       = target.getBoundingClientRect().top + window.scrollY - offset;
 
             window.scrollTo({ top, behavior: 'smooth' });
-
-            // Aktif link vurgulama
-            document.querySelectorAll('a.cat-link').forEach(l => l.classList.remove('text-amber-800'));
-            this.classList.add('text-amber-800');
         });
     });
 
-    // Scroll spy — görünür kategoriye göre aktif linki güncelle
+    // Scroll spy — görünür kategoriye göre aktif linki güncelle ve ortala
     const sections = document.querySelectorAll('section[id]');
     const links    = document.querySelectorAll('a.cat-link');
 
@@ -182,9 +212,12 @@
             if (entry.isIntersecting) {
                 const id = entry.target.id;
                 links.forEach(l => {
-                    l.classList.remove('text-amber-800');
                     if (l.getAttribute('href') === '#' + id) {
-                        l.classList.add('text-amber-800');
+                        if (!l.classList.contains('text-amber-800')) {
+                            links.forEach(x => x.classList.remove('text-amber-800', 'bg-amber-50'));
+                            l.classList.add('text-amber-800', 'bg-amber-50');
+                            centerCategoryLink(l);
+                        }
                     }
                 });
             }

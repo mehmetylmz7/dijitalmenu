@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -12,7 +12,17 @@ namespace EntityLayer.Concrete
         [Key]
 
         public int Id { get; set; }
-        public string Name { get; set; }
+        [Required, StringLength(100, MinimumLength = 2)]
+        public string Name { get; set; } = string.Empty;
+
+        [StringLength(2048)]
+        public string? GoogleMapsUrl { get; set; }
+
+        [StringLength(500)]
+        public string? Address { get; set; }
+
+        [RegularExpression(@"^$|^[0-9+()\-\s]{7,25}$")]
+        public string? Phone { get; set; }
 
         public int ThemeId { get; set; }
         public Theme Theme { get; set; }

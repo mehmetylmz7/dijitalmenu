@@ -32,10 +32,10 @@
 
   <!-- Serene Navigation Bar -->
   <nav class="sticky top-0 z-30 bg-[#022312]/95 backdrop-blur-md border-b border-[#1b4332] overflow-x-auto no-scrollbar">
-    <div class="max-w-4xl mx-auto flex justify-center py-4 px-6 gap-6 md:gap-10 min-w-max font-sans text-xs uppercase tracking-widest text-emerald-300">
+    <div class="max-w-4xl mx-auto flex justify-start md:justify-center py-4 px-6 gap-6 md:gap-10 min-w-max font-sans text-xs uppercase tracking-widest text-emerald-300">
       @foreach (var cat in categories)
       {
-        <button onclick="scrollToJadeCategory('jade-cat-@cat.Id')"
+        <button onclick="scrollToJadeCategory(this, 'jade-cat-@cat.Id')"
                 class="hover:text-[#d4af37] transition-colors relative py-1 bg-transparent border-none cursor-pointer">
           @cat.Name
         </button>
@@ -64,7 +64,7 @@
         <div class="space-y-12">
           @foreach (var item in items)
           {
-            var img = foodImages[item.Id % foodImages.Length];
+            var img = !string.IsNullOrWhiteSpace(item.ImageUrl) ? item.ImageUrl : foodImages[item.Id % foodImages.Length];
             <div class="flex flex-col md:flex-row gap-6 p-4 rounded-xl border border-transparent hover:border-[#1b4332] hover:bg-[#042f1a]/30 transition-all duration-300">
               <div class="w-full md:w-36 h-36 shrink-0 rounded-lg overflow-hidden border border-[#1b4332] bg-[#022312]">
                 <img src="@img" 
@@ -125,7 +125,8 @@
       </div>
       <div>
         <h5 class="text-white font-bold uppercase tracking-widest mb-4">MÜRACAAT</h5>
-        <p>Telefon: +90 555 000 00 00</p>
+        <p>Telefon: @(string.IsNullOrWhiteSpace(restaurant?.Phone) ? "+90 555 000 00 00" : restaurant.Phone)</p>
+        <p class="mt-2 text-stone-500">📍 @(string.IsNullOrWhiteSpace(restaurant?.Address) ? "Atatürk Caddesi, Hatay" : restaurant.Address)</p>
       </div>
       <div>
         <h5 class="text-white font-bold uppercase tracking-widest mb-4">ÇALIŞMA GÜNLERİ</h5>
@@ -133,11 +134,33 @@
         <p>Hafta Sonu: 10:00 - 00:00</p>
       </div>
     </div>
+
+    @if (!string.IsNullOrWhiteSpace(restaurant?.GoogleMapsUrl))
+    {
+      var mapsUrl = restaurant.GoogleMapsUrl;
+      <div class="max-w-4xl mx-auto my-8 overflow-hidden rounded-2xl border border-[#1b4332] shadow-xl">
+        @if (mapsUrl.Contains("embed"))
+        {
+          <iframe src="@mapsUrl" class="w-full h-64 border-0" allowfullscreen="" loading="lazy"></iframe>
+        }
+        else
+        {
+          <div class="p-6 text-center bg-[#05291b]">
+            <a href="@mapsUrl" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-6 py-3 bg-[#d4af37] hover:bg-[#b59228] text-[#01140a] font-bold rounded-xl text-xs uppercase tracking-wider transition-all shadow-md">
+              <i class="fa-solid fa-location-dot"></i> Haritada Gör &amp; Yol Tarifi Al
+            </a>
+          </div>
+        }
+      </div>
+    }
   </footer>
 </div>
 
 <script>
-function scrollToJadeCategory(catId) {
+function scrollToJadeCategory(btn, catId) {
+  if (btn) {
+    btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  }
   const element = document.getElementById(catId);
   if (element) {
     element.scrollIntoView({ behavior: 'smooth', block: 'start' });

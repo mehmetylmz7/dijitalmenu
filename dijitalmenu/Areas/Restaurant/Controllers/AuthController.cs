@@ -1,7 +1,9 @@
 using BusinessLayer.Abstract;
+using DataAccessLayer.Concrete;
 using dijitalmenu.Helpers;
 using EntityLayer.Concrete;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace dijitalmenu.Areas.Restaurant.Controllers
 {
@@ -12,14 +14,20 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
         private readonly IRestaurantService _restaurantService;
         private readonly IMenuService _menuService;
         private readonly IThemeService _themeService;
+        private readonly Context _context;
 
-        public AuthController(IUserService userService, IRestaurantService restaurantService,
-            IMenuService menuService, IThemeService themeService)
+        public AuthController(
+            IUserService userService,
+            IRestaurantService restaurantService,
+            IMenuService menuService,
+            IThemeService themeService,
+            Context context)
         {
             _userService = userService;
             _restaurantService = restaurantService;
             _menuService = menuService;
             _themeService = themeService;
+            _context = context;
         }
 
         [HttpGet]
@@ -34,8 +42,9 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
         [HttpPost]
         public IActionResult Login(string username, string password)
         {
+            var normalizedUsername = username?.Trim() ?? string.Empty;
             var user = _userService.TGetListAll()
-                .FirstOrDefault(u => u.Username == username);
+                .FirstOrDefault(item => item.Username.Equals(normalizedUsername, StringComparison.OrdinalIgnoreCase));
 
             if (user != null && PasswordHelper.Verify(password, user.Password))
             {
@@ -45,9 +54,7 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                     _userService.TUpdate(user);
                 }
 
-                HttpContext.Session.SetString("RestaurantUserId", user.Id.ToString());
-                HttpContext.Session.SetString("RestaurantId", user.RestaurantId.ToString());
-                HttpContext.Session.SetString("RestaurantUsername", user.Username);
+                SignIn(user);
                 return RedirectToAction("Index", "Dashboard", new { area = "Restaurant" });
             }
 
@@ -61,58 +68,115 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             if (!string.IsNullOrEmpty(HttpContext.Session.GetString("RestaurantUserId")))
                 return RedirectToAction("Index", "Dashboard", new { area = "Restaurant" });
 
-            ViewBag.Themes = _themeService.TGetListAll().OrderBy(t => t.Id).ToList();
+            PopulateThemes();
             return View();
         }
 
         [HttpPost]
         public IActionResult Register(string restaurantName, string username, string password, int themeId = 0)
         {
-            var existing = _userService.TGetListAll().FirstOrDefault(u => u.Username == username);
-            if (existing != null)
+            restaurantName = restaurantName?.Trim() ?? string.Empty;
+            username = username?.Trim() ?? string.Empty;
+
+            if (!IsValidRegistration(restaurantName, username, password, out var validationError))
             {
-                ViewBag.Error = "Bu kullanıcı adı zaten alınmış.";
-                ViewBag.Themes = _themeService.TGetListAll().OrderBy(t => t.Id).ToList();
+                ViewBag.Error = validationError;
+                PopulateThemes();
                 return View();
             }
 
-            if (themeId <= 0)
+            var existingUser = _userService.TGetListAll()
+                .FirstOrDefault(item => item.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
+            if (existingUser != null)
             {
-                var firstTheme = _themeService.TGetListAll().OrderBy(t => t.Id).FirstOrDefault();
-                themeId = firstTheme?.Id ?? 1;
+                ViewBag.Error = "Bu kullanıcı adı zaten alınmış.";
+                PopulateThemes();
+                return View();
             }
 
-            var restaurant = new EntityLayer.Concrete.Restaurant
+            var themes = _themeService.TGetListAll().OrderBy(theme => theme.Id).ToList();
+            var selectedTheme = themeId > 0
+                ? themes.FirstOrDefault(theme => theme.Id == themeId)
+                : themes.FirstOrDefault();
+            if (selectedTheme == null)
             {
-                Name = restaurantName,
-                ThemeId = themeId
-            };
-            _restaurantService.TInsert(restaurant);
+                ViewBag.Error = "Geçerli bir menü teması seçmelisiniz.";
+                PopulateThemes(themes);
+                return View();
+            }
 
-            var user = new User
+            try
             {
-                Username = username,
-                Password = PasswordHelper.Hash(password),
-                RestaurantId = restaurant.Id
-            };
-            _userService.TInsert(user);
+                using var transaction = _context.Database.BeginTransaction();
 
-            var menu = new Menu { RestaurantId = restaurant.Id };
-            _menuService.TInsert(menu);
+                var restaurant = new EntityLayer.Concrete.Restaurant
+                {
+                    Name = restaurantName,
+                    ThemeId = selectedTheme.Id
+                };
+                _restaurantService.TInsert(restaurant);
 
-            HttpContext.Session.SetString("RestaurantUserId", user.Id.ToString());
-            HttpContext.Session.SetString("RestaurantId", restaurant.Id.ToString());
-            HttpContext.Session.SetString("RestaurantUsername", user.Username);
+                var user = new User
+                {
+                    Username = username,
+                    Password = PasswordHelper.Hash(password),
+                    RestaurantId = restaurant.Id
+                };
+                _userService.TInsert(user);
 
-            return RedirectToAction("Index", "Dashboard", new { area = "Restaurant" });
+                _menuService.TInsert(new Menu { RestaurantId = restaurant.Id });
+                transaction.Commit();
+
+                SignIn(user);
+                return RedirectToAction("Index", "Dashboard", new { area = "Restaurant" });
+            }
+            catch (DbUpdateException)
+            {
+                ViewBag.Error = "Kayıt tamamlanamadı. Kullanıcı adı zaten alınmış olabilir; lütfen tekrar deneyin.";
+                PopulateThemes(themes);
+                return View();
+            }
         }
 
         public IActionResult Logout()
         {
-            HttpContext.Session.Remove("RestaurantUserId");
-            HttpContext.Session.Remove("RestaurantId");
-            HttpContext.Session.Remove("RestaurantUsername");
+            HttpContext.Session.Clear();
             return RedirectToAction("Login", "Auth", new { area = "Restaurant" });
+        }
+
+        private void SignIn(User user)
+        {
+            HttpContext.Session.SetString("RestaurantUserId", user.Id.ToString());
+            HttpContext.Session.SetString("RestaurantId", user.RestaurantId.ToString());
+            HttpContext.Session.SetString("RestaurantUsername", user.Username);
+        }
+
+        private void PopulateThemes(List<Theme>? themes = null) =>
+            ViewBag.Themes = themes ?? _themeService.TGetListAll().OrderBy(theme => theme.Id).ToList();
+
+        private static bool IsValidRegistration(string restaurantName, string username, string password, out string error)
+        {
+            if (restaurantName.Length is < 2 or > 100)
+            {
+                error = "Restoran adı 2 ile 100 karakter arasında olmalıdır.";
+                return false;
+            }
+
+            if (username.Length is < 3 or > 50 || !username.All(character => char.IsLetterOrDigit(character) || character is '.' or '_' or '-'))
+            {
+                error = "Kullanıcı adı 3 ile 50 karakter arasında olmalı; yalnızca harf, rakam, nokta, alt çizgi ve tire içermelidir.";
+                return false;
+            }
+
+            if (password.Length < 12 || !password.Any(char.IsUpper) || !password.Any(char.IsLower) ||
+                !password.Any(char.IsDigit) || !password.Any(character => !char.IsLetterOrDigit(character)))
+            {
+                error = "Şifre en az 12 karakter olmalı; büyük harf, küçük harf, rakam ve özel karakter içermelidir.";
+                return false;
+            }
+
+            error = string.Empty;
+            return true;
         }
     }
 }

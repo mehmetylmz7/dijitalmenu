@@ -24,6 +24,7 @@
             <thead>
                 <tr>
                     <th>#</th>
+                    <th>Görsel</th>
                     <th>Ürün Adı</th>
                     <th>Kategori</th>
                     <th>Fiyat</th>
@@ -34,8 +35,12 @@
                 @foreach (var item in Model)
                 {
                     var catName = categories?.FirstOrDefault(c => c.Id == item.CategoryId)?.Name ?? "-";
+                    var imgUrl = !string.IsNullOrWhiteSpace(item.ImageUrl) ? item.ImageUrl : "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=100";
                     <tr>
                         <td><span class="badge badge-green">@item.Id</span></td>
+                        <td>
+                            <img src="@imgUrl" alt="@item.Name" style="width:44px;height:44px;border-radius:8px;object-fit:cover;" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=100'" />
+                        </td>
                         <td>@item.Name</td>
                         <td style="color:#7d8590;">@catName</td>
                         <td style="color:#4ade80;font-weight:600;">@item.Price.ToString("N2") ₺</td>

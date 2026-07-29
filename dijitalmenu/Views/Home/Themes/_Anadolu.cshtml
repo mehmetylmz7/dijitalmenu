@@ -18,10 +18,10 @@
 
   <!-- Sticky Category Bar -->
   <div class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-stone-200 shadow-sm overflow-x-auto no-scrollbar">
-    <div class="max-w-6xl mx-auto flex justify-center py-4 px-4 gap-4 md:gap-8 min-w-max">
+    <div class="max-w-6xl mx-auto flex justify-start md:justify-center py-4 px-4 gap-4 md:gap-8 min-w-max">
       @foreach (var cat in categories)
       {
-        <button onclick="scrollToAnadoluCategory('anadolu-cat-@cat.Id')"
+        <button onclick="scrollToAnadoluCategory(this, 'anadolu-cat-@cat.Id')"
                 class="text-stone-600 hover:text-amber-800 font-semibold text-sm md:text-base transition-colors whitespace-nowrap">
           @cat.Name
         </button>
@@ -107,11 +107,13 @@
           <h4 class="text-white font-bold mb-4 uppercase tracking-widest">İletişim</h4>
           <p>+90 (555) 000 00 00</p>
           <p>info@dijitalmenu.com</p>
+        <div>
+          <h4 class="text-white font-bold mb-4 uppercase tracking-widest">İletişim</h4>
+          <p>Tel: @(string.IsNullOrWhiteSpace(restaurant?.Phone) ? "+90 (555) 000 00 00" : restaurant.Phone)</p>
         </div>
         <div>
           <h4 class="text-white font-bold mb-4 uppercase tracking-widest">Adres</h4>
-          <p>Atatürk Caddesi, No: 123</p>
-          <p>Hatay, Türkiye</p>
+          <p>@(string.IsNullOrWhiteSpace(restaurant?.Address) ? "Atatürk Caddesi, Hatay" : restaurant.Address)</p>
         </div>
         <div>
           <h4 class="text-white font-bold mb-4 uppercase tracking-widest">Çalışma Saatleri</h4>
@@ -120,11 +122,25 @@
         </div>
       </div>
 
-      <div class="flex justify-center gap-8 mb-12">
-        <a href="#" class="w-12 h-12 flex items-center justify-center rounded-full border border-stone-800 hover:border-amber-400 hover:text-amber-400 transition-all"><i class="fab fa-instagram text-xl"></i></a>
-        <a href="#" class="w-12 h-12 flex items-center justify-center rounded-full border border-stone-800 hover:border-amber-400 hover:text-amber-400 transition-all"><i class="fab fa-facebook-f text-xl"></i></a>
-        <a href="#" class="w-12 h-12 flex items-center justify-center rounded-full border border-stone-800 hover:border-amber-400 hover:text-amber-400 transition-all"><i class="fas fa-map-marked-alt text-xl"></i></a>
-      </div>
+      @if (!string.IsNullOrWhiteSpace(restaurant?.GoogleMapsUrl))
+      {
+        var mapsUrl = restaurant.GoogleMapsUrl;
+        <div class="max-w-4xl mx-auto mb-12 overflow-hidden rounded-2xl border border-stone-800 shadow-2xl">
+          @if (mapsUrl.Contains("embed"))
+          {
+            <iframe src="@mapsUrl" class="w-full h-64 border-0" allowfullscreen="" loading="lazy"></iframe>
+          }
+          else
+          {
+            <div class="p-6 bg-stone-800/80 text-center">
+              <a href="@mapsUrl" target="_blank" rel="noopener"
+                 class="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 hover:bg-amber-600 text-stone-950 font-bold rounded-xl text-xs uppercase tracking-wider transition-all shadow-lg">
+                <i class="fas fa-map-marked-alt text-lg"></i> Google Haritalar'da Konumu Aç &amp; Yol Tarifi
+              </a>
+            </div>
+          }
+        </div>
+      }
 
       <div class="border-t border-stone-800 pt-10 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] uppercase tracking-widest font-medium">
         <p>© @DateTime.Now.Year @restaurant?.Name | Gururla Hizmetinizdeyiz.</p>
@@ -134,7 +150,10 @@
 </div>
 
 <script>
-function scrollToAnadoluCategory(catId) {
+function scrollToAnadoluCategory(btn, catId) {
+  if (btn) {
+    btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  }
   const element = document.getElementById(catId);
   if (element) {
     const offset = 120;

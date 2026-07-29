@@ -1,5 +1,16 @@
 @model int
+@{
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    var area = ViewContext.RouteData.Values["area"]?.ToString();
+    var warning = controller switch
+    {
+        "Restaurant" when area == "Admin" => "Bu restoran silindiğinde bağlı kullanıcılar, menü, kategoriler ve ürünler de kalıcı olarak silinir. Devam etmek istiyor musunuz?",
+        "Category" => "Bu kategori silindiğinde içindeki tüm ürünler de kalıcı olarak silinir. Devam etmek istiyor musunuz?",
+        "Menu" => "Bu menü silindiğinde bağlı kategoriler ve ürünler de kalıcı olarak silinir. Devam etmek istiyor musunuz?",
+        _ => "Bu kayıt kalıcı olarak silinecek. Devam etmek istiyor musunuz?"
+    };
+}
 <form asp-action="Delete" asp-route-id="@Model" method="post" style="display:inline"
-      onsubmit="return confirm('Silmek istediğinize emin misiniz?')">
-    <button type="submit" class="btn btn-sm btn-danger">🗑️ Sil</button>
+      onsubmit="return confirm('@warning')">
+    <button type="submit" class="btn btn-sm btn-danger">Sil</button>
 </form>

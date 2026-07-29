@@ -723,6 +723,35 @@
                 </div>
             </div>
 
+            <!-- 4. Harita & Konum Ayarları -->
+            <div class="section-card" id="sec-location">
+                <button class="section-trigger" onclick="toggleSection('sec-location')">
+                    <span class="step-badge">4</span>
+                    <span>
+                        <div class="step-title">📍 Harita & Konum</div>
+                        <div class="step-desc">Google Haritalar adresi ve iletisim</div>
+                    </span>
+                    <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="body-location">
+                    <label class="builder-label">Google Haritalar Bağlantısı (URL veya Embed Kodu)</label>
+                    <input type="text" id="googleMapsUrl" class="builder-input" value="@restaurant?.GoogleMapsUrl"
+                           placeholder="https://maps.google.com/?q=... veya <iframe src='...'></iframe>" />
+
+                    <label class="builder-label">Adres</label>
+                    <input type="text" id="restaurantAddress" class="builder-input" value="@restaurant?.Address"
+                           placeholder="Örn: Atatürk Caddesi No:123, Hatay" />
+
+                    <label class="builder-label">Telefon</label>
+                    <input type="text" id="restaurantPhone" class="builder-input" value="@restaurant?.Phone"
+                           placeholder="Örn: +90 555 000 00 00" />
+
+                    <button class="btn-builder-primary" onclick="submitLocationSettings()">
+                        💾 Harita & Konum Bilgilerini Kaydet
+                    </button>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -947,6 +976,24 @@
                 showToast('"' + name + '" menuye eklendi!');
             } else {
                 alert(d.message || 'Urun eklenirken hata olustu.');
+            }
+        })
+        .catch(e => console.error(e));
+    }
+
+    function submitLocationSettings() {
+        const googleMapsUrl = document.getElementById('googleMapsUrl').value.trim();
+        const address = document.getElementById('restaurantAddress').value.trim();
+        const phone = document.getElementById('restaurantPhone').value.trim();
+
+        postForm('/Restaurant/Builder/UpdateLocation', { googleMapsUrl, address, phone })
+        .then(r => r.json())
+        .then(d => {
+            if (d.success) {
+                refreshPreview();
+                showToast('📍 Konum ve harita bilgileri kaydedildi!');
+            } else {
+                alert(d.message || 'Hata oluştu.');
             }
         })
         .catch(e => console.error(e));

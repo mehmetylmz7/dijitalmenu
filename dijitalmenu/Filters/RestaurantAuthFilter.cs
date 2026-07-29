@@ -8,8 +8,12 @@ namespace dijitalmenu.Filters
         public void OnActionExecuting(ActionExecutingContext context)
         {
             var userId = context.HttpContext.Session.GetString("RestaurantUserId");
-            if (string.IsNullOrEmpty(userId))
+            var restaurantId = context.HttpContext.Session.GetString("RestaurantId");
+
+            if (!int.TryParse(userId, out var parsedUserId) || parsedUserId <= 0 ||
+                !int.TryParse(restaurantId, out var parsedRestaurantId) || parsedRestaurantId <= 0)
             {
+                context.HttpContext.Session.Clear();
                 context.Result = new RedirectToRouteResult(new RouteValueDictionary
                 {
                     { "area", "Restaurant" },

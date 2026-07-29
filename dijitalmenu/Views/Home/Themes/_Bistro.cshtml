@@ -261,7 +261,7 @@
             <div class="bistro-list">
                 @foreach (var item in catItems)
                 {
-                    var img = foodImages[item.Id % foodImages.Length];
+                    var img = !string.IsNullOrWhiteSpace(item.ImageUrl) ? item.ImageUrl : foodImages[item.Id % foodImages.Length];
                     var desc = string.IsNullOrWhiteSpace(item.Description) ? "" : item.Description;
 
                     <div class="bistro-item">
@@ -309,9 +309,10 @@
 
         chips.forEach(chip => {
             chip.addEventListener('click', function () {
-                // Aktif chip
+                // Aktif chip ve ortalama
                 chips.forEach(c => c.classList.remove('active'));
                 this.classList.add('active');
+                this.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
 
                 const target = this.dataset.cat;
 

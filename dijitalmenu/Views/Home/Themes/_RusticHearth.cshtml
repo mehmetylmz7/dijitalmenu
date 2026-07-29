@@ -30,10 +30,10 @@
 
   <!-- Earthy Categories Bar -->
   <nav class="sticky top-0 z-30 bg-[#f9f3eb]/95 backdrop-blur-md border-b-2 border-[#dfccb7] overflow-x-auto no-scrollbar">
-    <div class="max-w-4xl mx-auto flex justify-center py-4 px-6 gap-4 md:gap-8 min-w-max">
+    <div class="max-w-4xl mx-auto flex justify-start md:justify-center py-4 px-6 gap-4 md:gap-8 min-w-max">
       @foreach (var cat in categories)
       {
-        <button onclick="scrollToRusticCategory('rustic-cat-@cat.Id')"
+        <button onclick="scrollToRusticCategory(this, 'rustic-cat-@cat.Id')"
                 class="px-4 py-2 bg-[#f0e3d4]/40 hover:bg-[#c0603d] hover:text-white rounded-xl text-xs md:text-sm font-bold tracking-wider uppercase transition-all duration-200 border-none cursor-pointer">
           @cat.Name
         </button>
@@ -58,7 +58,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           @foreach (var item in items)
           {
-            var img = foodImages[item.Id % foodImages.Length];
+            var img = !string.IsNullOrWhiteSpace(item.ImageUrl) ? item.ImageUrl : foodImages[item.Id % foodImages.Length];
             <div class="bg-[#f0e3d4]/30 rounded-[2rem] p-5 border border-[#dfccb7]/60 hover:border-[#c0603d] transition-all duration-300 flex flex-col">
               <div class="relative h-48 rounded-[1.5rem] overflow-hidden mb-4 bg-stone-100">
                 <img src="@img" 
@@ -122,12 +122,11 @@
       </div>
       <div>
         <h5 class="text-white font-bold uppercase tracking-wider mb-4">OCAK BAŞI</h5>
-        <p>Tel: +90 555 000 00 00</p>
+        <p>Tel: @(string.IsNullOrWhiteSpace(restaurant?.Phone) ? "+90 555 000 00 00" : restaurant.Phone)</p>
       </div>
       <div>
         <h5 class="text-white font-bold uppercase tracking-wider mb-4">ADRESİMİZ</h5>
-        <p>Atatürk Caddesi, No: 123</p>
-        <p>Hatay, Türkiye</p>
+        <p>@(string.IsNullOrWhiteSpace(restaurant?.Address) ? "Atatürk Caddesi, Hatay" : restaurant.Address)</p>
       </div>
       <div>
         <h5 class="text-white font-bold uppercase tracking-wider mb-4">KAPILARIMIZ</h5>
@@ -135,11 +134,33 @@
         <p>H. Sonu: 10:00 - 00:00</p>
       </div>
     </div>
+
+    @if (!string.IsNullOrWhiteSpace(restaurant?.GoogleMapsUrl))
+    {
+      var mapsUrl = restaurant.GoogleMapsUrl;
+      <div class="max-w-4xl mx-auto my-8 overflow-hidden rounded-2xl border border-[#63483b] shadow-xl">
+        @if (mapsUrl.Contains("embed"))
+        {
+          <iframe src="@mapsUrl" class="w-full h-64 border-0" allowfullscreen="" loading="lazy"></iframe>
+        }
+        else
+        {
+          <div class="p-6 text-center bg-[#362319]">
+            <a href="@mapsUrl" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-6 py-3 bg-[#c0603d] hover:bg-[#a04e2e] text-white font-bold rounded-xl text-xs uppercase tracking-wider transition-all shadow-md">
+              <i class="fa-solid fa-location-dot"></i> Google Haritalar'da Aç &amp; Yol Tarifi
+            </a>
+          </div>
+        }
+      </div>
+    }
   </footer>
 </div>
 
 <script>
-function scrollToRusticCategory(catId) {
+function scrollToRusticCategory(btn, catId) {
+  if (btn) {
+    btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  }
   const element = document.getElementById(catId);
   if (element) {
     element.scrollIntoView({ behavior: 'smooth', block: 'start' });

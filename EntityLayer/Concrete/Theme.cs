@@ -11,6 +11,7 @@ namespace EntityLayer.Concrete
     {
         [Key]
         public int Id { get; set; }
+        [Required, StringLength(100, MinimumLength = 2)]
         public string Name { get; set; } = string.Empty;
 
         public string PrimaryColor { get; set; } = string.Empty;
