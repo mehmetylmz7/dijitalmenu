@@ -1,0 +1,25 @@
+@model List<EntityLayer.Concrete.DefaultCategory>
+@{
+    ViewData["Title"] = "Varsayılan Kategoriler";
+}
+<div class="card">
+    <div class="card-header"><h5>Varsayılan Kategoriler</h5></div>
+    <div class="card-body">
+        <p style="color:#7d8590;margin-bottom:20px;">Buraya eklenen kategoriler tüm mevcut restoranlara ve yeni oluşturulacak restoranlara otomatik eklenir.</p>
+        @if (TempData["Error"] != null) { <div class="alert-error">@TempData["Error"]</div> }
+        @if (TempData["Success"] != null) { <div class="alert-info">@TempData["Success"]</div> }
+        <form method="post" asp-action="Create" style="display:flex;gap:10px;margin-bottom:24px;">
+            <input class="form-control" type="text" name="name" maxlength="100" required placeholder="Örn: İçecekler" />
+            <button class="btn btn-primary" type="submit">Ekle</button>
+        </form>
+        <table>
+            <thead><tr><th>#</th><th>Ad</th><th>İşlem</th></tr></thead>
+            <tbody>
+            @foreach (var item in Model)
+            {
+                <tr><td>@item.Id</td><td>@item.Name</td><td><partial name="~/Views/Shared/_DeleteButton.cshtml" model="item.Id" /></td></tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

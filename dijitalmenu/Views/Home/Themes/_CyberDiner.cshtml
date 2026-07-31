@@ -50,12 +50,29 @@
       if (!items.Any()) continue;
 
       <section id="cyber-cat-@cat.Id" class="mb-24 scroll-mt-28 text-left">
-        <div class="mb-10 flex items-center justify-between border-b border-[#00f0ff]/10 pb-2">
-          <h3 class="text-xl md:text-2xl font-black text-[#00f0ff] tracking-tight uppercase flex items-center gap-2">
-            <i class="fa-solid fa-terminal text-[#ff007f]"></i> @cat.Name
-          </h3>
-          <span class="text-xs text-[#00f0ff]/50">SEC_ID: @cat.Name.ToUpper()_DB</span>
-        </div>
+        @if (!string.IsNullOrEmpty(cat.ImageUrl))
+        {
+          <div class="mb-10 relative h-48 md:h-56 overflow-hidden border-2 border-[#00f0ff] shadow-[0_0_15px_rgba(0,240,255,0.3)] bg-[#030008]">
+            <img src="@cat.ImageUrl" alt="@cat.Name" class="absolute inset-0 w-full h-full object-cover opacity-50 mix-blend-screen" />
+            <div class="absolute inset-0 bg-[linear-gradient(rgba(0,240,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(0,240,255,0.1)_1px,transparent_1px)] bg-[size:20px_20px]"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-[#030008] to-transparent"></div>
+            <div class="absolute bottom-4 left-4 right-4 flex items-end justify-between border-b border-[#00f0ff]/30 pb-2">
+              <h3 class="text-2xl md:text-4xl font-black text-[#00f0ff] tracking-tight uppercase flex items-center gap-3 drop-shadow-[0_0_8px_rgba(0,240,255,0.8)]">
+                <i class="fa-solid fa-terminal text-[#ff007f] text-xl md:text-3xl"></i> @cat.Name
+              </h3>
+              <span class="text-xs text-[#00f0ff]/70 font-mono hidden md:block">SEC_ID: @cat.Name.ToUpper()_DB</span>
+            </div>
+          </div>
+        }
+        else
+        {
+          <div class="mb-10 flex items-center justify-between border-b border-[#00f0ff]/10 pb-2">
+            <h3 class="text-xl md:text-2xl font-black text-[#00f0ff] tracking-tight uppercase flex items-center gap-2">
+              <i class="fa-solid fa-terminal text-[#ff007f]"></i> @cat.Name
+            </h3>
+            <span class="text-xs text-[#00f0ff]/50">SEC_ID: @cat.Name.ToUpper()_DB</span>
+          </div>
+        }
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           @foreach (var item in items)

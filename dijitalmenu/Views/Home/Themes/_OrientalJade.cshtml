@@ -51,15 +51,33 @@
       if (!items.Any()) continue;
 
       <section id="jade-cat-@cat.Id" class="mb-24 scroll-mt-24">
-        <div class="text-center mb-12">
-          <span class="text-[#d4af37] text-xs font-sans font-bold uppercase tracking-[0.3em] block mb-2">
-            HAZIRLANIŞI ÖZEL
-          </span>
-          <h3 class="text-2xl md:text-3xl font-serif text-white tracking-wide">
-            @cat.Name
-          </h3>
-          <div class="h-[1.5px] w-12 bg-emerald-500/30 mx-auto mt-4"></div>
-        </div>
+        @if (!string.IsNullOrEmpty(cat.ImageUrl))
+        {
+          <div class="mb-12 relative h-40 md:h-56 rounded-2xl overflow-hidden border border-[#1b4332] shadow-lg flex items-center justify-center">
+            <img src="@cat.ImageUrl" alt="@cat.Name" class="absolute inset-0 w-full h-full object-cover opacity-60" />
+            <div class="absolute inset-0 bg-[#022312]/50 mix-blend-multiply"></div>
+            <div class="relative z-10 text-center">
+              <span class="text-[#d4af37] text-xs font-sans font-bold uppercase tracking-[0.3em] block mb-2 drop-shadow-md">
+                HAZIRLANIŞI ÖZEL
+              </span>
+              <h3 class="text-3xl md:text-4xl font-serif text-white tracking-widest drop-shadow-lg">
+                @cat.Name
+              </h3>
+            </div>
+          </div>
+        }
+        else
+        {
+          <div class="text-center mb-12">
+            <span class="text-[#d4af37] text-xs font-sans font-bold uppercase tracking-[0.3em] block mb-2">
+              HAZIRLANIŞI ÖZEL
+            </span>
+            <h3 class="text-2xl md:text-3xl font-serif text-white tracking-wide">
+              @cat.Name
+            </h3>
+            <div class="h-[1.5px] w-12 bg-emerald-500/30 mx-auto mt-4"></div>
+          </div>
+        }
 
         <div class="space-y-12">
           @foreach (var item in items)

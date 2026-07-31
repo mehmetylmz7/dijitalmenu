@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: dijitalmenu
+    env: docker
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ConnectionStrings__DefaultConnection
+        sync: false
+      - key: Seed__AdminUsername
+        sync: false
+      - key: Seed__AdminPassword
+        sync: false

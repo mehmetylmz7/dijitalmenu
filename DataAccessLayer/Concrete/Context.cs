@@ -15,6 +15,7 @@ namespace DataAccessLayer.Concrete
         }
         public DbSet<Admin> Admins { get; set; }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<DefaultCategory> DefaultCategories { get; set; }
 
         public DbSet<Menu> Menus { get; set; }
         public DbSet<MenuItem> MenuItems { get; set; }
@@ -37,6 +38,10 @@ namespace DataAccessLayer.Concrete
 
             modelBuilder.Entity<Category>()
                 .HasIndex(category => new { category.MenuId, category.Name })
+                .IsUnique();
+
+            modelBuilder.Entity<DefaultCategory>()
+                .HasIndex(category => category.Name)
                 .IsUnique();
         }
 

@@ -14,6 +14,7 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
         private readonly IRestaurantService _restaurantService;
         private readonly IMenuService _menuService;
         private readonly IThemeService _themeService;
+        private readonly IDefaultCategoryService _defaultCategoryService;
         private readonly Context _context;
 
         public AuthController(
@@ -21,12 +22,14 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             IRestaurantService restaurantService,
             IMenuService menuService,
             IThemeService themeService,
+            IDefaultCategoryService defaultCategoryService,
             Context context)
         {
             _userService = userService;
             _restaurantService = restaurantService;
             _menuService = menuService;
             _themeService = themeService;
+            _defaultCategoryService = defaultCategoryService;
             _context = context;
         }
 
@@ -124,7 +127,9 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 };
                 _userService.TInsert(user);
 
-                _menuService.TInsert(new Menu { RestaurantId = restaurant.Id });
+                var menu = new Menu { RestaurantId = restaurant.Id };
+                _menuService.TInsert(menu);
+                _defaultCategoryService.TApplyToMenu(menu.Id);
                 transaction.Commit();
 
                 SignIn(user);

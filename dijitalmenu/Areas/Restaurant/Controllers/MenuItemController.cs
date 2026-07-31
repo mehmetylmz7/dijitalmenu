@@ -2,6 +2,7 @@ using BusinessLayer.Abstract;
 using dijitalmenu.Filters;
 using EntityLayer.Concrete;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace dijitalmenu.Areas.Restaurant.Controllers
 {
@@ -163,9 +164,10 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             menuItem.Description = menuItem.Description?.Trim() ?? string.Empty;
             menuItem.ImageUrl = menuItem.ImageUrl?.Trim();
 
-            if (!TryValidateModel(menuItem))
+            var validationResults = new List<ValidationResult>();
+            if (!Validator.TryValidateObject(menuItem, new ValidationContext(menuItem), validationResults, validateAllProperties: true))
             {
-                error = ModelState.Values.SelectMany(value => value.Errors)
+                error = validationResults
                     .Select(item => item.ErrorMessage)
                     .FirstOrDefault(message => !string.IsNullOrWhiteSpace(message)) ?? "Ürün bilgileri geçersiz.";
                 return false;

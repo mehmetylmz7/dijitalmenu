@@ -21,6 +21,7 @@
             <thead>
                 <tr>
                     <th>#</th>
+                    <th>Görsel</th>
                     <th>Kategori Adı</th>
                     <th>İşlemler</th>
                 </tr>
@@ -30,6 +31,16 @@
                 {
                     <tr>
                         <td><span class="badge badge-green">@item.Id</span></td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(item.ImageUrl))
+                            {
+                                <img src="@item.ImageUrl" alt="@item.Name" style="width:40px;height:40px;object-fit:cover;border-radius:4px;" />
+                            }
+                            else
+                            {
+                                <div style="width:40px;height:40px;background:#e1e4e8;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#6a737d;font-size:12px;">Yok</div>
+                            }
+                        </td>
                         <td>@item.Name</td>
                         <td style="display:flex;gap:8px;">
                             <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">✏️ Düzenle</a>

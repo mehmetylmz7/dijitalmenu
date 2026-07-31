@@ -1,6 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+var port = Environment.GetEnvironmentVariable("PORT");
+if (int.TryParse(port, out var parsedPort) && parsedPort > 0)
+{
+    builder.WebHost.UseUrls($"http://0.0.0.0:{parsedPort}");
+}
 
 // Add services to the container.
 builder.Services.AddControllersWithViews(options =>
@@ -13,7 +18,17 @@ builder.Services.AddScoped<dijitalmenu.Filters.AdminAuthFilter>();
 builder.Services.AddScoped<dijitalmenu.Filters.RestaurantAuthFilter>();
 
 builder.Services.AddDbContext<DataAccessLayer.Concrete.Context>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    var provider = builder.Configuration["DatabaseProvider"];
+    if (provider == "PostgreSQL")
+    {
+        options.UseNpgsql(builder.Configuration.GetConnectionString("PostgresConnection"));
+    }
+    else
+    {
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    }
+});
 
 // Session
 builder.Services.AddSession(options =>
@@ -26,6 +41,7 @@ builder.Services.AddSession(options =>
 // Data Access Layer DI Registration
 builder.Services.AddScoped<DataAccessLayer.Abstract.IAdminDal, DataAccessLayer.Repositories.AdminRepository>();
 builder.Services.AddScoped<DataAccessLayer.Abstract.ICategoryDal, DataAccessLayer.Repositories.CategoryRepository>();
+builder.Services.AddScoped<DataAccessLayer.Abstract.IDefaultCategoryDal, DataAccessLayer.Repositories.DefaultCategoryRepository>();
 builder.Services.AddScoped<DataAccessLayer.Abstract.IMenuDal, DataAccessLayer.Repositories.MenuRepository>();
 builder.Services.AddScoped<DataAccessLayer.Abstract.IMenuItemDal, DataAccessLayer.Repositories.MenuItemRepository>();
 builder.Services.AddScoped<DataAccessLayer.Abstract.IRestaurantDal, DataAccessLayer.Repositories.RestaurantRepository>();
@@ -35,6 +51,7 @@ builder.Services.AddScoped<DataAccessLayer.Abstract.IUserDal, DataAccessLayer.Re
 // Business Layer DI Registration
 builder.Services.AddScoped<BusinessLayer.Abstract.IAdminService, BusinessLayer.Concrete.AdminManager>();
 builder.Services.AddScoped<BusinessLayer.Abstract.ICategoryService, BusinessLayer.Concrete.CategoryManager>();
+builder.Services.AddScoped<BusinessLayer.Abstract.IDefaultCategoryService, BusinessLayer.Concrete.DefaultCategoryManager>();
 builder.Services.AddScoped<BusinessLayer.Abstract.IMenuService, BusinessLayer.Concrete.MenuManager>();
 builder.Services.AddScoped<BusinessLayer.Abstract.IMenuItemService, BusinessLayer.Concrete.MenuItemManager>();
 builder.Services.AddScoped<BusinessLayer.Abstract.IRestaurantService, BusinessLayer.Concrete.RestaurantManager>();

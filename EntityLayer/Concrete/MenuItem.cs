@@ -20,7 +20,7 @@ namespace EntityLayer.Concrete
         public string Description { get; set; } = string.Empty;
 
         [Column(TypeName = "decimal(18,2)")]
-        [Range(typeof(decimal), "0", "999999.99")]
+        [Range(typeof(decimal), "0", "999999.99", ParseLimitsInInvariantCulture = true)]
         public decimal Price { get; set; }
 
         [StringLength(2048)]
