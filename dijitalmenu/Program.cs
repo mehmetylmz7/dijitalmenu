@@ -65,7 +65,73 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<DataAccessLayer.Concrete.Context>();
-    context.Database.Migrate();
+    try
+    {
+        context.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogWarning(ex, "Veritabanı migration işlemi esnasında bir uyarı oluştu. Uygulama başlatılmaya devam ediyor.");
+    }
+
+    // Dual DB Schema Safeguard: Ensure 'Slug' column exists on Restaurants table (SQL Server & Postgres)
+    try
+    {
+        var provider = context.Database.ProviderName;
+        if (provider != null && provider.Contains("SqlServer", StringComparison.OrdinalIgnoreCase))
+        {
+            context.Database.ExecuteSqlRaw(@"
+                IF NOT EXISTS (
+                    SELECT * FROM sys.columns 
+                    WHERE object_id = OBJECT_ID(N'[dbo].[Restaurants]') 
+                    AND name = 'Slug'
+                )
+                BEGIN
+                    ALTER TABLE [dbo].[Restaurants] ADD [Slug] nvarchar(100) NULL;
+                END
+            ");
+        }
+        else
+        {
+            context.Database.ExecuteSqlRaw(@"
+                ALTER TABLE ""Restaurants"" ADD COLUMN IF NOT EXISTS ""Slug"" character varying(100) NULL;
+            ");
+        }
+    }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogWarning(ex, "Restaurants.Slug kolonu şemaya eklenirken bir uyarı oluştu.");
+    }
+
+    // Populate missing slugs for existing restaurants
+    try
+    {
+        var restaurantsWithoutSlug = context.Restaurants.Where(r => string.IsNullOrEmpty(r.Slug)).ToList();
+        if (restaurantsWithoutSlug.Any())
+        {
+            foreach (var rest in restaurantsWithoutSlug)
+            {
+                string baseSlug = dijitalmenu.Helpers.StringHelper.GenerateSlug(rest.Name);
+                if (string.IsNullOrEmpty(baseSlug)) baseSlug = "restoran";
+
+                string candidate = baseSlug;
+                int counter = 1;
+                while (context.Restaurants.Any(r => r.Id != rest.Id && r.Slug == candidate))
+                {
+                    candidate = $"{baseSlug}-{counter++}";
+                }
+                rest.Slug = candidate;
+            }
+            context.SaveChanges();
+        }
+    }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogWarning(ex, "Restoran Slug değerleri güncellenirken bir uyarı oluştu.");
+    }
 
     // Admin bootstrap seed
     var adminService = scope.ServiceProvider.GetRequiredService<BusinessLayer.Abstract.IAdminService>();
@@ -281,6 +347,14 @@ using (var scope = app.Services.CreateScope())
         
         foreach (var r in restaurants)
         {
+            bool rUpdated = false;
+            if (string.IsNullOrWhiteSpace(r.Slug))
+            {
+                r.Slug = dijitalmenu.Helpers.StringHelper.GenerateSlug(r.Name);
+                if (string.IsNullOrWhiteSpace(r.Slug)) r.Slug = "restoran-" + r.Id;
+                rUpdated = true;
+            }
+
             if (oldThemeIds.Contains(r.ThemeId))
             {
                 var oldTheme = oldThemes.First(ot => ot.Id == r.ThemeId);
@@ -291,10 +365,14 @@ using (var scope = app.Services.CreateScope())
 
                 var targetTheme = updatedThemes.FirstOrDefault(ut => ut.Name == targetThemeName) ?? defaultTheme;
                 r.ThemeId = targetTheme.Id;
+                rUpdated = true;
+            }
+
+            if (rUpdated)
+            {
                 restaurantService.TUpdate(r);
             }
         }
-
     }
 
     // Seed deniz1234 user & menu
@@ -405,6 +483,12 @@ app.UseRouting();
 app.UseSession();
 
 app.UseAuthorization();
+
+// Menu Route
+app.MapControllerRoute(
+    name: "menu",
+    pattern: "Menu/{id?}",
+    defaults: new { controller = "Home", action = "Menu" });
 
 // Admin Area Route
 app.MapControllerRoute(

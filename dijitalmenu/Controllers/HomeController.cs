@@ -15,10 +15,11 @@ public class HomeController : Controller
     private readonly IMenuItemService   _menuItemService;
     private readonly IThemeService      _themeService;
     private readonly IWebHostEnvironment _env;
+    private readonly IConfiguration     _configuration;
 
     public HomeController(IRestaurantService restaurantService, IMenuService menuService,
         ICategoryService categoryService, IMenuItemService menuItemService,
-        IThemeService themeService, IWebHostEnvironment env)
+        IThemeService themeService, IWebHostEnvironment env, IConfiguration configuration)
     {
         _restaurantService = restaurantService;
         _menuService       = menuService;
@@ -26,6 +27,7 @@ public class HomeController : Controller
         _menuItemService   = menuItemService;
         _themeService      = themeService;
         _env               = env;
+        _configuration     = configuration;
     }
 
     // GET: / — Landing page with demo themes
@@ -108,13 +110,21 @@ public class HomeController : Controller
         return View("Menu");
     }
 
-    // GET: /Home/Menu/1 — Restoranın dijital menüsü
-    public IActionResult Menu(int id, int? previewThemeId = null)
+    // GET: /Menu/{slug} — Restoranın dijital menüsü
+    public IActionResult Menu(string id, int? previewThemeId = null)
     {
-        var restaurant = _restaurantService.TGetByID(id);
+        // id parametresi routing'den geliyor ama aslında slug'ı temsil ediyor
+        var restaurant = _restaurantService.TGetListAll().FirstOrDefault(r => r.Slug == id);
+        
+        // Geriye dönük uyumluluk (eğer ID girilmişse)
+        if (restaurant == null && int.TryParse(id, out int numericId))
+        {
+            restaurant = _restaurantService.TGetByID(numericId);
+        }
+
         if (restaurant == null) return NotFound();
 
-        var menu  = _menuService.TGetListAll().FirstOrDefault(m => m.RestaurantId == id);
+        var menu  = _menuService.TGetListAll().FirstOrDefault(m => m.RestaurantId == restaurant.Id);
         
         EntityLayer.Concrete.Theme? theme = null;
         if (previewThemeId.HasValue)
@@ -147,10 +157,42 @@ public class HomeController : Controller
         var items   = _menuItemService.TGetListAll()
                         .Where(mi => catIds2.Contains(mi.CategoryId)).ToList();
 
+        string appUrl = _configuration["AppUrl"];
+        string baseUrl = !string.IsNullOrWhiteSpace(appUrl) ? appUrl : $"{Request.Scheme}://{Request.Host}";
+        string qrUrl = $"{baseUrl.TrimEnd('/')}/Menu/{restaurant.Slug}";
+
         ViewBag.Restaurant = restaurant;
         ViewBag.Categories = cats;
         ViewBag.MenuItems  = items;
+        ViewBag.MenuUrl    = qrUrl;
+        ViewBag.QrCodeUrl  = $"{baseUrl.TrimEnd('/')}/Menu/{restaurant.Slug}/qr";
+
         return View();
+    }
+
+    // GET: /Menu/{id}/qr or /QR/{id} — Public QR Code PNG Generator
+    [HttpGet("Menu/{id}/qr")]
+    [HttpGet("QR/{id}")]
+    public IActionResult GetQrCode(string id)
+    {
+        var restaurant = _restaurantService.TGetListAll().FirstOrDefault(r => r.Slug == id);
+        if (restaurant == null && int.TryParse(id, out int numericId))
+        {
+            restaurant = _restaurantService.TGetByID(numericId);
+        }
+
+        if (restaurant == null) return NotFound();
+
+        string appUrl = _configuration["AppUrl"];
+        string baseUrl = !string.IsNullOrWhiteSpace(appUrl) ? appUrl : $"{Request.Scheme}://{Request.Host}";
+        string qrUrl = $"{baseUrl.TrimEnd('/')}/Menu/{restaurant.Slug}";
+
+        using var qrGenerator = new QRCoder.QRCodeGenerator();
+        using var qrCodeData = qrGenerator.CreateQrCode(qrUrl, QRCoder.QRCodeGenerator.ECCLevel.Q);
+        using var qrCode = new QRCoder.PngByteQRCode(qrCodeData);
+        byte[] qrCodeBytes = qrCode.GetGraphic(20);
+
+        return File(qrCodeBytes, "image/png");
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

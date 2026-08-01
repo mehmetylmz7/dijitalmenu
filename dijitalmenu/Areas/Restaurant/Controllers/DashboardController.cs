@@ -12,14 +12,16 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
         private readonly IMenuItemService _menuItemService;
         private readonly IMenuService _menuService;
         private readonly IRestaurantService _restaurantService;
+        private readonly IConfiguration _configuration;
 
         public DashboardController(ICategoryService categoryService, IMenuItemService menuItemService,
-            IMenuService menuService, IRestaurantService restaurantService)
+            IMenuService menuService, IRestaurantService restaurantService, IConfiguration configuration)
         {
             _categoryService = categoryService;
             _menuItemService = menuItemService;
             _menuService = menuService;
             _restaurantService = restaurantService;
+            _configuration = configuration;
         }
 
         public IActionResult Index()
@@ -41,6 +43,22 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             ViewBag.RestaurantUsername = HttpContext.Session.GetString("RestaurantUsername");
             ViewBag.CategoryCount = catCount;
             ViewBag.MenuItemCount = itemCount;
+
+            if (restaurant != null)
+            {
+                string appUrl = _configuration["AppUrl"];
+                string baseUrl = !string.IsNullOrWhiteSpace(appUrl) ? appUrl : $"{Request.Scheme}://{Request.Host}";
+                string qrUrl = $"{baseUrl.TrimEnd('/')}/Menu/{restaurant.Slug}";
+
+                using var qrGenerator = new QRCoder.QRCodeGenerator();
+                using var qrCodeData = qrGenerator.CreateQrCode(qrUrl, QRCoder.QRCodeGenerator.ECCLevel.Q);
+                using var qrCode = new QRCoder.PngByteQRCode(qrCodeData);
+                byte[] qrCodeImage = qrCode.GetGraphic(20);
+
+                ViewBag.QrCodeImage = "data:image/png;base64," + Convert.ToBase64String(qrCodeImage);
+                ViewBag.MenuUrl = qrUrl;
+                ViewBag.PublicQrImageUrl = $"{baseUrl.TrimEnd('/')}/Menu/{restaurant.Slug}/qr";
+            }
 
             return View();
         }

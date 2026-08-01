@@ -7,6 +7,8 @@ services:
     envVars:
       - key: ASPNETCORE_ENVIRONMENT
         value: Production
+      - key: AppUrl
+        sync: false
       - key: ConnectionStrings__DefaultConnection
         sync: false
       - key: Seed__AdminUsername

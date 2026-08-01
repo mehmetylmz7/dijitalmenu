@@ -26,3 +26,37 @@
         <a asp-area="Restaurant" asp-controller="MenuItem" asp-action="Index" class="btn btn-secondary">🍕 Ürünleri Yönet</a>
     </div>
 </div>
+
+<div class="card" style="margin-top:20px;">
+    <div class="card-header" style="display:flex; justify-scale:space-between; align-items:center;">
+        <h5 style="margin:0;">📱 QR Kod ve Canlı Menü Bağlantısı</h5>
+        <span class="badge" style="background:#e0f2fe; color:#0369a1; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600;">İnternet Erişimi Aktif</span>
+    </div>
+    <div class="card-body" style="text-align:center;">
+        @if (ViewBag.QrCodeImage != null)
+        {
+            <div style="margin-bottom:20px;">
+                <img src="@ViewBag.QrCodeImage" alt="Restoran QR Kodu" style="max-width:220px; border: 2px solid #e2e8f0; padding:12px; border-radius:16px; background:#fff; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);" />
+            </div>
+            <div style="margin-bottom:20px; background:#f8fafc; padding:15px; border-radius:12px; border:1px solid #e2e8f0; max-width:600px; margin-left:auto; margin-right:auto;">
+                <span style="color:#64748b; font-size:13px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Müşterilerinizin Erişeceği İnternet Menü Bağlantısı:</span> <br/>
+                <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-top:8px; flex-wrap:wrap;">
+                    <a href="@ViewBag.MenuUrl" target="_blank" style="color:#0284c7; font-weight:700; font-size:17px; word-break:break-all;">@ViewBag.MenuUrl</a>
+                    <button type="button" onclick="navigator.clipboard.writeText('@ViewBag.MenuUrl'); alert('Menü bağlantısı kopyalandı!');" class="btn btn-secondary" style="font-size:12px; padding:4px 10px;">📋 Kopyala</button>
+                </div>
+            </div>
+            <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+                <a href="@ViewBag.QrCodeImage" download="Menu_QRCode.png" class="btn btn-success" style="background-color:#10b981; border:none; padding:10px 20px; font-weight:600;">⬇️ QR Kodu İndir (PNG)</a>
+                <a href="@ViewBag.PublicQrImageUrl" target="_blank" class="btn btn-primary" style="background-color:#0284c7; border:none; padding:10px 20px; font-weight:600;">🌐 İnternet QR Görsel Bağlantısı</a>
+            </div>
+            <div style="margin-top:18px; background:#ecfdf5; border:1px solid #a7f3d0; color:#065f46; padding:12px 16px; border-radius:12px; font-size:13px; max-width:600px; margin-left:auto; margin-right:auto; display:flex; align-items:center; justify-content:center; gap:8px;">
+                <span>🔒</span>
+                <span><strong>Sabit QR Garantisi:</strong> Menünüzdeki ürünler, fiyatlar veya tasarım değişse bile bu QR kodunuz asla değişmez. Masalara bastırdığınız QR kodları yeniden bastırmanıza gerek yoktur.</span>
+            </div>
+        }
+        else
+        {
+            <p class="text-muted">QR Kod oluşturulamadı. Lütfen restoran bilgilerinizi güncelleyin.</p>
+        }
+    </div>
+</div>
