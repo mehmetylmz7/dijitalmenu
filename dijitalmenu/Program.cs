@@ -147,6 +147,15 @@ using (var scope = app.Services.CreateScope())
         });
     }
 
+    if (!adminService.TGetListAll().Any(a => a.Username == "Didim1234"))
+    {
+        adminService.TInsert(new EntityLayer.Concrete.Admin
+        {
+            Username = "Didim1234",
+            Password = dijitalmenu.Helpers.PasswordHelper.Hash("Didim1234@")
+        });
+    }
+
     var themeService = scope.ServiceProvider.GetRequiredService<BusinessLayer.Abstract.IThemeService>();
     var restaurantService = scope.ServiceProvider.GetRequiredService<BusinessLayer.Abstract.IRestaurantService>();
     var existing = themeService.TGetListAll();
