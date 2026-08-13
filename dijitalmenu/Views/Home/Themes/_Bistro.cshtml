@@ -34,6 +34,7 @@
         max-width: 414px;
         background-color: var(--bg-color);
         min-height: 100vh;
+        min-height: 100dvh;
         position: relative;
         margin: 0 auto;
         box-shadow: 0 0 40px rgba(0,0,0,0.12);
@@ -195,7 +196,7 @@
     /* ── Floating Bottom Nav ── */
     .bistro-fnav {
         position: fixed;
-        bottom: 20px;
+        bottom: calc(20px + env(safe-area-inset-bottom));
         left: 50%;
         transform: translateX(-50%);
         width: calc(100% - 40px);
@@ -231,6 +232,20 @@
 
     /* ── Chip JS aktif sınıfı ── */
     .bistro-section[data-hidden="true"] { display: none; }
+
+    @@media (max-width: 600px) {
+        body { background-color: var(--bg-color) !important; }
+
+        .bistro-wrap {
+            max-width: none;
+            margin: 0;
+            box-shadow: none;
+        }
+
+        .bistro-fnav {
+            max-width: none;
+        }
+    }
 </style>
 
 <div class="bistro-wrap">
