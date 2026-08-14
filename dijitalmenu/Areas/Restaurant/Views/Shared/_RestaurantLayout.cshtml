@@ -293,6 +293,12 @@
            asp-area="Restaurant" asp-controller="Builder" asp-action="Index">
             <span class="icon">✨</span> Menü Oluşturucu
         </a>
+
+        <div class="nav-section-label">Hesap</div>
+        <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Account" ? "active" : "")"
+           asp-area="Restaurant" asp-controller="Account" asp-action="Index">
+            <span class="icon">👤</span> Hesabım
+        </a>
     </nav>
 
     <div class="sidebar-footer">
@@ -326,6 +332,10 @@
         @if (TempData["Error"] != null)
         {
             <div class="alert-error">⚠️ @TempData["Error"]</div>
+        }
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert-info">✅ @TempData["Success"]</div>
         }
         @RenderBody()
     </main>

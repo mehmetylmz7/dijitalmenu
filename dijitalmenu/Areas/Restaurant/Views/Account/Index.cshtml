@@ -1,0 +1,94 @@
+@model dijitalmenu.Models.RestaurantAccountViewModel
+@{
+    ViewData["Title"] = "Hesabım";
+}
+
+<div style="display: flex; flex-direction: column; gap: 24px; max-width: 900px;">
+    <!-- Başlık ve Hızlı Navigasyon -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <div>
+            <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text);">👤 Hesap ve İşletme Yönetimi</h3>
+            <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 4px;">Kullanıcı profilinizi ve restoran işletme bilgilerinizi buradan yönetebilirsiniz.</p>
+        </div>
+        <a asp-area="Restaurant" asp-controller="Account" asp-action="ChangePassword" class="btn btn-warning">
+            <span>🔒</span> Şifre Değiştir
+        </a>
+    </div>
+
+    <!-- 1. Profil Bilgileri Kartı -->
+    <div class="card">
+        <div class="card-header">
+            <h5>👤 Profil Bilgileri</h5>
+        </div>
+        <div class="card-body">
+            <form asp-area="Restaurant" asp-controller="Account" asp-action="UpdateProfile" method="post">
+                <div class="form-group">
+                    <label class="form-label" for="username">Kullanıcı Adı</label>
+                    <input type="text" id="username" name="username" class="form-control" value="@Model.Username" required minlength="3" maxlength="50" autocomplete="username" />
+                    <small style="color: var(--text-muted); font-size: 0.75rem; display: block; margin-top: 6px;">
+                        Kullanıcı adınız giriş yaparken kullanılır. 3-50 karakter arası olmalıdır.
+                    </small>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <span>💾</span> Profil Bilgilerini Kaydet
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. İşletme Bilgileri Kartı -->
+    <div class="card">
+        <div class="card-header">
+            <h5>🏪 İşletme Bilgileri</h5>
+        </div>
+        <div class="card-body">
+            <form asp-area="Restaurant" asp-controller="Account" asp-action="UpdateBusiness" method="post">
+                <div class="form-group">
+                    <label class="form-label" for="restaurantName">Restoran Adı</label>
+                    <input type="text" id="restaurantName" name="restaurantName" class="form-control" value="@Model.RestaurantName" required minlength="2" maxlength="100" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="phone">İletişim Telefonu</label>
+                    <input type="tel" id="phone" name="phone" class="form-control" value="@Model.Phone" placeholder="Örn: 0555 123 45 67" maxlength="25" />
+                    <small style="color: var(--text-muted); font-size: 0.75rem; display: block; margin-top: 6px;">
+                        Müşterilerinizin menü üzerinden görebileceği irtibat numarası.
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="address">Adres</label>
+                    <textarea id="address" name="address" class="form-control" rows="3" placeholder="Restoran açık adresi..." maxlength="500">@Model.Address</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="googleMapsUrl">Google Haritalar (Maps) Bağlantısı</label>
+                    <input type="url" id="googleMapsUrl" name="googleMapsUrl" class="form-control" value="@Model.GoogleMapsUrl" placeholder="https://maps.google.com/..." maxlength="2048" />
+                    <small style="color: var(--text-muted); font-size: 0.75rem; display: block; margin-top: 6px;">
+                        Google Haritalar URL'si veya Paylaş bağlantısı girebilirsiniz.
+                    </small>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <span>💾</span> İşletme Bilgilerini Kaydet
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 3. Güvenlik Özeti Kartı -->
+    <div class="card">
+        <div class="card-header">
+            <h5>🛡️ Güvenlik</h5>
+        </div>
+        <div class="card-body" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+            <div>
+                <p style="font-weight: 600; font-size: 0.9rem; color: var(--text);">Hesap Şifresi</p>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">Hesap güvenliğiniz için şifrenizi düzenli aralıklarla güncellemenizi öneririz.</p>
+            </div>
+            <a asp-area="Restaurant" asp-controller="Account" asp-action="ChangePassword" class="btn btn-secondary">
+                <span>🔑</span> Şifremi Değiştir
+            </a>
+        </div>
+    </div>
+</div>
