@@ -4,153 +4,302 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] — Dijital Menü</title>
-    <meta name="description" content="Dijital menü sistemi — restoranınızın menüsünü kolayca yönetin ve müşterilerinize sunun." />
+    <meta name="description" content="QR kodla açılan, modern ve kolay yönetilen dijital restoran menü platformu." />
+
+    <!-- Google Fonts: Sora (Headlines) & Inter (Body) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0..1,0&display=swap" rel="stylesheet" />
+
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         :root {
-            --bg: #0f1117;
-            --surface: #1a1d27;
-            --surface2: #21253a;
-            --accent: #6c63ff;
-            --accent-light: #a78bfa;
-            --text: #e2e8f0;
-            --text-muted: #8892a4;
-            --border: #2d3148;
+            --primary: #10B981;
+            --primary-dark: #006c49;
+            --primary-light: #4edea3;
+            --primary-dim: rgba(16, 185, 129, 0.1);
+            --charcoal: #111827;
+            --charcoal-light: #1f2937;
+            --bg: #f8f9fa;
+            --surface: #ffffff;
+            --surface-low: #f3f4f5;
+            --surface-container: #edeeef;
+            --text: #191c1d;
+            --text-secondary: #575e70;
+            --text-muted: #7d8590;
+            --border: #E5E7EB;
+            --border-light: #f0f1f2;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 20px 48px rgba(17, 24, 39, 0.08);
+            --radius-sm: 8px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+            --radius-full: 9999px;
+            --font-display: 'Sora', sans-serif;
+            --font-body: 'Inter', sans-serif;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: var(--font-body);
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* ─── Header (Static, not sticky, links on the left) ─── */
-        header {
-            background: var(--surface);
+        /* ─── Top Navigation ─── */
+        .site-header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            background: rgba(248, 249, 250, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border);
-            width: 100%;
+            height: 76px;
+            transition: all 0.2s ease;
         }
 
-        nav {
-            max-width: 1200px;
+        .nav-container {
+            max-width: 1280px;
             margin: 0 auto;
             padding: 0 24px;
-            height: 70px;
+            height: 100%;
             display: flex;
             align-items: center;
-            justify-content: flex-start; /* Sola hizalama */
-            gap: 40px; /* Logo ile linkler arası boşluk */
-            flex-wrap: wrap;
+            justify-content: space-between;
         }
 
-        .nav-brand {
-            display: flex; align-items: center; gap: 10px;
-            text-decoration: none; color: var(--text);
-            font-size: 1.25rem; font-weight: 700;
-        }
-
-        .nav-brand span {
-            background: linear-gradient(135deg, var(--accent), var(--accent-light));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .nav-links {
-            display: flex; align-items: center; gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .nav-links a {
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
             text-decoration: none;
-            color: var(--text-muted);
-            font-size: .875rem;
+            color: var(--charcoal);
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            font-weight: 700;
+            transition: transform 0.2s ease;
+        }
+
+        .brand-logo:hover {
+            transform: scale(0.98);
+        }
+
+        .brand-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .nav-link {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--primary);
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-nav-login {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 18px;
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
             font-weight: 600;
-            padding: 8px 14px;
-            border-radius: 8px;
-            transition: all .2s;
+            color: var(--charcoal);
+            text-decoration: none;
+            background: transparent;
+            border: 1px solid var(--border);
+            transition: all 0.2s ease;
         }
 
-        .nav-links a:hover { background: var(--surface2); color: var(--text); }
-
-        .nav-links .btn-restaurant {
-            background: rgba(34,197,94,.12);
-            color: #4ade80 !important;
-            padding: 8px 16px;
-            border-radius: 10px;
-            border: 1px solid rgba(34,197,94,.20);
-        }
-        .nav-links .btn-restaurant:hover { background: rgba(34,197,94,.22); }
-
-        .nav-links .btn-admin {
-            background: linear-gradient(135deg, var(--accent), var(--accent-light));
-            color: #fff !important;
-            padding: 8px 16px;
-            border-radius: 10px;
+        .btn-nav-login:hover {
+            background: var(--surface-low);
+            border-color: #cbd5e1;
         }
 
-        .nav-links .btn-admin:hover { opacity: .95; transform: translateY(-1px); }
+        .btn-nav-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 20px;
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #ffffff;
+            text-decoration: none;
+            background: var(--primary);
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.28);
+            transition: all 0.2s ease;
+        }
 
-        /* ─── Main ─── */
-        main { 
-            flex: 1; 
+        .btn-nav-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35);
+        }
+
+        /* ─── Main Content ─── */
+        main {
+            flex: 1;
+            padding-top: 76px;
             width: 100%;
         }
 
-        /* ─── Footer ─── */
-        footer {
-            background: var(--surface);
+        /* ─── Modern Footer ─── */
+        .site-footer {
+            background: var(--surface-low);
             border-top: 1px solid var(--border);
-            padding: 24px;
-            text-align: center;
-            color: var(--text-muted);
-            font-size: .85rem;
+            padding: 48px 24px;
             width: 100%;
+            margin-top: auto;
         }
 
-        footer a { color: var(--accent-light); text-decoration: none; }
+        .footer-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 24px;
+        }
 
+        .footer-brand {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--charcoal);
+            text-decoration: none;
+        }
+
+        .footer-text {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .footer-links {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .footer-link {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--primary);
+        }
+
+        /* ─── Mobile Responsiveness ─── */
         @@media (max-width: 768px) {
-            nav {
-                height: auto;
-                padding: 16px;
-                gap: 16px;
-                justify-content: center;
+            .nav-menu { display: none; }
+            .footer-container {
+                flex-direction: column;
                 text-align: center;
+                align-items: center;
             }
-            .nav-links {
+            .footer-links {
                 justify-content: center;
-                width: 100%;
             }
         }
     </style>
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
-    <header>
-        <nav>
-            <a class="nav-brand" asp-controller="Home" asp-action="Index">
-                🍽️ <span>DijitalMenü</span>
+    <header class="site-header">
+        <div class="nav-container">
+            <a class="brand-logo" asp-controller="Home" asp-action="Index">
+                <div class="brand-icon">🍽️</div>
+                <span>Dijital Menü</span>
             </a>
-            <div class="nav-links">
-                <a asp-controller="Home" asp-action="Index">Restoranlar</a>
-                <a asp-area="Restaurant" asp-controller="Auth" asp-action="Login" class="btn-restaurant">🍃 Restoran Girişi</a>
-                <a asp-area="Admin" asp-controller="Auth" asp-action="Login" class="btn-admin">⚙️ Admin</a>
+
+            <nav class="nav-menu">
+                <a class="nav-link" href="#features">Özellikler</a>
+                <a class="nav-link" href="#how-it-works">Nasıl Çalışır?</a>
+                <a class="nav-link" href="#demo">Canlı Temalar</a>
+            </nav>
+
+            <div class="nav-actions">
+                <a class="btn-nav-login" asp-area="Restaurant" asp-controller="Auth" asp-action="Login">
+                    <span>Giriş Yap</span>
+                </a>
+                <a class="btn-nav-primary" asp-area="Restaurant" asp-controller="Auth" asp-action="Register">
+                    <span>Ücretsiz Başla</span>
+                </a>
             </div>
-        </nav>
+        </div>
     </header>
 
     <main>
         @RenderBody()
     </main>
 
-    <footer>
-        <p>© @DateTime.Now.Year <strong>DijitalMenü</strong> — Restoran menünüzü dijitale taşıyın.</p>
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <a class="footer-logo" asp-controller="Home" asp-action="Index">
+                    <span>🍽️</span>
+                    <span>Dijital Menü</span>
+                </a>
+                <p class="footer-text">© @DateTime.Now.Year Dijital Menü. Tüm hakları saklıdır.</p>
+            </div>
+
+            <div class="footer-links">
+                <a class="footer-link" href="#features">Özellikler</a>
+                <a class="footer-link" href="#demo">Temalar</a>
+                <a class="footer-link" asp-area="Restaurant" asp-controller="Auth" asp-action="Login">Restoran Girişi</a>
+                <a class="footer-link" asp-area="Admin" asp-controller="Auth" asp-action="Login">Admin Paneli</a>
+            </div>
+        </div>
     </footer>
 
     @await RenderSectionAsync("Scripts", required: false)

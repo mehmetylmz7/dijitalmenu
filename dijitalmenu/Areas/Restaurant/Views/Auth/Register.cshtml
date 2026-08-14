@@ -8,212 +8,291 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Restoran Kaydı — Dijital Menü</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- Google Fonts: Sora & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet" />
+
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+        :root {
+            --primary: #10B981;
+            --primary-dark: #006c49;
+            --primary-light: #4edea3;
+            --charcoal: #111827;
+            --bg: #f8f9fa;
+            --surface: #ffffff;
+            --surface-low: #f3f4f5;
+            --text: #191c1d;
+            --text-secondary: #575e70;
+            --border: #E5E7EB;
+            --shadow-lg: 0 20px 48px rgba(17, 24, 39, 0.08);
+            --radius-md: 14px;
+            --radius-lg: 24px;
+            --font-display: 'Sora', sans-serif;
+            --font-body: 'Inter', sans-serif;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background: #0d1117;
-            color: #e6edf3;
+            font-family: var(--font-body);
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 24px;
-        }
-
-        .bg {
-            position: fixed; inset: 0;
-            background: radial-gradient(ellipse at 70% 30%, rgba(34,197,94,.12) 0%, transparent 60%);
-            pointer-events: none;
-        }
-
-        .card {
+            padding: 32px 24px;
             position: relative;
-            background: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 24px;
-            padding: 48px 44px;
-            width: 100%;
-            max-width: 500px;
-            box-shadow: 0 25px 60px rgba(0,0,0,.5);
+            overflow-x: hidden;
         }
 
-        .logo { text-align: center; margin-bottom: 32px; }
-        .logo .emoji { font-size: 3rem; display: block; margin-bottom: 12px; }
-        .logo h1 { font-size: 1.5rem; font-weight: 700; background: linear-gradient(135deg, #22c55e, #4ade80); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        .logo p { font-size: .85rem; color: #7d8590; margin-top: 4px; }
+        .ambient-glow {
+            position: absolute;
+            top: 15%; left: 50%;
+            transform: translateX(-50%);
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, rgba(248, 249, 250, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .register-card {
+            position: relative;
+            z-index: 10;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 44px 40px;
+            width: 100%;
+            max-width: 520px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .logo-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .logo-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: #ffffff;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+            margin-bottom: 14px;
+        }
+
+        .logo-header h1 {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--charcoal);
+        }
+
+        .logo-header p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
 
         .section-divider {
-            font-size: .7rem; font-weight: 600;
-            text-transform: uppercase; letter-spacing: .08em;
-            color: #7d8590; margin: 20px 0 12px;
-            padding-top: 12px; border-top: 1px solid #21262d;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-secondary);
+            margin: 24px 0 14px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border);
         }
 
-        .form-group { margin-bottom: 16px; }
-        .form-label { display: block; font-size: .85rem; font-weight: 500; color: #7d8590; margin-bottom: 8px; }
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--charcoal);
+            margin-bottom: 8px;
+        }
 
         .form-control {
-            width: 100%; padding: 12px 16px;
-            background: #1c2128; border: 1px solid #30363d;
-            border-radius: 12px; color: #e6edf3;
-            font-size: .9rem; font-family: inherit;
-            outline: none; transition: border-color .2s;
+            width: 100%;
+            padding: 11px 16px;
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 0.9rem;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.2s ease;
         }
-        .form-control:focus { border-color: #22c55e; }
 
-        /* ─── Tema Başlık Satırı ─── */
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+        }
+
         .theme-label-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
             margin-bottom: 10px;
         }
-        .theme-label-row .form-label { margin-bottom: 0; }
-        .theme-hint {
-            font-size: .72rem;
-            color: #7d8590;
-            font-style: italic;
-        }
 
-        /* ─── Temaları Keşfet Butonu ─── */
-        .btn-explore {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 14px;
-            background: transparent;
-            border: 1px solid #30363d;
-            border-radius: 20px;
-            color: #7d8590;
-            font-size: .75rem;
-            font-weight: 600;
-            font-family: inherit;
-            cursor: pointer;
-            text-decoration: none;
-            transition: border-color .2s, color .2s, background .2s;
-        }
-        .btn-explore:hover {
-            border-color: #4ade80;
-            color: #4ade80;
-            background: rgba(74,222,128,.06);
-        }
-        .btn-explore .sparkle { font-size: .8rem; }
-
-        /* ─── Tema Seçici Grid ─── */
         .theme-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 10px;
-            max-height: 320px;
+            max-height: 280px;
             overflow-y: auto;
             padding-right: 4px;
         }
-        .theme-grid::-webkit-scrollbar { width: 4px; }
-        .theme-grid::-webkit-scrollbar-track { background: transparent; }
-        .theme-grid::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
 
         .theme-option {
-            border: 2px solid #30363d;
+            border: 2px solid var(--border);
             border-radius: 12px;
             overflow: hidden;
             cursor: pointer;
-            transition: border-color .2s, transform .15s, box-shadow .2s;
+            transition: all 0.2s ease;
             position: relative;
+            background: var(--surface-low);
         }
-        .theme-option:hover { border-color: #7d8590; transform: translateY(-2px); }
-        .theme-option.selected {
-            border-color: #22c55e;
-            box-shadow: 0 0 0 3px rgba(34,197,94,.2);
-        }
-        .theme-option input[type="radio"] { display: none; }
 
-        /* Renk Önizleme */
+        .theme-option:hover {
+            border-color: #cbd5e1;
+            transform: translateY(-2px);
+        }
+
+        .theme-option.selected {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+        }
+
         .theme-swatch {
-            height: 52px;
+            height: 48px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 5px;
+            gap: 6px;
             padding: 0 10px;
         }
+
         .swatch-dot {
             width: 10px; height: 10px;
             border-radius: 50%;
             flex-shrink: 0;
         }
+
         .swatch-bar {
             height: 5px; border-radius: 3px;
-            flex: 1; opacity: .6;
+            flex: 1; opacity: 0.7;
         }
 
-        /* Tema Adı */
         .theme-option-info {
-            padding: 7px 10px 9px;
-            border-top: 1px solid rgba(255,255,255,.06);
-            background: rgba(0,0,0,.25);
+            padding: 7px 10px;
+            border-top: 1px solid var(--border);
+            background: #ffffff;
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
+
         .theme-option-name {
-            font-size: .78rem;
+            font-size: 0.75rem;
             font-weight: 600;
-            color: #e6edf3;
+            color: var(--charcoal);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
         .theme-check {
             width: 18px; height: 18px;
             border-radius: 50%;
-            border: 2px solid #30363d;
+            border: 1px solid var(--border);
             display: flex; align-items: center; justify-content: center;
-            font-size: .6rem;
-            transition: all .2s;
-            flex-shrink: 0;
-        }
-        .theme-option.selected .theme-check {
-            background: #22c55e;
-            border-color: #22c55e;
-            color: #0d1117;
+            font-size: 0.65rem;
+            color: transparent;
+            transition: all 0.2s ease;
         }
 
-        /* ─── Submit ─── */
-        .btn-submit {
-            width: 100%; padding: 13px;
-            background: linear-gradient(135deg, #22c55e, #4ade80);
-            border: none; border-radius: 12px;
-            color: #0d1117; font-size: 1rem; font-weight: 700;
-            font-family: inherit; cursor: pointer; margin-top: 12px;
-            transition: opacity .2s, transform .2s;
+        .theme-option.selected .theme-check {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #ffffff;
         }
-        .btn-submit:hover { opacity: .9; transform: translateY(-1px); }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary);
+            border: none;
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            margin-top: 12px;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+            transition: all 0.2s ease;
+        }
+
+        .btn-submit:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35);
+        }
 
         .alert-error {
-            background: rgba(248,81,73,.1); border: 1px solid rgba(248,81,73,.3);
-            border-radius: 10px; padding: 12px 16px;
-            color: #f85149; font-size: .875rem; margin-bottom: 20px;
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            border-radius: 10px;
+            padding: 12px 16px;
+            color: #b91c1c;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 20px;
         }
 
-        .footer-link { text-align: center; margin-top: 20px; font-size: .85rem; color: #7d8590; }
-        .footer-link a { color: #4ade80; text-decoration: none; }
+        .footer-link {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
 
-        @@media (max-width: 520px) {
-            .card { padding: 36px 24px; }
-            .theme-grid { grid-template-columns: repeat(2, 1fr); }
+        .footer-link a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .footer-link a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <div class="bg"></div>
-    <div class="card">
-        <div class="logo">
-            <span class="emoji">🍃</span>
-            <h1>Ücretsiz Kaydolun</h1>
-            <p>Restoranınız için dijital menü oluşturun</p>
+    <div class="ambient-glow"></div>
+
+    <div class="register-card">
+        <div class="logo-header">
+            <div class="logo-icon">🍃</div>
+            <h1>Ücretsiz Kayıt Olun</h1>
+            <p>Restoranınız için dijital menünüzü dakikalar içinde kurun</p>
         </div>
 
         @if (ViewBag.Error != null)
@@ -222,25 +301,19 @@
         }
 
         <form method="post" asp-area="Restaurant" asp-controller="Auth" asp-action="Register" id="registerForm">
-
             <div class="section-divider">🏪 Restoran Bilgileri</div>
 
             <div class="form-group">
-                <label class="form-label">Restoran Adı</label>
-                <input type="text" name="restaurantName" class="form-control"
+                <label class="form-label" for="restaurantName">Restoran Adı</label>
+                <input type="text" id="restaurantName" name="restaurantName" class="form-control"
                        placeholder="Örn: Lezzet Köşesi" required autofocus />
             </div>
 
             <!-- Tema Seçimi -->
             <div class="form-group">
                 <div class="theme-label-row">
-                    <label class="form-label">🎨 Menü Teması</label>
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <span class="theme-hint">Daha sonra değiştirebilirsiniz</span>
-                        <a href="/Home/Preview" target="_blank" class="btn-explore">
-                            <span class="sparkle">✨</span> Temaları Keşfet
-                        </a>
-                    </div>
+                    <label class="form-label">🎨 Başlangıç Teması</label>
+                    <span style="font-size:0.75rem; color:var(--text-secondary);">Daha sonra değiştirebilirsiniz</span>
                 </div>
 
                 <input type="hidden" name="themeId" id="selectedThemeId" value="@(themes.FirstOrDefault()?.Id ?? 0)" />
@@ -254,13 +327,11 @@
                             <div class="theme-option @(isFirst ? "selected" : "")"
                                  id="opt-@theme.Id"
                                  onclick="selectTheme(@theme.Id)">
-                                <!-- Renk önizlemesi -->
                                 <div class="theme-swatch" style="background: @theme.BackgroundColor;">
                                     <div class="swatch-dot" style="background: @theme.PrimaryColor;"></div>
                                     <div class="swatch-bar" style="background: @theme.PrimaryColor;"></div>
                                     <div class="swatch-dot" style="background: @theme.SecondaryColor; width:7px; height:7px;"></div>
                                 </div>
-                                <!-- Tema Adı & Check -->
                                 <div class="theme-option-info">
                                     <span class="theme-option-name">@theme.Name</span>
                                     <div class="theme-check" id="chk-@theme.Id">✓</div>
@@ -271,24 +342,24 @@
                 }
                 else
                 {
-                    <p style="color:#7d8590; font-size:.85rem; padding: 12px 0;">
-                        Henüz tema bulunamadı. Varsayılan tema atanacak.
+                    <p style="color:var(--text-secondary); font-size:0.85rem; padding: 8px 0;">
+                        Varsayılan tema atanacaktır.
                     </p>
                 }
             </div>
 
-            <div class="section-divider">🔐 Hesap Bilgileri</div>
+            <div class="section-divider">🔐 Giriş Bilgileri</div>
 
             <div class="form-group">
-                <label class="form-label">Kullanıcı Adı</label>
-                <input type="text" name="username" class="form-control"
-                       placeholder="benzersiz_kullanici_adi" required />
+                <label class="form-label" for="username">Kullanıcı Adı</label>
+                <input type="text" id="username" name="username" class="form-control"
+                       placeholder="kullanici_adiniz" required autocomplete="username" />
             </div>
 
             <div class="form-group">
-                <label class="form-label">Şifre</label>
-                <input type="password" name="password" class="form-control"
-                       placeholder="••••••••" required />
+                <label class="form-label" for="password">Şifre</label>
+                <input type="password" id="password" name="password" class="form-control"
+                       placeholder="••••••••" required autocomplete="new-password" />
             </div>
 
             <button type="submit" class="btn-submit" id="submitBtn">
@@ -304,13 +375,8 @@
 
     <script>
         function selectTheme(id) {
-            // Hidden input güncelle
             document.getElementById('selectedThemeId').value = id;
-
-            // Önceki seçimi kaldır
             document.querySelectorAll('.theme-option').forEach(el => el.classList.remove('selected'));
-
-            // Yeni seçimi aktif yap
             document.getElementById('opt-' + id).classList.add('selected');
         }
     </script>

@@ -1,421 +1,862 @@
 @{
-    ViewData["Title"] = "Dijital Menü — Modern Restoran Menü Platformu";
+    ViewData["Title"] = "Restoranınızın Menüsü Artık Telefonda — Dijital Menü";
     var themes = ViewBag.Themes as List<EntityLayer.Concrete.Theme> ?? new();
 
-    // Tema adı → (emoji, açıklama, renk sınıfı, previewThemeId)
     var demoThemes = new[]
     {
-        new { Name = "Modern Minimalist",           Emoji = "⬜",  Desc = "Sade, temiz ve zamansız. Marka kimliğini ön plana çıkar.",    Accent = "#6c63ff", Border = "rgba(108,99,255,.35)",  Shadow = "rgba(108,99,255,.18)" },
-        new { Name = "Sıcak & Rustik",              Emoji = "🪵",  Desc = "Nordic ahşap dokusu. Sıcak ve samimi atmosfer.",             Accent = "#e07b39", Border = "rgba(224,123,57,.35)",  Shadow = "rgba(224,123,57,.18)" },
-        new { Name = "Koyu & Lüks",                 Emoji = "🌙",  Desc = "Midnight karanlığında altın detaylar. Premium his.",         Accent = "#d4af37", Border = "rgba(212,175,55,.35)",  Shadow = "rgba(212,175,55,.18)" },
-        new { Name = "Renkli & Eğlenceli",          Emoji = "⚡",  Desc = "Neon ışıltısı, cyberpunk enerjisi. Cesur ve dikkat çekici.", Accent = "#ff007a", Border = "rgba(255,0,122,.35)",   Shadow = "rgba(255,0,122,.18)"  },
-        new { Name = "Editöryal & Kalın Tipografi", Emoji = "🗞️", Desc = "Brutalist tasarım. Güçlü tipografi ile etkileyici duruş.",  Accent = "#f5c518", Border = "rgba(245,197,24,.35)",  Shadow = "rgba(245,197,24,.18)" },
-        new { Name = "Mobil Bistro",                Emoji = "📱",  Desc = "Modern mobil kart tasarımı. Chip filtreli, akıcı deneyim.", Accent = "#ef233c", Border = "rgba(239,35,60,.35)",   Shadow = "rgba(239,35,60,.18)"  },
-        new { Name = "Ay Cafe",                     Emoji = "☕",  Desc = "Sticky kategori nav, liste menü, yıldızlı footer.",         Accent = "#ff6b6b", Border = "rgba(255,107,107,.35)", Shadow = "rgba(255,107,107,.18)"},
-        new { Name = "Klasik Elegance",             Emoji = "🌿",  Desc = "Koyu çam yeşili ve mat altın detaylar. Fraunces fontu ile seçkin menü.", Accent = "#37463b", Border = "rgba(55,70,59,.35)", Shadow = "rgba(55,70,59,.18)"},
-        new { Name = "Anadolu Klasik",              Emoji = "🍲",  Desc = "Görsel kartlı ızgara tasarımı, servis bilgilendirme kartı, koyu altlık.", Accent = "#78350f", Border = "rgba(120,53,15,.35)", Shadow = "rgba(120,53,15,.18)"},
-        new { Name = "Eski Gazete Kültürü",         Emoji = "📰",  Desc = "Eski nostaljik gazete mizanpajı, sepya ve çift çizgili kenarlıklar.", Accent = "#2d1e10", Border = "rgba(45,30,16,.35)", Shadow = "rgba(45,30,16,.18)"},
-        new { Name = "Uzak Doğu Esintisi",          Emoji = "⛩️",  Desc = "Koyu zümrüt yeşili ve mat altın tonlarında zen stili menü tasarımı.", Accent = "#d4af37", Border = "rgba(212,175,55,.35)", Shadow = "rgba(212,175,55,.18)"},
-        new { Name = "Pastel Günbatımı",            Emoji = "🌇",  Desc = "Yumuşak şeftali ve günbatımı renkleri, yuvarlatılmış geniş köşeler.", Accent = "#ff793f", Border = "rgba(255,121,63,.35)", Shadow = "rgba(255,121,63,.18)"},
-        new { Name = "Bento Düzeni",                Emoji = "🍱",  Desc = "Bento kutusu şeklinde modern parçalı grid yerleşimi ve adres kartı.", Accent = "#b45309", Border = "rgba(180,83,9,.35)", Shadow = "rgba(180,83,9,.18)"},
-        new { Name = "Ege Rüzgarı",                 Emoji = "⚓",  Desc = "Mavi ve beyaz Akdeniz rüzgarı, deniz ürünleri için harika marin.", Accent = "#0284c7", Border = "rgba(2,132,199,.35)", Shadow = "rgba(2,132,199,.18)"},
-        new { Name = "Fütüristik Neon Diner",       Emoji = "👾",  Desc = "Siberpunk neon renkleri, terminal kod yazı tipleri, sistem uyarıları.", Accent = "#00f0ff", Border = "rgba(0,240,255,.35)", Shadow = "rgba(0,240,255,.18)"},
-        new { Name = "Sıcak Odun Ateşi",            Emoji = "🔥",  Desc = "Toprak tonlarında sıcak fırın, odun ateşi logolu şömine konsepti.", Accent = "#c0603d", Border = "rgba(192,96,61,.35)", Shadow = "rgba(192,96,61,.18)"},
-        new { Name = "Lüks Akşam Yemeği",           Emoji = "🍷",  Desc = "Sinematik karanlık arka plan, altın yıldızlı premium şef yemekleri.", Accent = "#f59e0b", Border = "rgba(245,158,11,.35)", Shadow = "rgba(245,158,11,.18)"},
-        new { Name = "Endüstriyel Minimalist",      Emoji = "🛠️",  Desc = "Neobrutalist kalın siyah çizgiler, gölgeli kutular ve sade düzen.", Accent = "#111111", Border = "rgba(17,17,17,.35)", Shadow = "rgba(17,17,17,.18)"},
+        new { Name = "Modern Minimalist",           Emoji = "⬜",  Desc = "Sade, temiz ve zamansız. Marka kimliğini ön plana çıkar.",    Accent = "#10B981", Border = "rgba(16,185,129,.35)",   Shadow = "rgba(16,185,129,.15)" },
+        new { Name = "Sıcak & Rustik",              Emoji = "🪵",  Desc = "Nordic ahşap dokusu. Sıcak ve samimi atmosfer.",             Accent = "#e07b39", Border = "rgba(224,123,57,.35)",   Shadow = "rgba(224,123,57,.15)" },
+        new { Name = "Koyu & Lüks",                 Emoji = "🌙",  Desc = "Midnight karanlığında altın detaylar. Premium his.",         Accent = "#d4af37", Border = "rgba(212,175,55,.35)",   Shadow = "rgba(212,175,55,.15)" },
+        new { Name = "Renkli & Eğlenceli",          Emoji = "⚡",  Desc = "Neon ışıltısı, cyberpunk enerjisi. Cesur ve dikkat çekici.", Accent = "#ff007a", Border = "rgba(255,0,122,.35)",    Shadow = "rgba(255,0,122,.15)"  },
+        new { Name = "Editöryal & Kalın Tipografi", Emoji = "🗞️", Desc = "Brutalist tasarım. Güçlü tipografi ile etkileyici duruş.",  Accent = "#f59e0b", Border = "rgba(245,158,11,.35)",   Shadow = "rgba(245,158,11,.15)" },
+        new { Name = "Mobil Bistro",                Emoji = "📱",  Desc = "Modern mobil kart tasarımı. Chip filtreli, akıcı deneyim.", Accent = "#ef233c", Border = "rgba(239,35,60,.35)",    Shadow = "rgba(239,35,60,.15)"  },
+        new { Name = "Ay Cafe",                     Emoji = "☕",  Desc = "Sticky kategori nav, liste menü, yıldızlı footer.",         Accent = "#ff6b6b", Border = "rgba(255,107,107,.35)",  Shadow = "rgba(255,107,107,.15)"},
+        new { Name = "Klasik Elegance",             Emoji = "🌿",  Desc = "Koyu çam yeşili ve mat altın detaylar. Fraunces fontu ile seçkin menü.", Accent = "#006c49", Border = "rgba(0,108,73,.35)", Shadow = "rgba(0,108,73,.15)"},
+        new { Name = "Anadolu Klasik",              Emoji = "🍲",  Desc = "Görsel kartlı ızgara tasarımı, servis bilgilendirme kartı, koyu altlık.", Accent = "#78350f", Border = "rgba(120,53,15,.35)", Shadow = "rgba(120,53,15,.15)"},
+        new { Name = "Eski Gazete Kültürü",         Emoji = "📰",  Desc = "Eski nostaljik gazete mizanpajı, sepya ve çift çizgili kenarlıklar.", Accent = "#2d1e10", Border = "rgba(45,30,16,.35)", Shadow = "rgba(45,30,16,.15)"},
+        new { Name = "Uzak Doğu Esintisi",          Emoji = "⛩️",  Desc = "Koyu zümrüt yeşili ve mat altın tonlarında zen stili menü tasarımı.", Accent = "#d4af37", Border = "rgba(212,175,55,.35)", Shadow = "rgba(212,175,55,.15)"},
+        new { Name = "Pastel Günbatımı",            Emoji = "🌇",  Desc = "Yumuşak şeftali ve günbatımı renkleri, yuvarlatılmış geniş köşeler.", Accent = "#ff793f", Border = "rgba(255,121,63,.35)", Shadow = "rgba(255,121,63,.15)"},
+        new { Name = "Bento Düzeni",                Emoji = "🍱",  Desc = "Bento kutusu şeklinde modern parçalı grid yerleşimi ve adres kartı.", Accent = "#b45309", Border = "rgba(180,83,9,.35)", Shadow = "rgba(180,83,9,.15)"},
+        new { Name = "Ege Rüzgarı",                 Emoji = "⚓",  Desc = "Mavi ve beyaz Akdeniz rüzgarı, deniz ürünleri için harika marin.", Accent = "#0284c7", Border = "rgba(2,132,199,.35)", Shadow = "rgba(2,132,199,.15)"},
+        new { Name = "Fütüristik Neon Diner",       Emoji = "👾",  Desc = "Siberpunk neon renkleri, terminal kod yazı tipleri, sistem uyarıları.", Accent = "#00f0ff", Border = "rgba(0,240,255,.35)", Shadow = "rgba(0,240,255,.15)"},
+        new { Name = "Sıcak Odun Ateşi",            Emoji = "🔥",  Desc = "Toprak tonlarında sıcak fırın, odun ateşi logolu şömine konsepti.", Accent = "#c0603d", Border = "rgba(192,96,61,.35)", Shadow = "rgba(192,96,61,.15)"},
+        new { Name = "Lüks Akşam Yemeği",           Emoji = "🍷",  Desc = "Sinematik karanlık arka plan, altın yıldızlı premium şef yemekleri.", Accent = "#f59e0b", Border = "rgba(245,158,11,.35)", Shadow = "rgba(245,158,11,.15)"},
+        new { Name = "Endüstriyel Minimalist",      Emoji = "🛠️",  Desc = "Neobrutalist kalın siyah çizgiler, gölgeli kutular ve sade düzen.", Accent = "#111827", Border = "rgba(17,24,39,.35)", Shadow = "rgba(17,24,39,.15)"},
     };
 }
 
 @section Styles {
 <style>
-    /* ─── Hero ─── */
-    .hero {
-        background: radial-gradient(ellipse at 40% 0%, rgba(108,99,255,.28) 0%, transparent 60%),
-                    radial-gradient(ellipse at 85% 55%, rgba(167,139,250,.14) 0%, transparent 50%),
-                    radial-gradient(ellipse at 10% 80%, rgba(96,165,250,.10) 0%, transparent 45%);
-        padding: 96px 24px 72px;
-        text-align: center;
+    /* ─── Hero Section ─── */
+    .hero-section {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 48px 24px 80px;
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 48px;
+        align-items: center;
+        min-height: 80vh;
+    }
+
+    .hero-left {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        z-index: 10;
     }
 
     .hero-badge {
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        background: rgba(108,99,255,.15);
-        border: 1px solid rgba(108,99,255,.3);
-        border-radius: 100px;
-        padding: 6px 18px;
-        font-size: .8rem;
-        font-weight: 600;
-        color: #a78bfa;
-        letter-spacing: .04em;
-        text-transform: uppercase;
-        margin-bottom: 28px;
-        animation: fadeDown .6s ease both;
+        background: #ffffff;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-full);
+        padding: 6px 16px;
+        width: max-content;
+        box-shadow: var(--shadow-sm);
     }
 
-    .hero-badge span { animation: pulse 2s infinite; }
+    .hero-badge .badge-icon {
+        color: var(--primary);
+        font-size: 1rem;
+    }
 
-    .hero h1 {
-        font-size: clamp(2.4rem, 6vw, 4rem);
+    .hero-badge span {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .hero-title {
+        font-family: var(--font-display);
+        font-size: clamp(2.2rem, 5vw, 3.8rem);
         font-weight: 800;
         line-height: 1.12;
-        margin-bottom: 20px;
-        animation: fadeUp .7s ease .1s both;
+        letter-spacing: -0.02em;
+        color: var(--charcoal);
+        margin: 8px 0;
     }
 
-    .hero h1 .gradient {
-        background: linear-gradient(135deg, #6c63ff 0%, #a78bfa 50%, #60a5fa 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-
-    .hero p {
-        color: #8892a4;
+    .hero-subtitle {
         font-size: 1.15rem;
-        max-width: 520px;
-        margin: 0 auto 36px;
-        line-height: 1.75;
-        animation: fadeUp .7s ease .2s both;
+        color: var(--text-secondary);
+        line-height: 1.65;
+        max-width: 540px;
     }
 
     .hero-actions {
         display: flex;
         align-items: center;
-        justify-content: center;
-        gap: 14px;
+        gap: 16px;
+        margin-top: 12px;
         flex-wrap: wrap;
-        animation: fadeUp .7s ease .3s both;
     }
 
-    .btn-primary {
+    .btn-hero-primary {
         display: inline-flex;
         align-items: center;
+        justify-content: center;
         gap: 8px;
-        background: linear-gradient(135deg, #6c63ff, #a78bfa);
-        color: #fff;
-        padding: 13px 28px;
-        border-radius: 12px;
-        font-weight: 700;
-        font-size: .95rem;
-        text-decoration: none;
-        transition: transform .2s, box-shadow .2s;
-        box-shadow: 0 4px 24px rgba(108,99,255,.35);
-    }
-
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 32px rgba(108,99,255,.45);
-        color: #fff;
-    }
-
-    .btn-secondary {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        background: rgba(255,255,255,.06);
-        border: 1px solid rgba(255,255,255,.12);
-        color: #c4c9d6;
-        padding: 13px 28px;
-        border-radius: 12px;
+        background: var(--primary);
+        color: #ffffff;
         font-weight: 600;
-        font-size: .95rem;
+        font-size: 1rem;
+        padding: 14px 32px;
+        border-radius: var(--radius-sm);
         text-decoration: none;
-        transition: all .2s;
-        backdrop-filter: blur(6px);
+        box-shadow: 0 4px 16px rgba(16, 185, 129, 0.28);
+        transition: all 0.2s ease;
     }
 
-    .btn-secondary:hover {
-        background: rgba(255,255,255,.10);
-        border-color: rgba(255,255,255,.22);
-        color: #e2e8f0;
+    .btn-hero-primary:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(16, 185, 129, 0.38);
+        color: #ffffff;
     }
 
-    /* ─── Stats Bar ─── */
-    .stats-bar {
-        display: flex;
+    .btn-hero-secondary {
+        display: inline-flex;
+        align-items: center;
         justify-content: center;
-        gap: 48px;
-        flex-wrap: wrap;
-        padding: 32px 24px;
-        border-top: 1px solid rgba(255,255,255,.06);
-        border-bottom: 1px solid rgba(255,255,255,.06);
-        background: rgba(255,255,255,.02);
-        animation: fadeUp .7s ease .4s both;
+        gap: 8px;
+        background: #ffffff;
+        color: var(--charcoal);
+        border: 1px solid var(--border);
+        font-weight: 600;
+        font-size: 1rem;
+        padding: 14px 28px;
+        border-radius: var(--radius-sm);
+        text-decoration: none;
+        transition: all 0.2s ease;
     }
 
-    .stat-item {
-        text-align: center;
+    .btn-hero-secondary:hover {
+        background: var(--surface-low);
+        border-color: #cbd5e1;
     }
 
-    .stat-item strong {
-        display: block;
-        font-size: 1.8rem;
-        font-weight: 800;
-        background: linear-gradient(135deg, #6c63ff, #a78bfa);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+    .hero-social-proof {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-top: 16px;
+        color: var(--text-secondary);
+        font-size: 0.875rem;
     }
 
-    .stat-item span {
-        font-size: .82rem;
-        color: #8892a4;
-        letter-spacing: .03em;
+    .avatar-group {
+        display: flex;
+        align-items: center;
     }
 
-    /* ─── Demo Section ─── */
-    .demo-section {
-        max-width: 1200px;
+    .avatar-badge {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 2px solid #ffffff;
+        background: var(--surface-container);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--charcoal);
+        margin-left: -8px;
+    }
+
+    .avatar-badge:first-child { margin-left: 0; }
+
+    /* ─── Right Mockup Container ─── */
+    .hero-mockup-wrapper {
+        position: relative;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .mockup-ambient-bg {
+        position: absolute;
+        inset: -20px;
+        background: radial-gradient(circle at 60% 40%, rgba(16, 185, 129, 0.12) 0%, rgba(248, 249, 250, 0) 70%);
+        border-radius: 40px;
+        z-index: 0;
+    }
+
+    .phone-mockup {
+        position: relative;
+        width: 320px;
+        height: 580px;
+        background: #ffffff;
+        border-radius: 36px;
+        border: 8px solid #111827;
+        box-shadow: 0 25px 60px -15px rgba(17, 24, 39, 0.15);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        z-index: 2;
+        transform: rotate(1deg);
+        transition: transform 0.4s ease;
+    }
+
+    .phone-mockup:hover {
+        transform: rotate(0deg) translateY(-4px);
+    }
+
+    .phone-notch {
+        position: absolute;
+        top: 0; left: 50%;
+        transform: translateX(-50%);
+        width: 110px;
+        height: 18px;
+        background: #111827;
+        border-radius: 0 0 14px 14px;
+        z-index: 10;
+    }
+
+    .phone-header {
+        padding: 28px 16px 12px;
+        background: #ffffff;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .phone-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--charcoal);
+    }
+
+    .phone-tabs {
+        display: flex;
+        gap: 12px;
+        margin-top: 12px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+    }
+
+    .phone-tab {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        white-space: nowrap;
+    }
+
+    .phone-tab.active {
+        color: var(--primary);
+        border-bottom: 2px solid var(--primary);
+        padding-bottom: 2px;
+    }
+
+    .phone-content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 12px;
+        background: var(--bg);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .mini-menu-card {
+        background: #ffffff;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 10px;
+        display: flex;
+        gap: 10px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+
+    .mini-card-img {
+        width: 60px;
+        height: 60px;
+        border-radius: 10px;
+        background-size: cover;
+        background-position: center;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        background-color: var(--surface-low);
+    }
+
+    .mini-card-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .mini-card-title {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--charcoal);
+    }
+
+    .mini-card-desc {
+        font-size: 0.65rem;
+        color: var(--text-secondary);
+        line-height: 1.3;
+    }
+
+    .mini-card-price-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 4px;
+    }
+
+    .mini-card-price {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--primary);
+    }
+
+    .floating-qr-badge {
+        position: absolute;
+        right: -15px;
+        bottom: 40px;
+        background: #ffffff;
+        padding: 12px;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-lg);
+        z-index: 5;
+        transform: rotate(-6deg);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .floating-qr-badge .qr-icon {
+        font-size: 2.5rem;
+        color: var(--charcoal);
+    }
+
+    .floating-qr-badge span {
+        font-size: 0.65rem;
+        font-weight: 700;
+        color: var(--primary);
+    }
+
+    /* ─── Bento Grid Features ─── */
+    .features-section {
+        max-width: 1280px;
         margin: 0 auto;
-        padding: 72px 24px 96px;
+        padding: 80px 24px;
     }
 
-    .demo-section-header {
+    .section-header-center {
         text-align: center;
-        margin-bottom: 52px;
+        max-width: 700px;
+        margin: 0 auto 56px;
     }
 
-    .demo-section-header h2 {
-        font-size: clamp(1.6rem, 3vw, 2.2rem);
+    .section-header-center h2 {
+        font-family: var(--font-display);
+        font-size: clamp(1.8rem, 3.5vw, 2.5rem);
         font-weight: 800;
+        color: var(--charcoal);
+        letter-spacing: -0.01em;
         margin-bottom: 12px;
     }
 
-    .demo-section-header p {
-        color: #8892a4;
-        font-size: 1rem;
-        max-width: 460px;
-        margin: 0 auto;
-        line-height: 1.7;
+    .section-header-center p {
+        font-size: 1.05rem;
+        color: var(--text-secondary);
+        line-height: 1.6;
     }
 
-    .demo-grid {
+    .bento-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 24px;
+    }
+
+    .bento-card {
+        background: #ffffff;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 36px 28px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .bento-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .bento-icon-box {
+        width: 52px;
+        height: 52px;
+        border-radius: var(--radius-md);
+        background: var(--primary-dim);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary);
+        font-size: 1.75rem;
+    }
+
+    .bento-card h3 {
+        font-family: var(--font-display);
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--charcoal);
+    }
+
+    .bento-card p {
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+        line-height: 1.6;
+    }
+
+    /* ─── How it Works (Process) ─── */
+    .process-section {
+        background: var(--surface-low);
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+        padding: 80px 24px;
+    }
+
+    .process-container {
+        max-width: 1280px;
+        margin: 0 auto;
+    }
+
+    .process-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 32px;
+        margin-top: 48px;
+    }
+
+    .process-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 16px;
+    }
+
+    .step-number {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: #ffffff;
+        border: 2px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-display);
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--charcoal);
+        box-shadow: var(--shadow-sm);
+        transition: border-color 0.2s ease, color 0.2s ease;
+    }
+
+    .process-step:hover .step-number {
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+
+    .process-step h4 {
+        font-family: var(--font-display);
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--charcoal);
+    }
+
+    .process-step p {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        line-height: 1.6;
+        max-width: 300px;
+    }
+
+    /* ─── Live Themes Showcase ─── */
+    .themes-section {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 88px 24px;
+    }
+
+    .themes-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
         gap: 24px;
     }
 
-    /* ─── Demo Card ─── */
-    .demo-card {
-        position: relative;
-        background: #1a1d27;
-        border: 1px solid #2d3148;
-        border-radius: 22px;
+    .theme-card {
+        background: #ffffff;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
         overflow: hidden;
         text-decoration: none;
         color: inherit;
         display: flex;
         flex-direction: column;
-        transition: transform .3s cubic-bezier(.34,1.56,.64,1), border-color .25s, box-shadow .3s;
-        group: true;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-    .demo-card:hover {
-        transform: translateY(-6px) scale(1.01);
+    .theme-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-md);
     }
 
-    .demo-card-thumb {
-        height: 160px;
+    .theme-card-thumb {
+        height: 140px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 4rem;
-        background: linear-gradient(135deg, #21253a, #2d3148);
+        font-size: 3.5rem;
+        background: var(--surface-low);
         position: relative;
-        overflow: hidden;
     }
 
-    .demo-card-thumb .preview-label {
+    .live-chip {
         position: absolute;
-        top: 12px;
-        right: 12px;
-        background: rgba(0,0,0,.5);
-        backdrop-filter: blur(6px);
-        border: 1px solid rgba(255,255,255,.12);
-        border-radius: 8px;
-        padding: 4px 10px;
-        font-size: .72rem;
-        font-weight: 600;
-        color: #c4c9d6;
-        letter-spacing: .04em;
-        text-transform: uppercase;
-    }
-
-    .demo-card-thumb .live-dot {
-        position: absolute;
-        top: 12px;
-        left: 12px;
+        top: 12px; left: 12px;
         display: flex;
         align-items: center;
-        gap: 5px;
-        background: rgba(0,0,0,.5);
-        backdrop-filter: blur(6px);
-        border: 1px solid rgba(255,255,255,.12);
-        border-radius: 8px;
-        padding: 4px 10px;
-        font-size: .72rem;
-        font-weight: 600;
-        color: #4ade80;
-        letter-spacing: .04em;
+        gap: 6px;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(4px);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-full);
+        padding: 3px 10px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: var(--primary-dark);
     }
 
-    .live-dot::before {
+    .live-chip::before {
         content: '';
         width: 6px;
         height: 6px;
         border-radius: 50%;
-        background: #4ade80;
-        animation: blink 1.5s infinite;
+        background: var(--primary);
     }
 
-    .demo-card-body {
-        padding: 22px 22px 18px;
+    .theme-card-body {
+        padding: 20px;
         flex: 1;
         display: flex;
         flex-direction: column;
     }
 
-    .demo-card-body h3 {
+    .theme-card-title {
+        font-family: var(--font-display);
         font-size: 1.05rem;
         font-weight: 700;
-        margin-bottom: 8px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
+        color: var(--charcoal);
+        margin-bottom: 6px;
     }
 
-    .demo-card-body p {
-        font-size: .85rem;
-        color: #8892a4;
-        line-height: 1.6;
+    .theme-card-desc {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        line-height: 1.5;
         flex: 1;
-        margin-bottom: 18px;
+        margin-bottom: 16px;
     }
 
-    .demo-card-footer {
+    .theme-card-footer {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding-top: 14px;
-        border-top: 1px solid rgba(255,255,255,.06);
+        padding-top: 12px;
+        border-top: 1px solid var(--border-light);
     }
 
-    .demo-card-tag {
-        font-size: .75rem;
+    .theme-tag {
+        font-size: 0.75rem;
         font-weight: 600;
-        padding: 4px 10px;
-        border-radius: 20px;
-        background: rgba(255,255,255,.06);
-        color: #8892a4;
-        letter-spacing: .03em;
+        padding: 3px 10px;
+        border-radius: var(--radius-full);
+        background: var(--surface-low);
+        color: var(--text-secondary);
     }
 
-    .demo-cta {
-        font-size: .85rem;
+    .theme-cta {
+        font-size: 0.85rem;
         font-weight: 700;
+        color: var(--primary);
         display: flex;
         align-items: center;
-        gap: 5px;
-        transition: gap .2s;
+        gap: 4px;
     }
 
-    .demo-card:hover .demo-cta { gap: 9px; }
+    /* ─── Final CTA Banner ─── */
+    .cta-banner-section {
+        max-width: 1280px;
+        margin: 0 auto 80px;
+        padding: 0 24px;
+    }
 
-    /* ─── Glow overlay on hover ─── */
-    .demo-card::before {
-        content: '';
+    .cta-banner-card {
+        background: var(--charcoal);
+        border-radius: var(--radius-xl);
+        padding: 64px 32px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .cta-glow {
         position: absolute;
         inset: 0;
-        opacity: 0;
-        border-radius: 22px;
-        transition: opacity .3s;
+        background: radial-gradient(circle at 50% 30%, rgba(16, 185, 129, 0.22) 0%, transparent 65%);
         pointer-events: none;
     }
 
-    .demo-card:hover::before { opacity: 1; }
-
-    /* ─── CTA Section ─── */
-    .cta-section {
-        text-align: center;
-        padding: 64px 24px 96px;
-        background: radial-gradient(ellipse at 50% 0%, rgba(108,99,255,.18) 0%, transparent 65%);
-    }
-
-    .cta-section h2 {
-        font-size: clamp(1.5rem, 3vw, 2rem);
+    .cta-banner-title {
+        font-family: var(--font-display);
+        font-size: clamp(1.8rem, 4vw, 2.8rem);
         font-weight: 800;
-        margin-bottom: 12px;
+        color: #ffffff;
+        letter-spacing: -0.01em;
+        margin-bottom: 16px;
+        position: relative;
+        z-index: 2;
     }
 
-    .cta-section p {
-        color: #8892a4;
-        font-size: 1rem;
-        max-width: 400px;
-        margin: 0 auto 32px;
-        line-height: 1.7;
+    .cta-banner-desc {
+        font-size: 1.1rem;
+        color: #d1d5db;
+        max-width: 560px;
+        line-height: 1.6;
+        margin-bottom: 32px;
+        position: relative;
+        z-index: 2;
     }
 
-    /* ─── Animations ─── */
-    @@keyframes fadeUp   { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
-    @@keyframes fadeDown { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: none; } }
-    @@keyframes pulse    { 0%,100% { opacity: 1; } 50% { opacity: .5; } }
-    @@keyframes blink    { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+    /* ─── Responsive Layout ─── */
+    @@media (max-width: 992px) {
+        .hero-section {
+            grid-template-columns: 1fr;
+            text-align: center;
+            padding-top: 32px;
+        }
+        .hero-left {
+            align-items: center;
+        }
+        .hero-actions {
+            justify-content: center;
+        }
+        .hero-social-proof {
+            justify-content: center;
+        }
+        .hero-mockup-wrapper {
+            margin-top: 24px;
+        }
+    }
 </style>
 }
 
-<!-- ─── HERO ─── -->
-<div class="hero">
-    <div class="hero-badge">
-        <span>✨</span> @(ViewBag.Themes?.Count ?? 18) Hazır Tema · Anında Yayınla
-    </div>
-    <h1>
-        Restoranınız için<br>
-        <span class="gradient">Dijital Menü</span>
-    </h1>
-    <p>QR kod ile müşterilerinize anında menü sunan, profesyonel görünümlü ve tamamen özelleştirilebilir dijital menü platformu.</p>
-    <div class="hero-actions">
-        <a href="/Restaurant/Auth/Login" class="btn-primary" id="btn-restaurant-login">
-            🍃 Restoranım için başlat
-        </a>
-        <a href="#demo" class="btn-secondary" id="btn-see-demos">
-            🎨 Temaları keşfet
-        </a>
-    </div>
-</div>
+<!-- ─── HERO SECTION ─── -->
+<section class="hero-section">
+    <div class="hero-left">
+        <div class="hero-badge">
+            <span class="material-symbols-outlined badge-icon">restaurant</span>
+            <span>Restaurant Tech 2.0</span>
+        </div>
 
-<!-- ─── STATS ─── -->
-<div class="stats-bar">
-    <div class="stat-item">
-        <strong>5</strong>
-        <span>Hazır Tema</span>
-    </div>
-    <div class="stat-item">
-        <strong>QR</strong>
-        <span>Kod Desteği</span>
-    </div>
-    <div class="stat-item">
-        <strong>∞</strong>
-        <span>Kategori & Ürün</span>
-    </div>
-    <div class="stat-item">
-        <strong>100%</strong>
-        <span>Mobil Uyumlu</span>
-    </div>
-</div>
+        <h1 class="hero-title">
+            RESTORANINIZIN MENÜSÜ ARTIK TELEFONDA.
+        </h1>
 
-<!-- ─── DEMO THEMES ─── -->
-<div class="demo-section" id="demo">
-    <div class="demo-section-header">
-        <h2>🎨 Canlı Tema Önizlemeleri</h2>
-        <p>Her temaya tıklayarak gerçek bir menü deneyimi yaşayın. Hepsi tamamen mobil uyumlu.</p>
+        <p class="hero-subtitle">
+            QR kodla açılan, modern ve kolay yönetilen dijital restoran menünüzü dakikalar içinde oluşturun.
+        </p>
+
+        <div class="hero-actions">
+            <a class="btn-hero-primary" asp-area="Restaurant" asp-controller="Auth" asp-action="Register">
+                <span>Ücretsiz Başla</span>
+                <span class="material-symbols-outlined" style="font-size: 1.1rem;">arrow_forward</span>
+            </a>
+            <a class="btn-hero-secondary" href="#demo">
+                <span>Temaları Keşfet</span>
+            </a>
+        </div>
+
+        <div class="hero-social-proof">
+            <div class="avatar-group">
+                <div class="avatar-badge">🍕</div>
+                <div class="avatar-badge">☕</div>
+                <div class="avatar-badge">🍔</div>
+            </div>
+            <span>500+ restoran tarafından güvenle kullanılıyor</span>
+        </div>
     </div>
 
-    <div class="demo-grid">
+    <!-- ─── Right Interactive Phone Mockup ─── -->
+    <div class="hero-mockup-wrapper">
+        <div class="mockup-ambient-bg"></div>
+
+        <div class="phone-mockup">
+            <div class="phone-notch"></div>
+
+            <div class="phone-header">
+                <div class="phone-nav">
+                    <span>←</span>
+                    <span>La Trattoria Menü</span>
+                    <span>🔍</span>
+                </div>
+                <div class="phone-tabs">
+                    <span class="phone-tab active">Tümü</span>
+                    <span class="phone-tab">Ana Yemekler</span>
+                    <span class="phone-tab">Tatlılar</span>
+                    <span class="phone-tab">İçecekler</span>
+                </div>
+            </div>
+
+            <div class="phone-content">
+                <!-- Mini Item 1 -->
+                <div class="mini-menu-card">
+                    <div class="mini-card-img">🍔</div>
+                    <div class="mini-card-info">
+                        <div>
+                            <div class="mini-card-title">Truffle Gourmet Burger</div>
+                            <div class="mini-card-desc">Dana köfte, trüf mayonez, karamelize soğan.</div>
+                        </div>
+                        <div class="mini-card-price-row">
+                            <span class="mini-card-price">280 ₺</span>
+                            <span style="font-size:0.7rem; color:var(--text-muted);">Popüler ⭐</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mini Item 2 -->
+                <div class="mini-menu-card">
+                    <div class="mini-card-img">🥗</div>
+                    <div class="mini-card-info">
+                        <div>
+                            <div class="mini-card-title">Akdeniz Bahçe Salata</div>
+                            <div class="mini-card-desc">Taze yeşillikler, kiraz domates, beyaz peynir, zeytin.</div>
+                        </div>
+                        <div class="mini-card-price-row">
+                            <span class="mini-card-price">180 ₺</span>
+                            <span style="font-size:0.7rem; color:var(--text-muted);">Vejetaryen 🍃</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mini Item 3 -->
+                <div class="mini-menu-card">
+                    <div class="mini-card-img">🍕</div>
+                    <div class="mini-card-info">
+                        <div>
+                            <div class="mini-card-title">Margherita Pizza</div>
+                            <div class="mini-card-desc">San Marzano domates sos, taze mozzarella, fesleğen.</div>
+                        </div>
+                        <div class="mini-card-price-row">
+                            <span class="mini-card-price">240 ₺</span>
+                            <span style="font-size:0.7rem; color:var(--text-muted);">Şefin Seçimi 🔥</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="floating-qr-badge">
+            <span class="material-symbols-outlined qr-icon">qr_code_2</span>
+            <span>HIZLI QR</span>
+        </div>
+    </div>
+</section>
+
+<!-- ─── BENTO GRID FEATURES ─── -->
+<section class="features-section" id="features">
+    <div class="section-header-center">
+        <h2>RESTORANINIZ İÇİN İHTİYACINIZ OLAN HER ŞEY</h2>
+        <p>Modern, hızlı ve kolay yönetilen bir deneyimle müşterilerinizi etkileyin ve satışlarınızı artırın.</p>
+    </div>
+
+    <div class="bento-grid">
+        <div class="bento-card">
+            <div class="bento-icon-box">
+                <span class="material-symbols-outlined">qr_code_scanner</span>
+            </div>
+            <h3>QR Menü Deneyimi</h3>
+            <p>Müşterileriniz masadaki QR kodu okutarak anında güncel menünüze ulaşır. Uygulama indirme gerektirmeyen kusursuz mobil erişim.</p>
+        </div>
+
+        <div class="bento-card">
+            <div class="bento-icon-box">
+                <span class="material-symbols-outlined">edit_document</span>
+            </div>
+            <h3>Kolay Yönetim</h3>
+            <p>Fiyatları, ürün açıklamalarını ve stok durumunu saniyeler içinde güncelleyin. Tüm değişiklikler anında masalara yansır.</p>
+        </div>
+
+        <div class="bento-card">
+            <div class="bento-icon-box">
+                <span class="material-symbols-outlined">palette</span>
+            </div>
+            <h3>18+ Modern Tasarım</h3>
+            <p>Markanıza en uygun renkleri, profesyonel tipografiyi ve iştah açıcı düzenleri tek tıkla seçip özelleştirin.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ─── HOW IT WORKS (PROCESS) ─── -->
+<section class="process-section" id="how-it-works">
+    <div class="process-container">
+        <div class="section-header-center">
+            <h2>Nasıl Çalışır?</h2>
+            <p>3 basit adımda dijital menünüzü hazırlayın ve hemen yayınlayın.</p>
+        </div>
+
+        <div class="process-grid">
+            <div class="process-step">
+                <div class="step-number">01</div>
+                <h4>Hesap Oluştur</h4>
+                <p>Saniyeler içinde ücretsiz kaydınızı açın ve restoran bilgilerinizi tanımlayın.</p>
+            </div>
+
+            <div class="process-step">
+                <div class="step-number">02</div>
+                <h4>Menünü Hazırla</h4>
+                <p>Kategorilerinizi, ürünlerinizi, fiyatlarınızı ve fotoğraflarınızı kolayca ekleyin.</p>
+            </div>
+
+            <div class="process-step">
+                <div class="step-number">03</div>
+                <h4>QR Kodu Paylaş</h4>
+                <p>Oluşturulan sabit QR kodunuzu indirin, masalarınıza yerleştirin ve servise başlayın.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ─── LIVE THEMES SHOWCASE ─── -->
+<section class="themes-section" id="demo">
+    <div class="section-header-center">
+        <h2>🎨 Canlı Tema Galerisi</h2>
+        <p>Her temaya tıklayarak gerçek bir menü deneyimi yaşayın. Tüm temalar %100 mobil uyumludur.</p>
+    </div>
+
+    <div class="themes-grid">
         @{
-            // DB'deki gerçek restoranı demo için kullan (ilk mevcut restoran)
-            // Tema eşleme: DB'de kayıtlı temalar arasından eşleştir
             var themeMap = new System.Collections.Generic.Dictionary<string, int>();
             foreach (var t in themes)
             {
@@ -428,46 +869,39 @@
         {
             var themeId = themeMap.ContainsKey(demo.Name) ? themeMap[demo.Name] : 1;
             var href = $"/Home/Preview?themeId={themeId}";
-            var cardStyle = $"border-color:{demo.Border}; box-shadow:0 0 0 0 {demo.Shadow};";
-            var hoverGlow = $"background: radial-gradient(ellipse at 50% 0%, {demo.Shadow.Replace("18)", "08)")} 0%, transparent 70%);";
-            var ctaColor = $"color:{demo.Accent}";
 
-            <a class="demo-card" href="@href" id="demo-@demo.Name.Replace(" ", "-").Replace("&", "").Replace("ı","i").Replace("ğ","g").ToLower()"
-               style="@cardStyle"
-               onmouseenter="this.style.boxShadow='0 16px 48px @demo.Shadow'"
-               onmouseleave="this.style.boxShadow='0 0 0 0 @demo.Shadow'">
-
-                <div class="demo-card-thumb">
-                    <span class="live-dot">Canlı Demo</span>
-                    @demo.Emoji
-                    <span class="preview-label">Önizle →</span>
+            <a class="theme-card" href="@href" target="_blank" rel="noopener">
+                <div class="theme-card-thumb">
+                    <div class="live-chip">Canlı Demo</div>
+                    <span>@demo.Emoji</span>
                 </div>
 
-                <div class="demo-card-body">
-                    <h3>@demo.Emoji @demo.Name</h3>
-                    <p>@demo.Desc</p>
-                    <div class="demo-card-footer">
-                        <span class="demo-card-tag">Tema</span>
-                        <span class="demo-cta" style="@ctaColor">
-                            Dene <span>→</span>
-                        </span>
+                <div class="theme-card-body">
+                    <div class="theme-card-title">@demo.Emoji @demo.Name</div>
+                    <div class="theme-card-desc">@demo.Desc</div>
+
+                    <div class="theme-card-footer">
+                        <span class="theme-tag">Hazır Tema</span>
+                        <div class="theme-cta">
+                            <span>Önizle</span>
+                            <span>→</span>
+                        </div>
                     </div>
                 </div>
             </a>
         }
     </div>
-</div>
+</section>
 
-<!-- ─── CTA ─── -->
-<div class="cta-section">
-    <h2>Restoranınızı dijitale taşıyın 🚀</h2>
-    <p>Ücretsiz hesap oluşturun, menünüzü dakikalar içinde hazırlayın ve QR kodunuzu müşterilerinizle paylaşın.</p>
-    <div class="hero-actions">
-        <a href="/Restaurant/Auth/Login" class="btn-primary" id="btn-cta-start">
-            Hemen Başla — Ücretsiz
-        </a>
-        <a href="/Admin/Auth/Login" class="btn-secondary" id="btn-cta-admin">
-            ⚙️ Admin Paneli
+<!-- ─── DARK CTA BANNER ─── -->
+<section class="cta-banner-section">
+    <div class="cta-banner-card">
+        <div class="cta-glow"></div>
+        <h2 class="cta-banner-title">MENÜNÜZÜ BUGÜN DİJİTALE TAŞIYIN</h2>
+        <p class="cta-banner-desc">Restoran operasyonlarınızı kolaylaştırın, baskı maliyetlerini sıfırlayın ve müşteri deneyimini bir üst seviyeye çıkarın.</p>
+        <a class="btn-hero-primary" asp-area="Restaurant" asp-controller="Auth" asp-action="Register">
+            <span>Ücretsiz Kayıt Ol</span>
+            <span class="material-symbols-outlined" style="font-size: 1.1rem;">arrow_forward</span>
         </a>
     </div>
-</div>
+</section>

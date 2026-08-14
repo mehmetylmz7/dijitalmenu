@@ -7,34 +7,189 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Restoran Girişi — Dijital Menü</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- Google Fonts: Sora & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet" />
+
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', sans-serif; background: #0d1117; color: #e6edf3; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-        .bg { position: fixed; inset: 0; background: radial-gradient(ellipse at 30% 50%, rgba(34,197,94,.12) 0%, transparent 60%); }
-        .card { position: relative; background: #161b22; border: 1px solid #30363d; border-radius: 24px; padding: 48px 44px; width: 100%; max-width: 420px; box-shadow: 0 25px 60px rgba(0,0,0,.5); }
-        .logo { text-align: center; margin-bottom: 32px; }
-        .logo .emoji { font-size: 3rem; display: block; margin-bottom: 12px; }
-        .logo h1 { font-size: 1.5rem; font-weight: 700; background: linear-gradient(135deg, #22c55e, #4ade80); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        .logo p { font-size: .85rem; color: #7d8590; margin-top: 4px; }
-        .form-group { margin-bottom: 18px; }
-        .form-label { display: block; font-size: .85rem; font-weight: 500; color: #7d8590; margin-bottom: 8px; }
-        .form-control { width: 100%; padding: 12px 16px; background: #1c2128; border: 1px solid #30363d; border-radius: 12px; color: #e6edf3; font-size: .9rem; font-family: inherit; outline: none; transition: border-color .2s; }
-        .form-control:focus { border-color: #22c55e; }
-        .btn-submit { width: 100%; padding: 13px; background: linear-gradient(135deg, #22c55e, #4ade80); border: none; border-radius: 12px; color: #0d1117; font-size: 1rem; font-weight: 700; font-family: inherit; cursor: pointer; margin-top: 8px; transition: opacity .2s, transform .2s; }
-        .btn-submit:hover { opacity: .9; transform: translateY(-1px); }
-        .alert-error { background: rgba(248,81,73,.1); border: 1px solid rgba(248,81,73,.3); border-radius: 10px; padding: 12px 16px; color: #f85149; font-size: .875rem; margin-bottom: 20px; }
-        .footer-link { text-align: center; margin-top: 20px; font-size: .85rem; color: #7d8590; }
-        .footer-link a { color: #4ade80; text-decoration: none; }
+
+        :root {
+            --primary: #10B981;
+            --primary-dark: #006c49;
+            --primary-light: #4edea3;
+            --charcoal: #111827;
+            --bg: #f8f9fa;
+            --surface: #ffffff;
+            --text: #191c1d;
+            --text-secondary: #575e70;
+            --border: #E5E7EB;
+            --shadow-lg: 0 20px 48px rgba(17, 24, 39, 0.08);
+            --radius-md: 14px;
+            --radius-lg: 24px;
+            --font-display: 'Sora', sans-serif;
+            --font-body: 'Inter', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .ambient-glow {
+            position: absolute;
+            top: 20%; left: 50%;
+            transform: translateX(-50%);
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, rgba(248, 249, 250, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .login-card {
+            position: relative;
+            z-index: 10;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 44px 40px;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .logo-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .logo-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: #ffffff;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+            margin-bottom: 16px;
+        }
+
+        .logo-header h1 {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--charcoal);
+        }
+
+        .logo-header p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--charcoal);
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 0.9rem;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary);
+            border: none;
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            margin-top: 8px;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+            transition: all 0.2s ease;
+        }
+
+        .btn-submit:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35);
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            border-radius: 10px;
+            padding: 12px 16px;
+            color: #b91c1c;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+
+        .footer-link {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .footer-link a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .footer-link a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
-    <div class="bg"></div>
-    <div class="card">
-        <div class="logo">
-            <span class="emoji">🍃</span>
+    <div class="ambient-glow"></div>
+
+    <div class="login-card">
+        <div class="logo-header">
+            <div class="logo-icon">🍃</div>
             <h1>Restoran Paneli</h1>
-            <p>Hesabınıza giriş yapın</p>
+            <p>Yönetim hesabınıza giriş yapın</p>
         </div>
 
         @if (ViewBag.Error != null)
@@ -44,19 +199,21 @@
 
         <form method="post" asp-area="Restaurant" asp-controller="Auth" asp-action="Login">
             <div class="form-group">
-                <label class="form-label">Kullanıcı Adı</label>
-                <input type="text" name="username" class="form-control" placeholder="kullaniciadi" required autofocus />
+                <label class="form-label" for="username">Kullanıcı Adı</label>
+                <input type="text" id="username" name="username" class="form-control" placeholder="kullaniciadi" required autofocus autocomplete="username" />
             </div>
+
             <div class="form-group">
-                <label class="form-label">Şifre</label>
-                <input type="password" name="password" class="form-control" placeholder="••••••••" required />
+                <label class="form-label" for="password">Şifre</label>
+                <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required autocomplete="current-password" />
             </div>
+
             <button type="submit" class="btn-submit">Giriş Yap →</button>
         </form>
 
         <div class="footer-link">
-            Hesabınız yok mu?
-            <a asp-area="Restaurant" asp-controller="Auth" asp-action="Register">Ücretsiz kayıt olun</a>
+            Henüz hesabınız yok mu?
+            <a asp-area="Restaurant" asp-controller="Auth" asp-action="Register">Ücretsiz Kayıt Olun</a>
         </div>
     </div>
 </body>
