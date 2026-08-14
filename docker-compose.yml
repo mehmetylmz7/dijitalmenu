@@ -36,7 +36,7 @@ services:
       ConnectionStrings__PostgresConnection: "Host=postgres;Port=5432;Database=${DB_NAME};Username=postgres;Password=${MSSQL_SA_PASSWORD}"
       Seed__AdminUsername: "${SEED_ADMIN_USERNAME}"
       Seed__AdminPassword: "${SEED_ADMIN_PASSWORD}"
-      ASPNETCORE_ENVIRONMENT: "Development"
+      ASPNETCORE_ENVIRONMENT: "Production"
     ports:
       - "8080:8080"
     depends_on:

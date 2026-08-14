@@ -143,6 +143,7 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             }
         }
 
+        [HttpPost]
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();

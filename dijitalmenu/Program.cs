@@ -72,38 +72,13 @@ using (var scope = app.Services.CreateScope())
     catch (Exception ex)
     {
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-        logger.LogWarning(ex, "Veritabanı migration işlemi esnasında bir uyarı oluştu. Uygulama başlatılmaya devam ediyor.");
+        logger.LogCritical(ex, "Veritabanı migration başarısız! Uygulama durduruluyor.");
+        throw;
     }
 
-    // Dual DB Schema Safeguard: Ensure 'Slug' column exists on Restaurants table (SQL Server & Postgres)
-    try
-    {
-        var provider = context.Database.ProviderName;
-        if (provider != null && provider.Contains("SqlServer", StringComparison.OrdinalIgnoreCase))
-        {
-            context.Database.ExecuteSqlRaw(@"
-                IF NOT EXISTS (
-                    SELECT * FROM sys.columns 
-                    WHERE object_id = OBJECT_ID(N'[dbo].[Restaurants]') 
-                    AND name = 'Slug'
-                )
-                BEGIN
-                    ALTER TABLE [dbo].[Restaurants] ADD [Slug] nvarchar(100) NULL;
-                END
-            ");
-        }
-        else
-        {
-            context.Database.ExecuteSqlRaw(@"
-                ALTER TABLE ""Restaurants"" ADD COLUMN IF NOT EXISTS ""Slug"" character varying(100) NULL;
-            ");
-        }
-    }
-    catch (Exception ex)
-    {
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-        logger.LogWarning(ex, "Restaurants.Slug kolonu şemaya eklenirken bir uyarı oluştu.");
-    }
+    // Note: Runtime ALTER TABLE (Slug column safeguard) removed.
+    // Schema changes are now managed exclusively through EF Core migrations.
+    // Migration fail-fast (above) ensures schema is always correct at startup.
 
     // Populate missing slugs for existing restaurants
     try
@@ -138,8 +113,26 @@ using (var scope = app.Services.CreateScope())
     if (!adminService.TGetListAll().Any())
     {
         var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-        var username = config["Seed:AdminUsername"] ?? "admin";
-        var password = config["Seed:AdminPassword"] ?? "Admin123!";
+        var username = config["Seed:AdminUsername"];
+        var password = config["Seed:AdminPassword"];
+
+        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+        {
+            if (app.Environment.IsDevelopment())
+            {
+                username ??= "admin";
+                password ??= "DevPassword123!";
+                var devLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+                devLogger.LogWarning("Seed:AdminUsername/Password yapılandırılmamış. Development ortamı için varsayılan credential kullanılıyor.");
+            }
+            else
+            {
+                var prodLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+                prodLogger.LogCritical("Production ortamında Seed:AdminUsername ve Seed:AdminPassword yapılandırılmalıdır!");
+                throw new InvalidOperationException("Production ortamında admin seed credential'ları yapılandırılmalıdır. 'Seed:AdminUsername' ve 'Seed:AdminPassword' environment variable'larını ayarlayın.");
+            }
+        }
+
         adminService.TInsert(new EntityLayer.Concrete.Admin
         {
             Username = username,
@@ -375,7 +368,9 @@ using (var scope = app.Services.CreateScope())
         }
     }
 
-    // Seed deniz1234 user & menu
+    // Seed deniz1234 user & menu (Development only)
+    if (app.Environment.IsDevelopment())
+    {
     var denizUser = context.Users.FirstOrDefault(u => u.Username == "deniz1234");
     EntityLayer.Concrete.Menu denizMenu = null;
 
@@ -465,6 +460,7 @@ using (var scope = app.Services.CreateScope())
             }
         }
     }
+    } // end if (IsDevelopment) — deniz1234 seed
 }
 
 

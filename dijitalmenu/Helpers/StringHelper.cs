@@ -11,7 +11,7 @@ namespace dijitalmenu.Helpers
             if (string.IsNullOrWhiteSpace(phrase))
                 return string.Empty;
 
-            string str = RemoveDiacritics(phrase).ToLower();
+            string str = RemoveDiacritics(phrase).ToLowerInvariant();
             str = Regex.Replace(str, @"[^a-z0-9\s-]", "");
             str = Regex.Replace(str, @"\s+", " ").Trim();
             str = str.Substring(0, str.Length <= 100 ? str.Length : 100).Trim();
@@ -21,7 +21,43 @@ namespace dijitalmenu.Helpers
 
         private static string RemoveDiacritics(string text)
         {
-            var normalizedString = text.Normalize(NormalizationForm.FormD);
+            var sb = new StringBuilder(text.Length);
+            foreach (var c in text)
+            {
+                switch (c)
+                {
+                    case 'ı':
+                    case 'I':
+                    case 'İ':
+                        sb.Append('i');
+                        break;
+                    case 'ğ':
+                    case 'Ğ':
+                        sb.Append('g');
+                        break;
+                    case 'ü':
+                    case 'Ü':
+                        sb.Append('u');
+                        break;
+                    case 'ş':
+                    case 'Ş':
+                        sb.Append('s');
+                        break;
+                    case 'ö':
+                    case 'Ö':
+                        sb.Append('o');
+                        break;
+                    case 'ç':
+                    case 'Ç':
+                        sb.Append('c');
+                        break;
+                    default:
+                        sb.Append(c);
+                        break;
+                }
+            }
+
+            var normalizedString = sb.ToString().Normalize(NormalizationForm.FormD);
             var stringBuilder = new StringBuilder(capacity: normalizedString.Length);
 
             for (int i = 0; i < normalizedString.Length; i++)
@@ -30,13 +66,7 @@ namespace dijitalmenu.Helpers
                 var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
                 if (unicodeCategory != UnicodeCategory.NonSpacingMark)
                 {
-                    if (c == 'ı') stringBuilder.Append('i');
-                    else if (c == 'ğ') stringBuilder.Append('g');
-                    else if (c == 'ü') stringBuilder.Append('u');
-                    else if (c == 'ş') stringBuilder.Append('s');
-                    else if (c == 'ö') stringBuilder.Append('o');
-                    else if (c == 'ç') stringBuilder.Append('c');
-                    else stringBuilder.Append(c);
+                    stringBuilder.Append(c);
                 }
             }
 

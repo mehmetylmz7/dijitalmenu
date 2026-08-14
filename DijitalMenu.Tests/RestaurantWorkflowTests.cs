@@ -90,9 +90,9 @@ public class RestaurantWorkflowTests
         var restaurant = new Restaurant { Name = "Test Restaurant", ThemeId = 1 }; context.Restaurants.Add(restaurant); context.SaveChanges();
         var menu = new Menu { RestaurantId = restaurant.Id }; context.Menus.Add(menu); context.SaveChanges();
         context.Categories.Add(new Category { Name = "İçecek", MenuId = menu.Id }); context.SaveChanges();
-        var controller = new CategoryController(services.Categories, services.Menus) { ControllerContext = TestSupport.ControllerContext(new() { ["RestaurantId"] = restaurant.Id.ToString() }) };
+        var controller = new CategoryController(services.Categories, services.Menus, new TestWebHostEnvironment()) { ControllerContext = TestSupport.ControllerContext(new() { ["RestaurantId"] = restaurant.Id.ToString() }) };
 
-        var result = controller.Create("içecek");
+        var result = controller.Create("içecek", null);
 
         Assert.IsType<ViewResult>(result);
         Assert.Single(context.Categories);

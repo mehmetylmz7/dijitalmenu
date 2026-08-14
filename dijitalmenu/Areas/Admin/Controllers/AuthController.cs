@@ -45,6 +45,7 @@ namespace dijitalmenu.Areas.Admin.Controllers
             return View();
         }
 
+        [HttpPost]
         public IActionResult Logout()
         {
             HttpContext.Session.Remove("AdminUser");

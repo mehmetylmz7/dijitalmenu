@@ -305,9 +305,11 @@
                 <span>🌐</span> Menümü Görüntüle
             </a>
         }
-        <a asp-area="Restaurant" asp-controller="Auth" asp-action="Logout">
-            <span>🚪</span> Çıkış Yap
-        </a>
+        <form asp-area="Restaurant" asp-controller="Auth" asp-action="Logout" method="post" style="display:inline">
+            <button type="submit" style="background:none;border:none;color:inherit;cursor:pointer;font:inherit;padding:0;display:flex;align-items:center;gap:0.5rem;width:100%">
+                <span>🚪</span> Çıkış Yap
+            </button>
+        </form>
     </div>
 </aside>
 

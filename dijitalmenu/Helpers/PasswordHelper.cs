@@ -12,8 +12,9 @@ public static class PasswordHelper
         if (storedHash.StartsWith("$2"))
             return BCrypt.Net.BCrypt.Verify(password, storedHash);
 
-        // Eski düz metin şifreler için geçiş dönemi
-        return password == storedHash;
+        // Legacy plain-text passwords are no longer accepted for security.
+        // Users with unhashed passwords must reset their password.
+        return false;
     }
 
     public static bool NeedsRehash(string storedHash) =>

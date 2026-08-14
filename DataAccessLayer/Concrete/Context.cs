@@ -43,6 +43,11 @@ namespace DataAccessLayer.Concrete
             modelBuilder.Entity<DefaultCategory>()
                 .HasIndex(category => category.Name)
                 .IsUnique();
+
+            modelBuilder.Entity<Restaurant>()
+                .HasIndex(restaurant => restaurant.Slug)
+                .IsUnique()
+                .HasFilter(null);
         }
 
         }
