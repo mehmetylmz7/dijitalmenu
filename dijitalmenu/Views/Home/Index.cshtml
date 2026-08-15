@@ -488,117 +488,664 @@
         max-width: 300px;
     }
 
-    /* ─── Live Themes Showcase ─── */
+    /* ─── Live Themes Showcase (Interactive 3s Carousel & Mockup) ─── */
     .themes-section {
         max-width: 1280px;
         margin: 0 auto;
-        padding: 88px 24px;
+        padding: 96px 24px 80px;
+        position: relative;
+    }
+
+    .theme-stage-wrapper {
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 48px;
+        align-items: stretch;
+        margin-top: 40px;
+        margin-bottom: 56px;
+    }
+
+    .theme-control-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .theme-active-card {
+        background: #ffffff;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xl);
+        padding: 32px;
+        box-shadow: var(--shadow-md);
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .active-card-glow-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--primary);
+        transition: background 0.3s ease;
+    }
+
+    .theme-active-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .theme-active-info-left {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .theme-emoji-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 18px;
+        background: var(--surface-low);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.2rem;
+        flex-shrink: 0;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border);
+        transition: transform 0.2s ease;
+    }
+
+    .theme-title-box {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .theme-title-text {
+        font-family: var(--font-display);
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--charcoal);
+        letter-spacing: -0.01em;
+        line-height: 1.2;
+    }
+
+    .theme-badges-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .theme-tag-pill {
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: var(--radius-full);
+        border: 1px solid var(--primary);
+        color: var(--primary-dark);
+        background: var(--primary-dim);
+        transition: all 0.3s ease;
+    }
+
+    .theme-counter-chip {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        background: var(--surface-low);
+        padding: 4px 12px;
+        border-radius: var(--radius-full);
+        border: 1px solid var(--border);
+    }
+
+    .theme-active-desc {
+        font-size: 1rem;
+        color: var(--text-secondary);
+        line-height: 1.6;
+        min-height: 48px;
+    }
+
+    .theme-progress-box {
+        background: var(--surface-low);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 14px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .theme-progress-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+    }
+
+    .theme-progress-pulse {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .pulse-indicator {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--primary);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+        animation: pulseDot 1.8s infinite;
+    }
+
+    @@keyframes pulseDot {
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    .progress-track {
+        width: 100%;
+        height: 6px;
+        background: #e5e7eb;
+        border-radius: 999px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .progress-fill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, var(--primary), #3b82f6);
+        border-radius: 999px;
+        will-change: width;
+    }
+
+    .theme-controls-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        padding-top: 8px;
+    }
+
+    .nav-btn-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .theme-nav-btn {
+        width: 42px;
+        height: 42px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+        background: #ffffff;
+        color: var(--charcoal);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: var(--shadow-sm);
+        user-select: none;
+    }
+
+    .theme-nav-btn:hover {
+        background: var(--surface-low);
+        border-color: #cbd5e1;
+        transform: translateY(-1px);
+        color: var(--primary);
+    }
+
+    .theme-nav-btn:active {
+        transform: translateY(0);
+    }
+
+    .theme-action-btns {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .btn-preview-simulator {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--charcoal);
+        color: #ffffff;
+        font-weight: 600;
+        font-size: 0.875rem;
+        padding: 10px 18px;
+        border-radius: var(--radius-sm);
+        text-decoration: none;
+        transition: all 0.2s ease;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .btn-preview-simulator:hover {
+        background: var(--charcoal-light);
+        transform: translateY(-1px);
+        color: #ffffff;
+    }
+
+    .btn-use-theme {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--primary);
+        color: #ffffff;
+        font-weight: 600;
+        font-size: 0.875rem;
+        padding: 10px 20px;
+        border-radius: var(--radius-sm);
+        text-decoration: none;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 14px rgba(16,185,129,0.25);
+    }
+
+    .btn-use-theme:hover {
+        background: var(--primary-dark);
+        transform: translateY(-1px);
+        color: #ffffff;
+    }
+
+    /* ─── Quick Theme Selector Pills Deck ─── */
+    .theme-pills-deck {
+        background: #ffffff;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xl);
+        padding: 24px;
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .theme-pills-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--charcoal);
+    }
+
+    .theme-pills-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 8px;
+        max-height: 250px;
+        overflow-y: auto;
+        padding-right: 6px;
+    }
+
+    .theme-pills-grid::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .theme-pills-grid::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+    }
+
+    .theme-pill-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+        background: var(--surface-low);
+        color: var(--charcoal);
+        cursor: pointer;
+        text-align: left;
+        transition: all 0.2s ease;
+        font-size: 0.8rem;
+        font-weight: 600;
+        user-select: none;
+        width: 100%;
+    }
+
+    .theme-pill-item:hover {
+        background: #ffffff;
+        border-color: #cbd5e1;
+        transform: translateY(-1px);
+    }
+
+    .theme-pill-item.active {
+        background: #ffffff;
+        border-color: var(--primary);
+        box-shadow: 0 4px 12px rgba(16,185,129,0.15);
+        color: var(--charcoal);
+        font-weight: 700;
+    }
+
+    .pill-color-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    /* ─── Right Showcase Phone Mockup ─── */
+    .theme-phone-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 640px;
+    }
+
+    .phone-ambient-glow {
+        position: absolute;
+        inset: -30px;
+        border-radius: 60px;
+        background: radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.18) 0%, rgba(248, 249, 250, 0) 70%);
+        transition: background 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .showcase-phone-frame {
+        position: relative;
+        width: 340px;
+        height: 660px;
+        background: #ffffff;
+        border-radius: 46px;
+        border: 10px solid #1c1e2d;
+        box-shadow: 0 30px 70px -15px rgba(0,0,0,0.32), 0 0 0 1px rgba(255,255,255,0.1);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        z-index: 2;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .showcase-phone-frame:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 35px 80px -15px rgba(0,0,0,0.4);
+    }
+
+    .phone-island {
+        position: absolute;
+        top: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 20px;
+        background: #1c1e2d;
+        border-radius: 16px;
+        z-index: 30;
+        pointer-events: none;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding-right: 12px;
+    }
+
+    .phone-camera-lens {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #0b0c10;
+        border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .phone-floating-badge {
+        position: absolute;
+        top: 14px;
+        left: 14px;
+        background: rgba(17, 24, 39, 0.85);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        color: #ffffff;
+        border-radius: var(--radius-full);
+        padding: 4px 10px;
+        font-size: 0.65rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        z-index: 25;
+        pointer-events: none;
+        border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .phone-iframe-container {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        background: #ffffff;
+    }
+
+    .showcase-iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        transition: opacity 0.25s ease;
+        background: #ffffff;
+    }
+
+    .phone-loader-spinner {
+        position: absolute;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 20;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+    }
+
+    .phone-loader-spinner.active {
+        opacity: 1;
+        pointer-events: all;
+    }
+
+    .mini-spinner {
+        width: 36px;
+        height: 36px;
+        border: 3px solid rgba(16, 185, 129, 0.15);
+        border-left-color: var(--primary);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @@keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .phone-floating-arrow {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--charcoal);
+        cursor: pointer;
+        z-index: 10;
+        transition: all 0.2s ease;
+    }
+
+    .phone-floating-arrow.arrow-prev { left: -22px; }
+    .phone-floating-arrow.arrow-next { right: -22px; }
+
+    .phone-floating-arrow:hover {
+        background: #ffffff;
+        transform: translateY(-50%) scale(1.1);
+        color: var(--primary);
+    }
+
+    .phone-bottom-dots {
+        position: absolute;
+        bottom: -28px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        z-index: 5;
+        flex-wrap: wrap;
+        justify-content: center;
+        max-width: 320px;
+    }
+
+    .theme-dot-item {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #d1d5db;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .theme-dot-item:hover {
+        background: #9ca3af;
+        transform: scale(1.25);
+    }
+
+    .theme-dot-item.active {
+        background: var(--primary);
+        width: 18px;
+        border-radius: 4px;
+    }
+
+    /* ─── Secondary Theme Grid Below Stage ─── */
+    .theme-secondary-grid-section {
+        margin-top: 64px;
+        border-top: 1px solid var(--border-light);
+        padding-top: 48px;
+    }
+
+    .theme-grid-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 28px;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .theme-grid-header h3 {
+        font-family: var(--font-display);
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: var(--charcoal);
     }
 
     .themes-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
-        gap: 24px;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
     }
 
-    .theme-card {
+    .theme-mini-card {
         background: #ffffff;
         border: 1px solid var(--border);
         border-radius: var(--radius-lg);
-        overflow: hidden;
-        text-decoration: none;
-        color: inherit;
+        padding: 20px;
         display: flex;
         flex-direction: column;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .theme-card:hover {
-        transform: translateY(-5px);
-        box-shadow: var(--shadow-md);
-    }
-
-    .theme-card-thumb {
-        height: 140px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 3.5rem;
-        background: var(--surface-low);
+        gap: 14px;
+        transition: all 0.25s ease;
+        cursor: pointer;
+        text-decoration: none;
+        color: inherit;
         position: relative;
     }
 
-    .live-chip {
-        position: absolute;
-        top: 12px; left: 12px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(4px);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-full);
-        padding: 3px 10px;
-        font-size: 0.7rem;
-        font-weight: 700;
-        color: var(--primary-dark);
+    .theme-mini-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+        border-color: #cbd5e1;
     }
 
-    .live-chip::before {
-        content: '';
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: var(--primary);
+    .theme-mini-card.active {
+        border-color: var(--primary);
+        box-shadow: 0 4px 20px rgba(16, 185, 129, 0.18);
     }
 
-    .theme-card-body {
-        padding: 20px;
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .theme-card-title {
-        font-family: var(--font-display);
-        font-size: 1.05rem;
-        font-weight: 700;
-        color: var(--charcoal);
-        margin-bottom: 6px;
-    }
-
-    .theme-card-desc {
-        font-size: 0.85rem;
-        color: var(--text-secondary);
-        line-height: 1.5;
-        flex: 1;
-        margin-bottom: 16px;
-    }
-
-    .theme-card-footer {
+    .theme-mini-card-top {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding-top: 12px;
-        border-top: 1px solid var(--border-light);
     }
 
-    .theme-tag {
-        font-size: 0.75rem;
-        font-weight: 600;
-        padding: 3px 10px;
+    .theme-mini-emoji {
+        font-size: 2rem;
+    }
+
+    .theme-mini-badge {
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 2px 8px;
         border-radius: var(--radius-full);
         background: var(--surface-low);
         color: var(--text-secondary);
     }
 
-    .theme-cta {
-        font-size: 0.85rem;
+    .theme-mini-title {
+        font-family: var(--font-display);
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--charcoal);
+    }
+
+    .theme-mini-desc {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        line-height: 1.45;
+        flex: 1;
+    }
+
+    .theme-mini-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 10px;
+        border-top: 1px solid var(--border-light);
+    }
+
+    .theme-mini-btn-sim {
+        font-size: 0.75rem;
         font-weight: 700;
         color: var(--primary);
         display: flex;
         align-items: center;
         gap: 4px;
+    }
+
+    .theme-mini-btn-full {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+    .theme-mini-btn-full:hover {
+        color: var(--charcoal);
     }
 
     /* ─── Final CTA Banner ─── */
@@ -650,6 +1197,23 @@
     }
 
     /* ─── Responsive Layout ─── */
+    @@media (max-width: 1024px) {
+        .theme-stage-wrapper {
+            grid-template-columns: 1fr;
+            gap: 40px;
+        }
+        .theme-phone-wrapper {
+            order: -1;
+            min-height: auto;
+        }
+        .showcase-phone-frame {
+            width: 320px;
+            height: 600px;
+        }
+        .phone-floating-arrow.arrow-prev { left: 4px; }
+        .phone-floating-arrow.arrow-next { right: 4px; }
+    }
+
     @@media (max-width: 992px) {
         .hero-section {
             grid-template-columns: 1fr;
@@ -667,6 +1231,30 @@
         }
         .hero-mockup-wrapper {
             margin-top: 24px;
+        }
+    }
+
+    @@media (max-width: 640px) {
+        .showcase-phone-frame {
+            width: 100%;
+            max-width: 310px;
+            height: 560px;
+        }
+        .theme-active-card {
+            padding: 20px;
+        }
+        .theme-title-text {
+            font-size: 1.25rem;
+        }
+        .theme-action-btns {
+            width: 100%;
+        }
+        .btn-preview-simulator, .btn-use-theme {
+            width: 100%;
+            justify-content: center;
+        }
+        .theme-pills-grid {
+            grid-template-columns: 1fr 1fr;
         }
     }
 </style>
@@ -850,46 +1438,219 @@
 
 <!-- ─── LIVE THEMES SHOWCASE ─── -->
 <section class="themes-section" id="demo">
-    <div class="section-header-center">
-        <h2>🎨 Canlı Tema Galerisi</h2>
-        <p>Her temaya tıklayarak gerçek bir menü deneyimi yaşayın. Tüm temalar %100 mobil uyumludur.</p>
-    </div>
-
-    <div class="themes-grid">
-        @{
-            var themeMap = new System.Collections.Generic.Dictionary<string, int>();
-            foreach (var t in themes)
-            {
-                if (!themeMap.ContainsKey(t.Name))
-                    themeMap[t.Name] = t.Id;
-            }
+    @{
+        var themeMap = new System.Collections.Generic.Dictionary<string, int>();
+        foreach (var t in themes)
+        {
+            if (!themeMap.ContainsKey(t.Name))
+                themeMap[t.Name] = t.Id;
         }
 
-        @foreach (var demo in demoThemes)
-        {
-            var themeId = themeMap.ContainsKey(demo.Name) ? themeMap[demo.Name] : 1;
-            var href = $"/Home/Preview?themeId={themeId}";
+        var themeList = demoThemes.Select((d, idx) => new {
+            Index = idx,
+            Id = themeMap.ContainsKey(d.Name) ? themeMap[d.Name] : 1,
+            Name = d.Name,
+            Emoji = d.Emoji,
+            Desc = d.Desc,
+            Accent = d.Accent,
+            Border = d.Border,
+            Shadow = d.Shadow
+        }).ToList();
 
-            <a class="theme-card" href="@href" target="_blank" rel="noopener">
-                <div class="theme-card-thumb">
-                    <div class="live-chip">Canlı Demo</div>
-                    <span>@demo.Emoji</span>
-                </div>
+        var initialTheme = themeList.FirstOrDefault() ?? new {
+            Index = 0,
+            Id = 1,
+            Name = "Modern Minimalist",
+            Emoji = "⬜",
+            Desc = "Sade, temiz ve zamansız.",
+            Accent = "#10B981",
+            Border = "rgba(16,185,129,.35)",
+            Shadow = "rgba(16,185,129,.15)"
+        };
 
-                <div class="theme-card-body">
-                    <div class="theme-card-title">@demo.Emoji @demo.Name</div>
-                    <div class="theme-card-desc">@demo.Desc</div>
+        var themesJson = System.Text.Json.JsonSerializer.Serialize(themeList);
+    }
 
-                    <div class="theme-card-footer">
-                        <span class="theme-tag">Hazır Tema</span>
-                        <div class="theme-cta">
-                            <span>Önizle</span>
-                            <span>→</span>
+    <div class="section-header-center">
+        <div class="theme-tag-pill" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 16px; font-size: 0.8rem; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.04em;">
+            <span class="material-symbols-outlined" style="font-size: 1rem;">palette</span>
+            <span>18 Farklı Konsept & Canlı Demo</span>
+        </div>
+        <h2>🎨 Canlı Tema Galerisi</h2>
+        <p>Her konsepte özel tasarlanmış mobil menüler. Temalar 3 saniyede bir otomatik akar; dilediğiniz temaya tıklayarak 3 saniye beklemeden anında test edebilirsiniz.</p>
+    </div>
+
+    <!-- ─── Flagship Interactive Stage ─── -->
+    <div class="theme-stage-wrapper">
+        <!-- Sol Kontrol ve Bilgi Paneli -->
+        <div class="theme-control-panel">
+            <!-- Aktif Tema Kartı -->
+            <div class="theme-active-card" id="themeActiveCard">
+                <div class="active-card-glow-bar" id="activeCardGlowBar"></div>
+
+                <div class="theme-active-header">
+                    <div class="theme-active-info-left">
+                        <div class="theme-emoji-icon" id="activeThemeEmoji">@initialTheme.Emoji</div>
+                        <div class="theme-title-box">
+                            <h3 class="theme-title-text" id="activeThemeName">@initialTheme.Name</h3>
+                            <div class="theme-badges-row">
+                                <span class="theme-tag-pill" id="activeThemeTag">@initialTheme.Name</span>
+                                <span class="theme-counter-chip" id="activeThemeCounter">1 / @themeList.Count</span>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                <p class="theme-active-desc" id="activeThemeDesc">@initialTheme.Desc</p>
+
+                <!-- 3 Saniye Otomatik İlerleme Çubuğu -->
+                <div class="theme-progress-box">
+                    <div class="theme-progress-header">
+                        <div class="theme-progress-pulse">
+                            <span class="pulse-indicator"></span>
+                            <span id="progressStatusText">3s döngü aktif</span>
+                        </div>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">Sıradaki temaya geçiş</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill" id="themeProgressBar"></div>
+                    </div>
+                </div>
+
+                <!-- Kontrol Butonları ve Aksiyonlar -->
+                <div class="theme-controls-row">
+                    <div class="nav-btn-group">
+                        <button type="button" class="theme-nav-btn" onclick="prevThemeShowcase()" title="Önceki Tema">
+                            <span class="material-symbols-outlined">chevron_left</span>
+                        </button>
+                        <button type="button" class="theme-nav-btn" id="themePlayPauseBtn" onclick="toggleThemePlayPause()" title="Otomatik Akışı Duraklat / Başlat">
+                            <span class="material-symbols-outlined" id="themePlayPauseIcon">pause</span>
+                        </button>
+                        <button type="button" class="theme-nav-btn" onclick="nextThemeShowcase()" title="Sonraki Tema">
+                            <span class="material-symbols-outlined">chevron_right</span>
+                        </button>
+                    </div>
+
+                    <div class="theme-action-btns">
+                        <a id="themePreviewLinkBtn" href="/Home/Preview?themeId=@initialTheme.Id" target="_blank" rel="noopener" class="btn-preview-simulator">
+                            <span class="material-symbols-outlined" style="font-size: 1.1rem;">open_in_new</span>
+                            <span>Tam Ekran Simülatör</span>
+                        </a>
+                        <a asp-area="Restaurant" asp-controller="Auth" asp-action="Register" class="btn-use-theme">
+                            <span>Bu Temayla Başla</span>
+                            <span class="material-symbols-outlined" style="font-size: 1.1rem;">arrow_forward</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hızlı Seçim Butonları (18 Tema) -->
+            <div class="theme-pills-deck">
+                <div class="theme-pills-header">
+                    <span>⚡ Hızlı Tema Seçimi (Tıklayarak Hemen Deneyin):</span>
+                    <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">Tıklayınca anında yüklenir</span>
+                </div>
+                <div class="theme-pills-grid" id="themePillsContainer">
+                    @for (int i = 0; i < themeList.Count; i++)
+                    {
+                        var item = themeList[i];
+                        <button type="button" class="theme-pill-item @(i == 0 ? "active" : "")" 
+                                onclick="selectThemeShowcase(@i)" 
+                                data-index="@i" 
+                                title="@item.Name (@item.Desc)">
+                            <span class="pill-color-dot" style="background-color: @item.Accent;"></span>
+                            <span>@item.Emoji @item.Name</span>
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Sağ Canlı Telefon Mockup'ı -->
+        <div class="theme-phone-wrapper" id="showcasePhoneStage">
+            <div class="phone-ambient-glow" id="phoneAmbientGlow"></div>
+
+            <div class="showcase-phone-frame">
+                <!-- Dynamic Island / Notch -->
+                <div class="phone-island">
+                    <div class="phone-camera-lens"></div>
+                </div>
+
+                <!-- Floating Badge -->
+                <div class="phone-floating-badge">
+                    <span style="color: #10B981;">●</span>
+                    <span>Canlı Menü (Kaydırılabilir)</span>
+                </div>
+
+                <!-- Sol & Sağ Telefon Üzeri Hızlı Geçiş Butonları -->
+                <button type="button" class="phone-floating-arrow arrow-prev" onclick="prevThemeShowcase()" title="Önceki">
+                    <span class="material-symbols-outlined">chevron_left</span>
+                </button>
+                <button type="button" class="phone-floating-arrow arrow-next" onclick="nextThemeShowcase()" title="Sonraki">
+                    <span class="material-symbols-outlined">chevron_right</span>
+                </button>
+
+                <!-- Phone Iframe Container -->
+                <div class="phone-iframe-container">
+                    <div class="phone-loader-spinner" id="showcaseIframeLoader">
+                        <div class="mini-spinner"></div>
+                    </div>
+                    <iframe src="/Home/Demo?themeId=@initialTheme.Id&embed=1" class="showcase-iframe" id="showcaseIframe" title="Tema Önizleme Menüsü"></iframe>
+                </div>
+            </div>
+
+            <!-- Nokta Göstergeleri (Dots) -->
+            <div class="phone-bottom-dots" id="themeDotsContainer">
+                @for (int i = 0; i < themeList.Count; i++)
+                {
+                    <span class="theme-dot-item @(i == 0 ? "active" : "")" onclick="selectThemeShowcase(@i)" title="@themeList[i].Name"></span>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── Secondary 18 Themes Showcase Grid ─── -->
+    <div class="theme-secondary-grid-section">
+        <div class="theme-grid-header">
+            <div>
+                <h3>Tüm 18 Restoran Temasını İnceleyin</h3>
+                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 4px;">Kartlara tıklayarak doğrudan yukarıdaki canlı telefonda görüntüleyebilirsiniz.</p>
+            </div>
+            <a href="/Home/Preview?themeId=1" target="_blank" rel="noopener" class="btn-hero-secondary" style="padding: 8px 18px; font-size: 0.85rem;">
+                <span class="material-symbols-outlined" style="font-size: 1.1rem;">devices</span>
+                <span>Cihaz Simülatörünü Aç</span>
             </a>
-        }
+        </div>
+
+        <div class="themes-grid">
+            @for (int i = 0; i < themeList.Count; i++)
+            {
+                var item = themeList[i];
+                var previewUrl = $"/Home/Preview?themeId={item.Id}";
+
+                <div class="theme-mini-card @(i == 0 ? "active" : "")" onclick="selectThemeAndScroll(@i)" data-card-index="@i">
+                    <div class="theme-mini-card-top">
+                        <span class="theme-mini-emoji">@item.Emoji</span>
+                        <span class="theme-mini-badge" style="border-left: 3px solid @item.Accent;">Hazır Tema</span>
+                    </div>
+
+                    <div>
+                        <div class="theme-mini-title">@item.Emoji @item.Name</div>
+                        <div class="theme-mini-desc">@item.Desc</div>
+                    </div>
+
+                    <div class="theme-mini-footer">
+                        <div class="theme-mini-btn-sim">
+                            <span>Telefonda Dene</span>
+                            <span>↑</span>
+                        </div>
+                        <a href="@previewUrl" target="_blank" rel="noopener" class="theme-mini-btn-full" onclick="event.stopPropagation();" title="Tam Ekran Önizle">
+                            <span>Tam Ekran ↗</span>
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
     </div>
 </section>
 
@@ -905,3 +1666,226 @@
         </a>
     </div>
 </section>
+
+@section Scripts {
+<script>
+(function () {
+    const themes = @Html.Raw(themesJson);
+    if (!themes || !themes.length) return;
+
+    let currentIndex = 0;
+    const CYCLE_DURATION = 3000; // 3 seconds
+    let animFrameId = null;
+    let cycleStartTime = null;
+    let isPaused = false;
+    let isHoverPaused = false;
+
+    // Elements
+    const iframe = document.getElementById('showcaseIframe');
+    const iframeLoader = document.getElementById('showcaseIframeLoader');
+    const activeEmoji = document.getElementById('activeThemeEmoji');
+    const activeName = document.getElementById('activeThemeName');
+    const activeDesc = document.getElementById('activeThemeDesc');
+    const activeTag = document.getElementById('activeThemeTag');
+    const activeCounter = document.getElementById('activeThemeCounter');
+    const activeCardGlowBar = document.getElementById('activeCardGlowBar');
+    const progressBar = document.getElementById('themeProgressBar');
+    const progressStatusText = document.getElementById('progressStatusText');
+    const playPauseBtn = document.getElementById('themePlayPauseBtn');
+    const playPauseIcon = document.getElementById('themePlayPauseIcon');
+    const previewLinkBtn = document.getElementById('themePreviewLinkBtn');
+    const ambientGlow = document.getElementById('phoneAmbientGlow');
+    const phoneStage = document.getElementById('showcasePhoneStage');
+    const pills = document.querySelectorAll('.theme-pill-item');
+    const dots = document.querySelectorAll('.theme-dot-item');
+    const cards = document.querySelectorAll('.theme-mini-card');
+
+    function renderTheme(index, isManual = false) {
+        currentIndex = (index + themes.length) % themes.length;
+        const theme = themes[currentIndex];
+
+        // 1. Update Phone Iframe
+        if (iframe) {
+            iframe.style.opacity = '0.35';
+            if (iframeLoader) iframeLoader.classList.add('active');
+            iframe.src = '/Home/Demo?themeId=' + theme.Id + '&embed=1';
+        }
+
+        // 2. Update Active Card Texts & Badges
+        if (activeEmoji) activeEmoji.textContent = theme.Emoji;
+        if (activeName) activeName.textContent = theme.Name;
+        if (activeDesc) activeDesc.textContent = theme.Desc;
+        if (activeTag) {
+            activeTag.textContent = theme.Name;
+            activeTag.style.borderColor = theme.Border;
+            activeTag.style.color = theme.Accent;
+            activeTag.style.backgroundColor = theme.Shadow;
+        }
+        if (activeCounter) activeCounter.textContent = `${currentIndex + 1} / ${themes.length}`;
+        if (activeCardGlowBar) activeCardGlowBar.style.background = theme.Accent;
+        if (previewLinkBtn) previewLinkBtn.href = '/Home/Preview?themeId=' + theme.Id;
+
+        // 3. Update Dynamic Ambient Backlight Glow
+        if (ambientGlow) {
+            ambientGlow.style.background = `radial-gradient(circle at 50% 50%, ${theme.Shadow.replace('0.15', '0.35')} 0%, rgba(248, 249, 250, 0) 72%)`;
+        }
+
+        // 4. Update Quick Pills List
+        pills.forEach((pill, i) => {
+            const isActive = i === currentIndex;
+            pill.classList.toggle('active', isActive);
+            if (isActive) {
+                pill.style.borderColor = theme.Accent;
+                pill.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+            } else {
+                pill.style.borderColor = '';
+            }
+        });
+
+        // 5. Update Dots
+        dots.forEach((dot, i) => {
+            const isActive = i === currentIndex;
+            dot.classList.toggle('active', isActive);
+            if (isActive) {
+                dot.style.backgroundColor = theme.Accent;
+            } else {
+                dot.style.backgroundColor = '';
+            }
+        });
+
+        // 6. Update Bottom Grid Cards
+        cards.forEach((card, i) => {
+            card.classList.toggle('active', i === currentIndex);
+        });
+
+        // 7. Restart 3s Progress Timer
+        startProgressCycle();
+    }
+
+    function startProgressCycle() {
+        cancelAnimationFrame(animFrameId);
+        if (progressBar) progressBar.style.width = '0%';
+
+        if (isPaused || isHoverPaused) {
+            if (progressStatusText) progressStatusText.textContent = isPaused ? 'Durduruldu' : 'İnceleniyor';
+            return;
+        }
+
+        if (progressStatusText) progressStatusText.textContent = '3s döngü aktif';
+        cycleStartTime = performance.now();
+
+        function step(timestamp) {
+            if (isPaused || isHoverPaused) return;
+
+            const elapsed = timestamp - cycleStartTime;
+            const progress = Math.min(elapsed / CYCLE_DURATION, 1);
+            if (progressBar) progressBar.style.width = (progress * 100) + '%';
+
+            if (progress < 1) {
+                animFrameId = requestAnimationFrame(step);
+            } else {
+                // Auto switch to next theme after 3 seconds
+                renderTheme(currentIndex + 1, false);
+            }
+        }
+
+        animFrameId = requestAnimationFrame(step);
+    }
+
+    // Iframe load complete
+    if (iframe) {
+        iframe.addEventListener('load', function () {
+            iframe.style.opacity = '1';
+            if (iframeLoader) iframeLoader.classList.remove('active');
+        });
+    }
+
+    // Public window functions for clicks
+    window.prevThemeShowcase = function () {
+        renderTheme(currentIndex - 1, true);
+    };
+
+    window.nextThemeShowcase = function () {
+        renderTheme(currentIndex + 1, true);
+    };
+
+    window.selectThemeShowcase = function (index) {
+        renderTheme(index, true);
+    };
+
+    window.selectThemeAndScroll = function (index) {
+        renderTheme(index, true);
+        const stage = document.getElementById('demo');
+        if (stage) {
+            stage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    };
+
+    window.toggleThemePlayPause = function () {
+        isPaused = !isPaused;
+        if (playPauseIcon) {
+            playPauseIcon.textContent = isPaused ? 'play_arrow' : 'pause';
+        }
+        if (playPauseBtn) {
+            playPauseBtn.title = isPaused ? 'Otomatik Akışı Başlat' : 'Otomatik Akışı Duraklat';
+        }
+        if (!isPaused) {
+            startProgressCycle();
+        } else {
+            cancelAnimationFrame(animFrameId);
+            if (progressBar) progressBar.style.width = '0%';
+            if (progressStatusText) progressStatusText.textContent = 'Durduruldu';
+        }
+    };
+
+    // Pause on Hover over Phone
+    if (phoneStage) {
+        phoneStage.addEventListener('mouseenter', function () {
+            isHoverPaused = true;
+            cancelAnimationFrame(animFrameId);
+            if (progressStatusText) progressStatusText.textContent = 'İnceleniyor';
+        });
+
+        phoneStage.addEventListener('mouseleave', function () {
+            isHoverPaused = false;
+            if (!isPaused) startProgressCycle();
+        });
+    }
+
+    // Keyboard Arrow Keys
+    document.addEventListener('keydown', function (e) {
+        const demoSection = document.getElementById('demo');
+        if (!demoSection) return;
+        const rect = demoSection.getBoundingClientRect();
+        const isInView = rect.top < window.innerHeight && rect.bottom > 0;
+        if (isInView) {
+            if (e.key === 'ArrowRight') {
+                nextThemeShowcase();
+            } else if (e.key === 'ArrowLeft') {
+                prevThemeShowcase();
+            }
+        }
+    });
+
+    // Touch Swipe on Phone
+    let touchStartX = 0;
+    let touchEndX = 0;
+    if (phoneStage) {
+        phoneStage.addEventListener('touchstart', function (e) {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+        phoneStage.addEventListener('touchend', function (e) {
+            touchEndX = e.changedTouches[0].screenX;
+            if (touchStartX - touchEndX > 50) {
+                nextThemeShowcase();
+            } else if (touchEndX - touchStartX > 50) {
+                prevThemeShowcase();
+            }
+        }, { passive: true });
+    }
+
+    // Initial Start
+    renderTheme(0, true);
+})();
+</script>
+}

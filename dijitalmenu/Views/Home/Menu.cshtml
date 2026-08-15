@@ -74,14 +74,14 @@ else
     @await Html.PartialAsync($"Themes/_{partialViewName}")
 }
 
-@if (restaurant?.Id == 0)
+@if (restaurant?.Id == 0 && Context.Request.Query["embed"] != "1")
 {
     <a href="/" class="fixed bottom-6 right-6 z-[9999] flex items-center gap-2 bg-stone-900/90 text-white hover:bg-stone-800 backdrop-blur-md border border-white/10 px-4 py-2.5 rounded-full shadow-2xl transition-all duration-300 hover:-translate-y-0.5 text-xs font-semibold uppercase tracking-wider decoration-none" style="text-decoration: none !important;">
         <span>← Demodan Çık</span>
     </a>
 }
 
-@if (restaurant != null)
+@if (restaurant != null && Context.Request.Query["embed"] != "1")
 {
     <!-- Sol Altta Sabit QR Kodu Göster Butonu -->
     <button onclick="document.getElementById('qrModal').classList.remove('hidden')" class="fixed bottom-6 left-6 z-[9999] flex items-center gap-2 bg-stone-900/95 text-white hover:bg-stone-800 backdrop-blur-md border border-white/20 px-4 py-2.5 rounded-full shadow-2xl transition-all duration-300 hover:scale-105 text-xs font-bold uppercase tracking-wider cursor-pointer shadow-stone-900/20">

@@ -381,7 +381,7 @@
         <!-- Simulator Device Frame -->
         <div class="phone-mockup mode-desktop" id="deviceFrame">
             @{
-                var initialUrl = $"/Home/Demo?themeId={selectedThemeId}";
+                var initialUrl = $"/Home/Demo?themeId={selectedThemeId}&embed=1";
             }
             <iframe src="@initialUrl" id="previewIframe"></iframe>
         </div>
@@ -436,7 +436,7 @@
                 });
 
                 // Set source
-                iframe.src = "/Home/Demo?themeId=" + themeId;
+                iframe.src = "/Home/Demo?themeId=" + themeId + "&embed=1";
             }
 
             // On iframe load finish

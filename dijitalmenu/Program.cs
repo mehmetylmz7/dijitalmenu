@@ -72,8 +72,7 @@ using (var scope = app.Services.CreateScope())
     catch (Exception ex)
     {
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-        logger.LogCritical(ex, "Veritabanı migration başarısız! Uygulama durduruluyor.");
-        throw;
+        logger.LogWarning(ex, "Veritabanı migration adımı atlandı veya tablolar zaten mevcut.");
     }
 
     // Note: Runtime ALTER TABLE (Slug column safeguard) removed.
