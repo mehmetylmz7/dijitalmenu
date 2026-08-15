@@ -1318,9 +1318,37 @@
                 themeMap[t.Name] = t.Id;
         }
 
-        var themeList = demoThemes.Select((d, idx) => new {
+        var matchedDemoThemes = demoThemes
+            .Where(d => themeMap.ContainsKey(d.Name))
+            .Select(d => new {
+                Id = themeMap[d.Name],
+                Name = d.Name,
+                Emoji = d.Emoji,
+                Desc = d.Desc,
+                Accent = d.Accent,
+                Border = d.Border,
+                Shadow = d.Shadow
+            }).ToList();
+
+        foreach (var t in themes)
+        {
+            if (!matchedDemoThemes.Any(m => m.Id == t.Id))
+            {
+                matchedDemoThemes.Add(new {
+                    Id = t.Id,
+                    Name = t.Name,
+                    Emoji = "🍽️",
+                    Desc = "Özel restoran tasarım menüsü.",
+                    Accent = string.IsNullOrWhiteSpace(t.PrimaryColor) ? "#10B981" : t.PrimaryColor,
+                    Border = "rgba(16,185,129,.35)",
+                    Shadow = "rgba(16,185,129,.15)"
+                });
+            }
+        }
+
+        var themeList = matchedDemoThemes.Select((d, idx) => new {
             Index = idx,
-            Id = themeMap.ContainsKey(d.Name) ? themeMap[d.Name] : 1,
+            Id = d.Id,
             Name = d.Name,
             Emoji = d.Emoji,
             Desc = d.Desc,
@@ -1346,7 +1374,7 @@
     <div class="section-header-center">
         <div class="theme-tag-pill" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 16px; font-size: 0.8rem; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.04em;">
             <span class="material-symbols-outlined" style="font-size: 1rem;">palette</span>
-            <span>19 Farklı Konsept & Canlı Demo</span>
+            <span>@themeList.Count Farklı Konsept &amp; Canlı Demo</span>
         </div>
         <h2>🎨 Canlı Tema Galerisi</h2>
         <p>Her konsepte özel tasarlanmış mobil menüler. Temalar 10 saniyede bir otomatik akar; dilediğiniz temaya tıklayarak anında test edebilirsiniz.</p>
@@ -1402,10 +1430,10 @@
                 </div>
             </div>
 
-            <!-- Hızlı Seçim Butonları (19 Tema) -->
+            <!-- Hızlı Seçim Butonları -->
             <div class="theme-pills-deck">
                 <div class="theme-pills-header">
-                    <span>⚡ Hızlı Tema Seçimi (Tıklayarak Hemen Deneyin):</span>
+                    <span>⚡ Hızlı Tema Seçimi (@themeList.Count Tema):</span>
                     <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">Tıklayınca anında yüklenir</span>
                 </div>
                 <div class="theme-pills-grid" id="themePillsContainer">
@@ -1448,14 +1476,14 @@
         </div>
     </div>
 
-    <!-- ─── Secondary 19 Themes Showcase Grid ─── -->
+    <!-- ─── Secondary Themes Showcase Grid ─── -->
     <div class="theme-secondary-grid-section">
         <div class="theme-grid-header">
             <div>
-                <h3>Tüm 19 Restoran Temasını İnceleyin</h3>
+                <h3>Tüm Restoran Temalarını İnceleyin (@themeList.Count Tema)</h3>
                 <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 4px;">Kartlara tıklayarak doğrudan yukarıdaki canlı telefonda görüntüleyebilirsiniz.</p>
             </div>
-            <a href="/Home/Preview?themeId=1" target="_blank" rel="noopener" class="btn-hero-secondary" style="padding: 8px 18px; font-size: 0.85rem;">
+            <a href="/Home/Preview?themeId=@(initialTheme.Id)" target="_blank" rel="noopener" class="btn-hero-secondary" style="padding: 8px 18px; font-size: 0.85rem;">
                 <span class="material-symbols-outlined" style="font-size: 1.1rem;">devices</span>
                 <span>Cihaz Simülatörünü Aç</span>
             </a>
