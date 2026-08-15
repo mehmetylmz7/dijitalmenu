@@ -226,6 +226,18 @@
   </div>
 </div>
 
+@if (!string.IsNullOrWhiteSpace(restaurant?.ImportantNotice) || restaurant?.Id == 0)
+{
+  var notice = !string.IsNullOrWhiteSpace(restaurant?.ImportantNotice)
+    ? restaurant.ImportantNotice
+    : "Menü fiyatlarımıza KDV dahildir. Özel istek ve alerjenleriniz için lütfen servis personelimize danışınız.";
+
+  <div style="max-width: 680px; margin: 20px auto 0; padding: 16px 20px; background: var(--bg-card); border-left: 3px solid var(--accent); border-radius: 4px; box-shadow: var(--shadow-sm); font-size: 13px;">
+    <strong style="font-family: 'Fraunces', serif; color: var(--accent); font-size: 14px; display: block; margin-bottom: 4px;">Önemli Bilgilendirme</strong>
+    <p style="color: var(--ink-soft); margin: 0; line-height: 1.5; font-style: italic;">@notice</p>
+  </div>
+}
+
 <main class="elegance-main">
   @foreach (var cat in categories)
   {
@@ -259,7 +271,7 @@
 
 <footer class="elegance-footer">
   <span class="fname">@restaurant?.Name</span>
-  <p style="margin-top:4px; font-size:12px; opacity:0.8;">📍 @(string.IsNullOrWhiteSpace(restaurant?.Address) ? "Atatürk Caddesi, Hatay" : restaurant.Address) | 📞 @(string.IsNullOrWhiteSpace(restaurant?.Phone) ? "+90 555 000 00 00" : restaurant.Phone)</p>
+  <p style="margin-top:4px; font-size:12px; opacity:0.8;">📍 @(string.IsNullOrWhiteSpace(restaurant?.Address) ? "Atatürk Caddesi, Hatay" : restaurant.Address) | 📞 @(string.IsNullOrWhiteSpace(restaurant?.Phone) ? "+90 555 000 00 00" : restaurant.Phone) | ⏰ @(string.IsNullOrWhiteSpace(restaurant?.WorkingHours) ? "11:00 - 23:00" : restaurant.WorkingHours)</p>
 
   @if (!string.IsNullOrWhiteSpace(restaurant?.GoogleMapsUrl))
   {

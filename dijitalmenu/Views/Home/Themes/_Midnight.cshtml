@@ -8,7 +8,7 @@
     <div class="w-full max-w-3xl border border-zinc-800 p-8 md:p-16 rounded-2xl bg-gradient-to-tr from-zinc-900/50 to-transparent shadow-2xl">
         
         <!-- Header -->
-        <header class="mb-20 text-center relative">
+        <header class="mb-14 text-center relative">
             <div class="absolute -top-10 left-1/2 -translate-x-1/2 text-amber-500/10">
                 <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z"/><path d="m5 3 1 2.5L8.5 6 6 7 5 9.5 4 7 1.5 6 4 5.5Z"/><path d="m19 17 1 2.5 2.5.5-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1Z"/></svg>
             </div>
@@ -19,6 +19,21 @@
                 est. 2024 • premium experience
             </p>
         </header>
+
+        <!-- Notice Box (İsteğe Bağlı) -->
+        @if (!string.IsNullOrWhiteSpace(restaurant?.ImportantNotice) || restaurant?.Id == 0)
+        {
+            var notice = !string.IsNullOrWhiteSpace(restaurant?.ImportantNotice)
+                ? restaurant.ImportantNotice
+                : "Menü fiyatlarımıza KDV dahildir. Özel istek ve alerjenleriniz için lütfen servis personelimize danışınız.";
+
+            <div class="mb-16 p-6 rounded-xl border border-amber-500/20 bg-amber-500/5 text-center">
+                <span class="text-amber-500 text-xs uppercase font-mono tracking-widest block mb-2">✦ Bilgilendirme ✦</span>
+                <p class="text-stone-300 text-sm font-sans italic leading-relaxed">
+                    "@notice"
+                </p>
+            </div>
+        }
 
         <!-- Menu Categories -->
         <div class="space-y-20">
@@ -60,17 +75,36 @@
 
         <!-- Footer -->
         <footer class="mt-24 pt-12 border-t border-zinc-800 text-center space-y-6">
-            <p class="text-zinc-500 text-sm font-light italic">
-                "Yöresel Lezzetlerin Modern Buluşma Noktası"
+            <p class="text-zinc-400 text-sm font-light italic">
+                "@(string.IsNullOrWhiteSpace(restaurant?.Address) ? "Atatürk Caddesi, Hatay" : restaurant.Address)"
             </p>
-            <div class="grid grid-cols-2 gap-4 text-[10px] uppercase font-mono tracking-widest text-zinc-600">
+            <div class="grid grid-cols-2 gap-4 text-[10px] uppercase font-mono tracking-widest text-zinc-500">
                 <div class="text-right border-r border-zinc-800 pr-4">
-                    Merkez Mahallesi, Gastronomi Sokak No: 7
+                    Tel: @(string.IsNullOrWhiteSpace(restaurant?.Phone) ? "+90 (555) 000 00 00" : restaurant.Phone)
                 </div>
                 <div class="text-left pl-4">
-                    11:00 - 23:00
+                    @(string.IsNullOrWhiteSpace(restaurant?.WorkingHours) ? "11:00 - 23:00" : restaurant.WorkingHours)
                 </div>
             </div>
+
+            @if (!string.IsNullOrWhiteSpace(restaurant?.GoogleMapsUrl))
+            {
+                var mapsUrl = restaurant.GoogleMapsUrl;
+                <div class="pt-4">
+                    @if (mapsUrl.Contains("embed"))
+                    {
+                        <div class="rounded-xl overflow-hidden border border-zinc-800">
+                            <iframe src="@mapsUrl" class="w-full h-48 border-0" allowfullscreen="" loading="lazy"></iframe>
+                        </div>
+                    }
+                    else
+                    {
+                        <a href="@mapsUrl" target="_blank" rel="noopener" class="inline-block px-6 py-2 border border-amber-500/40 text-amber-400 text-xs font-mono uppercase tracking-wider rounded-lg hover:bg-amber-500/10 transition-colors">
+                            📍 Google Haritalar'da Aç &amp; Yol Tarifi
+                        </a>
+                    }
+                </div>
+            }
         </footer>
     </div>
 </div>

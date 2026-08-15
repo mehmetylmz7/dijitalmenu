@@ -164,7 +164,7 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
         }
 
         [HttpPost]
-        public IActionResult UpdateLocation(string googleMapsUrl, string? address, string? phone)
+        public IActionResult UpdateLocation(string? googleMapsUrl, string? address, string? phone, string? workingHours)
         {
             var rid = GetRestaurantId();
             var restaurant = _restaurantService.TGetByID(rid);
@@ -184,6 +184,7 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             if (!TryNormalizeGoogleMapsUrl(googleMapsUrl, out var normalizedMapsUrl) ||
                 (address?.Length ?? 0) > MaxAddressLength ||
                 (phone?.Length ?? 0) > MaxPhoneLength ||
+                (workingHours?.Length ?? 0) > 200 ||
                 (!string.IsNullOrWhiteSpace(phone) && !System.Text.RegularExpressions.Regex.IsMatch(phone, @"^[0-9+()\-\s]{7,25}$")))
             {
                 return Json(new { success = false, message = "Konum, adres veya telefon bilgisi geçersiz." });
@@ -192,10 +193,28 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             restaurant.GoogleMapsUrl = normalizedMapsUrl;
             restaurant.Address = address?.Trim();
             restaurant.Phone = phone?.Trim();
+            restaurant.WorkingHours = string.IsNullOrWhiteSpace(workingHours) ? null : workingHours.Trim();
 
             _restaurantService.TUpdate(restaurant);
 
-            return Json(new { success = true, message = "Konum ve iletişim bilgileri kaydedildi." });
+            return Json(new { success = true, message = "Konum, saat ve iletişim bilgileri kaydedildi." });
+        }
+
+        [HttpPost]
+        public IActionResult UpdateNotice(string? notice)
+        {
+            var rid = GetRestaurantId();
+            var restaurant = _restaurantService.TGetByID(rid);
+            if (restaurant == null) return Json(new { success = false, message = "Restoran bulunamadı." });
+
+            notice = notice?.Trim();
+            if (notice != null && notice.Length > 1000)
+                return Json(new { success = false, message = "Bilgilendirme notu en fazla 1000 karakter olabilir." });
+
+            restaurant.ImportantNotice = string.IsNullOrWhiteSpace(notice) ? null : notice;
+            _restaurantService.TUpdate(restaurant);
+
+            return Json(new { success = true, message = "Bilgilendirme notu güncellendi." });
         }
 
         private static bool TryNormalizeGoogleMapsUrl(string? value, out string? normalizedUrl)

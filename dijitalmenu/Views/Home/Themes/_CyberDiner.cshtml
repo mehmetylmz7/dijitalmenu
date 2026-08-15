@@ -113,18 +113,25 @@
       </section>
     }
 
-    <!-- Warning Section -->
-    <div class="border border-[#ff007f]/40 p-8 md:p-12 bg-[#ff007f]/5 hover:bg-[#ff007f]/10 transition-all duration-300 relative text-left">
-      <div class="absolute -top-3 left-6 bg-[#030008] px-3 text-[#ff007f] text-xs font-bold uppercase flex items-center gap-1.5">
-        <i class="fa-solid fa-triangle-exclamation animate-pulse"></i> SYSTEM_ALERT
+    <!-- Warning Section (İsteğe Bağlı) -->
+    @if (!string.IsNullOrWhiteSpace(restaurant?.ImportantNotice) || restaurant?.Id == 0)
+    {
+      var notice = !string.IsNullOrWhiteSpace(restaurant?.ImportantNotice)
+        ? restaurant.ImportantNotice
+        : "Menü fiyatlarımıza KDV dahildir. Özel istek ve alerjenleriniz için lütfen servis personelimize danışınız.";
+
+      <div class="border border-[#ff007f]/40 p-8 md:p-12 bg-[#ff007f]/5 hover:bg-[#ff007f]/10 transition-all duration-300 relative text-left">
+        <div class="absolute -top-3 left-6 bg-[#030008] px-3 text-[#ff007f] text-xs font-bold uppercase flex items-center gap-1.5">
+          <i class="fa-solid fa-triangle-exclamation animate-pulse"></i> SYSTEM_ALERT
+        </div>
+        <p class="text-xl md:text-2xl font-black uppercase tracking-tight mb-4 text-[#00f0ff] leading-normal">
+          "@notice"
+        </p>
+        <p class="text-[#a0a0cf] text-xs">
+          &gt; TÜM FİYAT MATRİSLERİMİZ GÜNCEL KDV DAHİLDİR. DEĞİŞİKLİK GÖSTEREBİLİR.
+        </p>
       </div>
-      <p class="text-xl md:text-2xl font-black uppercase tracking-tight mb-4 text-[#00f0ff] leading-normal">
-        "Kendi alkolünü yanında getiren misafirlerimizden kişi başı <span class="text-[#ff007f] font-bold bg-[#ff007f]/10 border border-[#ff007f]/30 px-2 py-0.5">100 TL</span> servis ücreti alınmaktadır."
-      </p>
-      <p class="text-[#a0a0cf] text-xs">
-        &gt; TÜM FİYAT MATRİSLERİMİZ GÜNCEL KDV DAHİLDİR. DEĞİŞİKLİK GÖSTEREBİLİR.
-      </p>
-    </div>
+    }
   </main>
 
   <!-- Cyber Footer -->
@@ -132,7 +139,7 @@
     <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-12 text-left">
       <div>
         <h5 class="text-[#00f0ff] font-bold uppercase tracking-widest mb-4">
-          // KOCAOĞLU
+          // @restaurant?.Name
         </h5>
         <p class="leading-relaxed">
           Cyber-gastronomi ilkelerine dayalı geleneksel Antakya tarifleri, optimize edilmiş süreçlerle sunulur.
@@ -151,11 +158,10 @@
         <p>@(string.IsNullOrWhiteSpace(restaurant?.Address) ? "Atatürk Caddesi, Hatay" : restaurant.Address)</p>
       </div>
       <div>
-        <h5 class="text-white font-bold uppercase tracking-widest mb-4">
-          // HOURS
+        <h5 class="text-[#00f0ff] font-bold uppercase tracking-widest mb-4">
+          // ACCESS_CYCLE
         </h5>
-        <p>SEC_01: 11:00 - 23:00</p>
-        <p>SEC_02: 10:00 - 00:00</p>
+        <p>@(string.IsNullOrWhiteSpace(restaurant?.WorkingHours) ? "11:00 - 23:00" : restaurant.WorkingHours)</p>
       </div>
     </div>
 

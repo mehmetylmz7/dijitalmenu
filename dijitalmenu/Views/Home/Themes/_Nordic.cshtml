@@ -19,19 +19,40 @@
             </header>
 
             <div class="space-y-6 text-sm">
+                @if (!string.IsNullOrWhiteSpace(restaurant?.ImportantNotice) || restaurant?.Id == 0)
+                {
+                    var notice = !string.IsNullOrWhiteSpace(restaurant?.ImportantNotice)
+                        ? restaurant.ImportantNotice
+                        : "Menü fiyatlarımıza KDV dahildir. Özel istek ve alerjenleriniz için lütfen servis personelimize danışınız.";
+
+                    <div class="p-6 bg-orange-500/10 rounded-3xl border border-orange-500/20 space-y-2">
+                        <span class="text-[10px] uppercase font-bold text-orange-600 tracking-wider">📢 Bilgilendirme</span>
+                        <p class="font-medium text-neutral-800 text-xs leading-relaxed">@notice</p>
+                    </div>
+                }
+
                 <div class="p-6 bg-white/50 backdrop-blur rounded-3xl border border-white/50 space-y-4 shadow-sm">
                     <div class="flex flex-col">
                         <span class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider mb-1">Adresimiz</span>
-                        <span class="font-medium text-neutral-800">Merkez Mahallesi, Gastronomi Sokak No: 7</span>
+                        <span class="font-medium text-neutral-800">@(string.IsNullOrWhiteSpace(restaurant?.Address) ? "Merkez Mahallesi, Gastronomi Sokak No: 7" : restaurant.Address)</span>
                     </div>
                     <div class="flex flex-col">
                         <span class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider mb-1">Telefon</span>
-                        <span class="font-medium text-neutral-800">+90 (212) 555 01 23</span>
+                        <span class="font-medium text-neutral-800">@(string.IsNullOrWhiteSpace(restaurant?.Phone) ? "+90 (212) 555 01 23" : restaurant.Phone)</span>
                     </div>
                     <div class="flex flex-col">
                         <span class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider mb-1">Çalışma Saatleri</span>
-                        <span class="font-medium italic text-neutral-800">Pazartesi - Pazar: 11:00 - 23:00</span>
+                        <span class="font-medium italic text-neutral-800">@(string.IsNullOrWhiteSpace(restaurant?.WorkingHours) ? "Pazartesi - Pazar: 11:00 - 23:00" : restaurant.WorkingHours)</span>
                     </div>
+                    @if (!string.IsNullOrWhiteSpace(restaurant?.GoogleMapsUrl))
+                    {
+                        var mapsUrl = restaurant.GoogleMapsUrl;
+                        <div class="pt-2 border-t border-neutral-200/60">
+                            <a href="@mapsUrl" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 text-xs font-bold text-orange-600 hover:text-orange-700">
+                                📍 Haritada Gör &amp; Yol Tarifi →
+                            </a>
+                        </div>
+                    }
                 </div>
                 
                 <div class="relative aspect-square rounded-3xl overflow-hidden bg-neutral-200 shadow-sm hidden lg:block">

@@ -91,23 +91,30 @@
       </section>
     }
 
-    <!-- Notes Block -->
-    <div class="mt-16 p-8 md:p-12 bg-gradient-to-br from-[#ff793f] to-[#e15f41] rounded-[2.5rem] text-white shadow-lg relative overflow-hidden">
-      <div class="absolute right-0 bottom-0 p-8 opacity-10">
-        <i class="fa-solid fa-sun text-[10rem]"></i>
+    <!-- Sunset Note (İsteğe Bağlı) -->
+    @if (!string.IsNullOrWhiteSpace(restaurant?.ImportantNotice) || restaurant?.Id == 0)
+    {
+      var notice = !string.IsNullOrWhiteSpace(restaurant?.ImportantNotice)
+        ? restaurant.ImportantNotice
+        : "Menü fiyatlarımıza KDV dahildir. Özel istek ve alerjenleriniz için lütfen servis personelimize danışınız.";
+
+      <div class="mt-16 p-8 md:p-12 bg-gradient-to-br from-[#ff793f] to-[#e15f41] rounded-[2.5rem] text-white shadow-lg relative overflow-hidden">
+        <div class="absolute right-0 bottom-0 p-8 opacity-10">
+          <i class="fa-solid fa-sun text-[10rem]"></i>
+        </div>
+        <div class="relative z-10 max-w-xl text-left">
+          <span class="text-amber-100 font-bold uppercase tracking-widest text-[10px] block mb-2">
+            ÖNEMLİ BİLGİLENDİRME
+          </span>
+          <p class="text-xl md:text-2xl font-semibold leading-relaxed mb-4">
+            "@notice"
+          </p>
+          <p class="text-amber-100/80 text-xs italic">
+            * Kahvelerimiz taze kavrulmuş çekirdeklerden öğütülmektedir.
+          </p>
+        </div>
       </div>
-      <div class="relative z-10 max-w-xl text-left">
-        <span class="text-amber-100 font-bold uppercase tracking-widest text-[10px] block mb-2">
-          KÜÇÜK BİR NOT
-        </span>
-        <p class="text-xl md:text-2xl font-semibold leading-relaxed mb-4">
-          "Kendi alkolünü yanında getiren misafirlerimizden kişi başı <span class="bg-white text-[#e15f41] px-2.5 py-1.0 rounded-xl font-bold">100 TL</span> servis ücreti alınmaktadır."
-        </p>
-        <p class="text-amber-100/80 text-xs italic">
-          * Kahvelerimiz taze kavrulmuş çekirdeklerden öğütülmektedir.
-        </p>
-      </div>
-    </div>
+    }
   </main>
 
   <!-- Sunset Footer -->
@@ -128,9 +135,8 @@
         <p>@(string.IsNullOrWhiteSpace(restaurant?.Address) ? "Atatürk Caddesi, Hatay" : restaurant.Address)</p>
       </div>
       <div>
-        <h5 class="text-white font-bold uppercase tracking-wider mb-4">SAATLERİMİZ</h5>
-        <p>H. İçi: 11:00 - 23:00</p>
-        <p>H. Sonu: 10:00 - 00:00</p>
+        <h5 class="text-white font-bold uppercase tracking-wider mb-4">ÇALIŞMA SAATLERİ</h5>
+        <p>@(string.IsNullOrWhiteSpace(restaurant?.WorkingHours) ? "Haftanın Her Günü: 11:00 - 23:00" : restaurant.WorkingHours)</p>
       </div>
     </div>
 

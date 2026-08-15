@@ -11,6 +11,8 @@ public class RestaurantAccountViewModel
     public string? Phone { get; set; }
     public string? Address { get; set; }
     public string? GoogleMapsUrl { get; set; }
+    public string? ImportantNotice { get; set; }
+    public string? WorkingHours { get; set; }
 }
 
 public class ChangePasswordViewModel

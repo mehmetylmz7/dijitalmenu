@@ -260,6 +260,20 @@
 
     <!-- Menü İçeriği -->
     <div class="aycafe-menu">
+        @if (!string.IsNullOrWhiteSpace(restaurant?.ImportantNotice) || restaurant?.Id == 0)
+        {
+            var notice = !string.IsNullOrWhiteSpace(restaurant?.ImportantNotice)
+                ? restaurant.ImportantNotice
+                : "Menü fiyatlarımıza KDV dahildir. Özel istek ve alerjenleriniz için lütfen servis personelimize danışınız.";
+
+            <div style="margin-bottom: 20px; padding: 14px 16px; background: #fff5f5; border-left: 4px solid var(--primary-color); border-radius: 12px; box-shadow: 0 2px 8px rgba(255,107,107,0.08); display: flex; gap: 12px; align-items: flex-start;">
+                <i class="fas fa-bullhorn" style="color: var(--primary-color); font-size: 16px; margin-top: 2px;"></i>
+                <div>
+                    <strong style="font-size: 13px; color: #2d3436; display: block; margin-bottom: 2px;">Önemli Bilgilendirme</strong>
+                    <p style="font-size: 12px; color: #636e72; margin: 0; line-height: 1.4;">@notice</p>
+                </div>
+            </div>
+        }
         @foreach (var cat in categories)
         {
             var catItems = menuItems.Where(mi => mi.CategoryId == cat.Id).ToList();
@@ -306,6 +320,10 @@
             @if (!string.IsNullOrWhiteSpace(restaurant?.Phone))
             {
                 <br><span>📞 @restaurant.Phone</span>
+            }
+            @if (!string.IsNullOrWhiteSpace(restaurant?.WorkingHours))
+            {
+                <br><span>⏰ @restaurant.WorkingHours</span>
             }
         </div>
         @if (!string.IsNullOrWhiteSpace(restaurant?.GoogleMapsUrl))

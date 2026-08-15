@@ -107,29 +107,36 @@
       </section>
     }
 
-    <!-- Notes -->
-    <div class="mt-20 p-10 bg-stone-900/30 rounded-3xl border border-amber-500/10 shadow-2xl relative overflow-hidden text-center max-w-4xl mx-auto text-left">
-      <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(245,158,11,0.03),transparent_60%)]"></div>
-      <div class="relative z-10 max-w-2xl mx-auto text-center">
-        <i class="fa-solid fa-wine-glass text-3xl text-amber-500 mb-4 opacity-80 animate-pulse"></i>
-        <h3 class="text-amber-500 font-bold uppercase tracking-widest text-xs mb-3">
-          SERVİS NOTU
-        </h3>
-        <p class="text-xl md:text-2xl font-serif leading-relaxed mb-4 text-stone-200">
-          "Kendi alkolünü yanında getiren misafirlerimizden kişi başı <span class="text-amber-400 font-bold">100 TL</span> servis ücreti alınmaktadır."
-        </p>
-        <p class="text-stone-500 text-xs italic">
-          Menü fiyatları mevsimsel hammadde tedariğine göre değişiklik gösterebilir.
-        </p>
+    <!-- Notes (İsteğe Bağlı) -->
+    @if (!string.IsNullOrWhiteSpace(restaurant?.ImportantNotice) || restaurant?.Id == 0)
+    {
+      var notice = !string.IsNullOrWhiteSpace(restaurant?.ImportantNotice)
+        ? restaurant.ImportantNotice
+        : "Menü fiyatlarımıza KDV dahildir. Özel istek ve alerjenleriniz için lütfen servis personelimize danışınız.";
+
+      <div class="mt-20 p-10 bg-stone-900/30 rounded-3xl border border-amber-500/10 shadow-2xl relative overflow-hidden text-center max-w-4xl mx-auto text-left">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(245,158,11,0.03),transparent_60%)]"></div>
+        <div class="relative z-10 max-w-2xl mx-auto text-center">
+          <i class="fa-solid fa-wine-glass text-3xl text-amber-500 mb-4 opacity-80 animate-pulse"></i>
+          <h3 class="text-amber-500 font-bold uppercase tracking-widest text-xs mb-3">
+            ÖNEMLİ BİLGİLENDİRME
+          </h3>
+          <p class="text-xl md:text-2xl font-serif leading-relaxed mb-4 text-stone-200">
+            "@notice"
+          </p>
+          <p class="text-stone-500 text-xs italic">
+            Menü fiyatları mevsimsel hammadde tedariğine göre değişiklik gösterebilir.
+          </p>
+        </div>
       </div>
-    </div>
+    }
   </div>
 
   <!-- Dark Luxury Footer -->
   <footer class="bg-stone-950 text-stone-500 py-16 px-6 border-t border-stone-900 text-xs">
     <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-12 text-left">
       <div>
-        <h5 class="text-white font-serif text-lg mb-4">KOCAOĞLU</h5>
+        <h5 class="text-white font-serif text-lg mb-4">@restaurant?.Name</h5>
         <p class="text-stone-600 leading-relaxed">
           Özel reçetelerle hazırlanan zengin menümüz ve büyüleyici ambiyansımızla sizleri ağırlamaktan mutluluk duyuyoruz.
         </p>
@@ -143,9 +150,8 @@
         <p>@(string.IsNullOrWhiteSpace(restaurant?.Address) ? "Atatürk Caddesi, Hatay" : restaurant.Address)</p>
       </div>
       <div>
-        <h5 class="text-white uppercase tracking-widest mb-4">SAATLER</h5>
-        <p>Hafta içi: 11:00 - 23:00</p>
-        <p>Hafta sonu: 10:00 - 00:00</p>
+        <h5 class="text-white uppercase tracking-widest mb-4">ÇALIŞMA SAATLERİ</h5>
+        <p>@(string.IsNullOrWhiteSpace(restaurant?.WorkingHours) ? "Haftanın Her Günü: 11:00 - 23:00" : restaurant.WorkingHours)</p>
       </div>
     </div>
 

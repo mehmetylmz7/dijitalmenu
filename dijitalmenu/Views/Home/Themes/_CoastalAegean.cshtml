@@ -91,30 +91,37 @@
       </section>
     }
 
-    <!-- Note Section -->
-    <div class="mt-16 p-8 md:p-12 bg-gradient-to-br from-[#0369a1] to-[#0284c7] rounded-3xl text-white shadow-xl relative overflow-hidden text-left">
-      <div class="absolute right-0 bottom-0 p-8 opacity-10">
-        <i class="fa-solid fa-ship text-[10rem]"></i>
+    <!-- Note Section (İsteğe Bağlı) -->
+    @if (!string.IsNullOrWhiteSpace(restaurant?.ImportantNotice) || restaurant?.Id == 0)
+    {
+      var notice = !string.IsNullOrWhiteSpace(restaurant?.ImportantNotice)
+        ? restaurant.ImportantNotice
+        : "Menü fiyatlarımıza KDV dahildir. Özel istek ve alerjenleriniz için lütfen servis personelimize danışınız.";
+
+      <div class="mt-16 p-8 md:p-12 bg-gradient-to-br from-[#0369a1] to-[#0284c7] rounded-3xl text-white shadow-xl relative overflow-hidden text-left">
+        <div class="absolute right-0 bottom-0 p-8 opacity-10">
+          <i class="fa-solid fa-ship text-[10rem]"></i>
+        </div>
+        <div class="relative z-10 max-w-xl">
+          <span class="text-[#e0f2fe] font-bold uppercase tracking-widest text-[10px] block mb-2">
+            Önemli Bilgilendirme
+          </span>
+          <p class="text-xl md:text-2xl font-serif leading-relaxed mb-4">
+            "@notice"
+          </p>
+          <p class="text-sky-100 text-xs italic">
+            * Deniz ürünlerimiz Hatay kıyılarından taze olarak günlük temin edilmektedir.
+          </p>
+        </div>
       </div>
-      <div class="relative z-10 max-w-xl">
-        <span class="text-[#e0f2fe] font-bold uppercase tracking-widest text-[10px] block mb-2">
-          Liman Bilgilendirmesi
-        </span>
-        <p class="text-xl md:text-2xl font-serif leading-relaxed mb-4">
-          "Kendi alkolünü yanında getiren misafirlerimizden kişi başı <span class="text-[#e0f2fe] font-bold bg-white/10 px-2.5 py-1.0 rounded-lg">100 TL</span> servis ücreti alınmaktadır."
-        </p>
-        <p class="text-sky-100 text-xs italic">
-          * Deniz ürünlerimiz Hatay kıyılarından taze olarak günlük temin edilmektedir.
-        </p>
-      </div>
-    </div>
+    }
   </main>
 
   <!-- Aegean Footer -->
   <footer class="bg-[#0f172a] text-[#94a3b8] py-16 px-6 text-xs border-t border-[#f3e1d3]">
     <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-12 text-left">
       <div>
-        <h5 class="text-white font-serif text-lg mb-4">KOCAOĞLU TAHT</h5>
+        <h5 class="text-white font-serif text-lg mb-4">@restaurant?.Name</h5>
         <p class="text-[#64748b] leading-relaxed">
           Tarihi lezzetleri, Ege ve Akdeniz'in taze deniz esintileri ile harmanlayarak şık masalara sunuyoruz.
         </p>
@@ -128,9 +135,8 @@
         <p>@(string.IsNullOrWhiteSpace(restaurant?.Address) ? "Atatürk Caddesi, Hatay" : restaurant.Address)</p>
       </div>
       <div>
-        <h5 class="text-white font-bold uppercase tracking-wider mb-4">AÇILIŞ-KAPANIŞ</h5>
-        <p>H. İçi: 11:00 - 23:00</p>
-        <p>H. Sonu: 10:00 - 00:00</p>
+        <h5 class="text-white font-bold uppercase tracking-wider mb-4">ÇALIŞMA SAATLERİ</h5>
+        <p>@(string.IsNullOrWhiteSpace(restaurant?.WorkingHours) ? "Haftanın Her Günü: 11:00 - 23:00" : restaurant.WorkingHours)</p>
       </div>
     </div>
 

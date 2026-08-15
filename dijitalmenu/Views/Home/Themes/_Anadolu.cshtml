@@ -81,19 +81,26 @@
       </section>
     }
 
-    <!-- Note Section -->
-    <div class="mt-16 p-10 bg-stone-900 rounded-3xl shadow-2xl relative overflow-hidden">
-      <div class="absolute top-0 right-0 p-8 opacity-10">
-        <i class="fas fa-wine-glass text-8xl text-white"></i>
+    <!-- Note Section (İsteğe Bağlı) -->
+    @if (!string.IsNullOrWhiteSpace(restaurant?.ImportantNotice) || restaurant?.Id == 0)
+    {
+      var notice = !string.IsNullOrWhiteSpace(restaurant?.ImportantNotice)
+        ? restaurant.ImportantNotice
+        : "Menü fiyatlarımıza KDV dahildir. Özel istek ve alerjenleriniz için lütfen servis personelimize danışınız.";
+
+      <div class="mt-16 p-10 bg-stone-900 rounded-3xl shadow-2xl relative overflow-hidden">
+        <div class="absolute top-0 right-0 p-8 opacity-10">
+          <i class="fas fa-wine-glass text-8xl text-white"></i>
+        </div>
+        <div class="relative z-10 max-w-2xl text-left">
+          <h3 class="text-amber-400 font-bold uppercase tracking-widest text-sm mb-4">Önemli Bilgilendirme</h3>
+          <p class="text-white text-xl md:text-2xl font-serif leading-relaxed mb-4">
+            "@notice"
+          </p>
+          <p class="text-stone-400 text-sm italic">Menü fiyatları ve içerikleri mevsimsel olarak değişebilir.</p>
+        </div>
       </div>
-      <div class="relative z-10 max-w-2xl text-left">
-        <h3 class="text-amber-400 font-bold uppercase tracking-widest text-sm mb-4">Servis Bilgilendirmesi</h3>
-        <p class="text-white text-xl md:text-2xl font-serif leading-relaxed mb-4">
-          "Kendi alkolünü yanında getiren misafirlerimizden kişi başı <span className="text-amber-400">100 TL</span> servis ücreti alınmaktadır."
-        </p>
-        <p class="text-stone-400 text-sm italic">Menü fiyatları ve içerikleri mevsimsel olarak değişebilir.</p>
-      </div>
-    </div>
+    }
   </div>
 
   <!-- Footer -->
@@ -105,10 +112,6 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16 max-w-4xl mx-auto text-sm">
         <div>
           <h4 class="text-white font-bold mb-4 uppercase tracking-widest">İletişim</h4>
-          <p>+90 (555) 000 00 00</p>
-          <p>info@dijitalmenu.com</p>
-        <div>
-          <h4 class="text-white font-bold mb-4 uppercase tracking-widest">İletişim</h4>
           <p>Tel: @(string.IsNullOrWhiteSpace(restaurant?.Phone) ? "+90 (555) 000 00 00" : restaurant.Phone)</p>
         </div>
         <div>
@@ -116,9 +119,8 @@
           <p>@(string.IsNullOrWhiteSpace(restaurant?.Address) ? "Atatürk Caddesi, Hatay" : restaurant.Address)</p>
         </div>
         <div>
-          <h4 class="text-white font-bold mb-4 uppercase tracking-widest">Çalışma Saatleri</h4>
-          <p>Hafta içi: 11:00 - 23:00</p>
-          <p>Hafta sonu: 10:00 - 00:00</p>
+          <h5 class="text-white font-bold uppercase tracking-wider mb-4">ÇALIŞMA SAATLERİ</h5>
+          <p>@(string.IsNullOrWhiteSpace(restaurant?.WorkingHours) ? "Haftanın Her Günü: 11:00 - 23:00" : restaurant.WorkingHours)</p>
         </div>
       </div>
 

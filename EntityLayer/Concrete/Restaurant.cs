@@ -24,6 +24,12 @@ namespace EntityLayer.Concrete
         [StringLength(500)]
         public string? Address { get; set; }
 
+        [StringLength(1000)]
+        public string? ImportantNotice { get; set; }
+
+        [StringLength(200)]
+        public string? WorkingHours { get; set; }
+
         [RegularExpression(@"^$|^[0-9+()\-\s]{7,25}$")]
         public string? Phone { get; set; }
 

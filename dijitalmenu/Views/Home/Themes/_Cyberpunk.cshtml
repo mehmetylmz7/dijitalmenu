@@ -9,7 +9,7 @@
         <div class="absolute -left-1 top-0 h-20 w-2 bg-[#ff003c] shadow-[0_0_20px_#ff003c]"></div>
         
         <!-- Header -->
-        <header class="mb-32 relative">
+        <header class="mb-20 relative">
             <div class="flex items-center gap-4 text-[#ff003c] mb-6">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-zap animate-pulse"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46L12.6 9h7.8a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46L11.4 15Z"/></svg>
                 <span class="text-xs font-black uppercase tracking-[0.5em] bg-[#ff003c]/20 px-2 py-1">SYS_ONLINE // v.7.0</span>
@@ -21,6 +21,23 @@
                 &gt; Yöresel Lezzetlerin Modern Buluşma Noktası
             </p>
         </header>
+
+        <!-- Cyber Notice Box (İsteğe Bağlı) -->
+        @if (!string.IsNullOrWhiteSpace(restaurant?.ImportantNotice) || restaurant?.Id == 0)
+        {
+            var notice = !string.IsNullOrWhiteSpace(restaurant?.ImportantNotice)
+                ? restaurant.ImportantNotice
+                : "Menü fiyatlarımıza KDV dahildir. Özel istek ve alerjenleriniz için lütfen servis personelimize danışınız.";
+
+            <div class="mb-20 p-6 border-2 border-[#00f0ff] bg-[#00f0ff]/5 relative">
+                <div class="absolute -top-3 left-4 bg-[#050505] px-2 text-[#00f0ff] text-[10px] font-black uppercase tracking-widest">
+                    // SYSTEM_NOTICE
+                </div>
+                <p class="text-base font-bold text-white uppercase tracking-wider leading-relaxed">
+                    @notice
+                </p>
+            </div>
+        }
 
         <!-- Categories & Items -->
         <div class="grid lg:grid-cols-2 gap-x-24 gap-y-32">
@@ -62,14 +79,23 @@
         </div>
 
         <!-- Footer -->
-        <footer class="mt-40 py-20 border-t border-white/10 flex flex-col md:flex-row justify-between items-end gap-12 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all">
+        <footer class="mt-40 py-20 border-t border-white/10 flex flex-col md:flex-row justify-between items-start md:items-end gap-12">
             <div class="space-y-2 text-[10px] font-black uppercase tracking-widest">
-                <p class="text-[#00f0ff] underline decoration-[#ff003c] underline-offset-4">Location: Merkez Mahallesi, Gastronomi Sokak No: 7</p>
-                <p>Access: 24/7.00</p>
+                <p class="text-[#00f0ff] underline decoration-[#ff003c] underline-offset-4">Location: @(string.IsNullOrWhiteSpace(restaurant?.Address) ? "Merkez Mahallesi, Gastronomi Sokak No: 7" : restaurant.Address)</p>
+                <p>Access: @(string.IsNullOrWhiteSpace(restaurant?.WorkingHours) ? "11:00 - 23:00" : restaurant.WorkingHours)</p>
+                @if (!string.IsNullOrWhiteSpace(restaurant?.GoogleMapsUrl))
+                {
+                    var mapsUrl = restaurant.GoogleMapsUrl;
+                    <div class="pt-2">
+                        <a href="@mapsUrl" target="_blank" rel="noopener" class="text-[#00ff9f] hover:text-white underline">
+                            [ OPEN_IN_GOOGLE_MAPS ]
+                        </a>
+                    </div>
+                }
             </div>
-            <div class="space-y-2 text-right text-[10px] font-black uppercase tracking-widest">
-                <p>COMMS: +90 (212) 555 01 23</p>
-                <p class="text-[#ff003c] font-black italic">No refunds in the afterlife.</p>
+            <div class="space-y-2 text-left md:text-right text-[10px] font-black uppercase tracking-widest">
+                <p>COMMS: @(string.IsNullOrWhiteSpace(restaurant?.Phone) ? "+90 (212) 555 01 23" : restaurant.Phone)</p>
+                <p class="text-[#ff003c] font-black italic">© @DateTime.Now.Year @restaurant?.Name</p>
             </div>
         </footer>
     </div>

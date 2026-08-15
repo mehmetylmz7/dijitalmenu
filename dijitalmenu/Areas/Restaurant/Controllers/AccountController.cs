@@ -50,7 +50,9 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 Slug = restaurant.Slug,
                 Phone = restaurant.Phone,
                 Address = restaurant.Address,
-                GoogleMapsUrl = restaurant.GoogleMapsUrl
+                GoogleMapsUrl = restaurant.GoogleMapsUrl,
+                ImportantNotice = restaurant.ImportantNotice,
+                WorkingHours = restaurant.WorkingHours
             };
 
             ViewBag.RestaurantUsername = user.Username;
@@ -68,32 +70,37 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             }
 
             username = username?.Trim() ?? string.Empty;
-
-            if (username.Length is < 3 or > 50 || !username.All(c => char.IsLetterOrDigit(c) || c is '.' or '_' or '-'))
+            if (string.IsNullOrWhiteSpace(username) || username.Length < 3 || username.Length > 50)
             {
-                TempData["Error"] = "Kullanıcı adı 3 ile 50 karakter arasında olmalı; yalnızca harf, rakam, nokta, alt çizgi ve tire içermelidir.";
+                TempData["Error"] = "Kullanıcı adı 3 ile 50 karakter arasında olmalıdır.";
                 return RedirectToAction("Index");
             }
 
-            var usernameExists = _userService.TGetListAll()
-                .Any(u => u.Id != userId && u.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
-
-            if (usernameExists)
+            if (!Regex.IsMatch(username, @"^[a-zA-Z0-9_.-]+$"))
             {
-                TempData["Error"] = "Bu kullanıcı adı başka bir hesap tarafından kullanılıyor.";
+                TempData["Error"] = "Kullanıcı adı sadece harf, rakam, nokta, tire ve alt çizgi içerebilir.";
+                return RedirectToAction("Index");
+            }
+
+            var existingUser = _userService.TGetListAll()
+                .FirstOrDefault(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase) && u.Id != userId);
+
+            if (existingUser != null)
+            {
+                TempData["Error"] = "Bu kullanıcı adı zaten başka bir hesap tarafından kullanılıyor.";
                 return RedirectToAction("Index");
             }
 
             user.Username = username;
             _userService.TUpdate(user);
 
-            HttpContext.Session.SetString("RestaurantUsername", user.Username);
+            HttpContext.Session.SetString("RestaurantUsername", username);
             TempData["Success"] = "Profil bilgileriniz başarıyla güncellendi.";
             return RedirectToAction("Index");
         }
 
         [HttpPost]
-        public IActionResult UpdateBusiness(string restaurantName, string? phone, string? address, string? googleMapsUrl)
+        public IActionResult UpdateBusiness(string restaurantName, string? phone, string? address, string? googleMapsUrl, string? importantNotice = null, string? workingHours = null)
         {
             var restaurantId = GetCurrentRestaurantId();
             var restaurant = _restaurantService.TGetByID(restaurantId);
@@ -121,9 +128,11 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             if (!TryNormalizeGoogleMapsUrl(googleMapsUrl, out var normalizedMapsUrl) ||
                 (address?.Length ?? 0) > MaxAddressLength ||
                 (phone?.Length ?? 0) > MaxPhoneLength ||
+                (importantNotice?.Length ?? 0) > 1000 ||
+                (workingHours?.Length ?? 0) > 200 ||
                 (!string.IsNullOrWhiteSpace(phone) && !Regex.IsMatch(phone, @"^[0-9+()\-\s]{7,25}$")))
             {
-                TempData["Error"] = "Konum, adres veya telefon bilgisi geçersiz.";
+                TempData["Error"] = "Konum, adres, çalışma saatleri veya telefon bilgisi geçersiz.";
                 return RedirectToAction("Index");
             }
 
@@ -131,6 +140,8 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             restaurant.Phone = string.IsNullOrWhiteSpace(phone) ? null : phone.Trim();
             restaurant.Address = string.IsNullOrWhiteSpace(address) ? null : address.Trim();
             restaurant.GoogleMapsUrl = normalizedMapsUrl;
+            restaurant.ImportantNotice = string.IsNullOrWhiteSpace(importantNotice) ? null : importantNotice.Trim();
+            restaurant.WorkingHours = string.IsNullOrWhiteSpace(workingHours) ? null : workingHours.Trim();
 
             _restaurantService.TUpdate(restaurant);
 

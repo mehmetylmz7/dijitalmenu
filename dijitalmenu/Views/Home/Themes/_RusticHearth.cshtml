@@ -92,30 +92,37 @@
       </section>
     }
 
-    <!-- Note Section -->
-    <div class="mt-16 p-8 md:p-10 bg-[#5c3e31] rounded-[2.5rem] text-white shadow-xl relative overflow-hidden text-left">
-      <div class="absolute -right-12 -bottom-12 opacity-5 text-stone-200">
-        <i class="fa-solid fa-bowl-rice text-[10rem]"></i>
+    <!-- Note Section (İsteğe Bağlı) -->
+    @if (!string.IsNullOrWhiteSpace(restaurant?.ImportantNotice) || restaurant?.Id == 0)
+    {
+      var notice = !string.IsNullOrWhiteSpace(restaurant?.ImportantNotice)
+        ? restaurant.ImportantNotice
+        : "Menü fiyatlarımıza KDV dahildir. Özel istek ve alerjenleriniz için lütfen servis personelimize danışınız.";
+
+      <div class="mt-16 p-8 md:p-10 bg-[#5c3e31] rounded-[2.5rem] text-white shadow-xl relative overflow-hidden text-left">
+        <div class="absolute -right-12 -bottom-12 opacity-5 text-stone-200">
+          <i class="fa-solid fa-bowl-rice text-[10rem]"></i>
+        </div>
+        <div class="relative z-10 max-w-xl">
+          <h4 class="text-[#df9e84] font-bold uppercase tracking-wider text-xs mb-3">
+            ÖNEMLİ BİLGİLENDİRME
+          </h4>
+          <p class="text-xl md:text-2xl font-serif leading-relaxed mb-4">
+            "@notice"
+          </p>
+          <p class="text-[#dfccb7] text-xs italic">
+            * El yapımı ekmeklerimiz ve yayık tereyağımız ikramımızdır.
+          </p>
+        </div>
       </div>
-      <div class="relative z-10 max-w-xl">
-        <h4 class="text-[#df9e84] font-bold uppercase tracking-wider text-xs mb-3">
-          Köyümüzden Sofranıza
-        </h4>
-        <p class="text-xl md:text-2xl font-serif leading-relaxed mb-4">
-          "Kendi alkolünü yanında getiren misafirlerimizden kişi başı <span class="text-[#df9e84] font-bold">100 TL</span> servis ücreti alınmaktadır."
-        </p>
-        <p class="text-[#dfccb7] text-xs italic">
-          * El yapımı ekmeklerimiz ve yayık tereyağımız ikramımızdır.
-        </p>
-      </div>
-    </div>
+    }
   </main>
 
   <!-- Rustic Footer -->
   <footer class="bg-[#483025] text-[#b39e95] py-16 px-6 text-xs border-t border-[#dfccb7]">
     <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-12 text-left">
       <div>
-        <h5 class="text-white font-serif text-lg mb-4">KOCAOĞLU OCAĞI</h5>
+        <h5 class="text-white font-serif text-lg mb-4">@restaurant?.Name</h5>
         <p class="text-[#968075] leading-relaxed">
           Kuşaktan kuşağa aktarılan sırlarımızla, Hatay'ın nefis odun fırını lezzetlerini sunuyoruz.
         </p>
@@ -129,9 +136,8 @@
         <p>@(string.IsNullOrWhiteSpace(restaurant?.Address) ? "Atatürk Caddesi, Hatay" : restaurant.Address)</p>
       </div>
       <div>
-        <h5 class="text-white font-bold uppercase tracking-wider mb-4">KAPILARIMIZ</h5>
-        <p>H. İçi: 11:00 - 23:00</p>
-        <p>H. Sonu: 10:00 - 00:00</p>
+        <h5 class="text-white font-bold uppercase tracking-wider mb-4">ÇALIŞMA SAATLERİ</h5>
+        <p>@(string.IsNullOrWhiteSpace(restaurant?.WorkingHours) ? "Haftanın Her Günü: 11:00 - 23:00" : restaurant.WorkingHours)</p>
       </div>
     </div>
 

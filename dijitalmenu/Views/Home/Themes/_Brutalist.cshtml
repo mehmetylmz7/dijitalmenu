@@ -19,9 +19,24 @@
             </div>
         </header>
 
+        <!-- Notice Block (İsteğe Bağlı) -->
+        @if (!string.IsNullOrWhiteSpace(restaurant?.ImportantNotice) || restaurant?.Id == 0)
+        {
+            var notice = !string.IsNullOrWhiteSpace(restaurant?.ImportantNotice)
+                ? restaurant.ImportantNotice
+                : "Menü fiyatlarımıza KDV dahildir. Özel istek ve alerjenleriniz için lütfen servis personelimize danışınız.";
+
+            <div class="border-b-[4px] border-black p-6 bg-white flex items-start gap-4">
+                <span class="bg-black text-yellow-300 px-3 py-1 text-xs font-black uppercase shrink-0">! DUYURU</span>
+                <p class="text-sm font-bold uppercase leading-snug text-black">
+                    @notice
+                </p>
+            </div>
+        }
+
         <!-- Categories & Items -->
         <div class="grid md:grid-cols-2 lg:grid-cols-3 border-b-[4px] border-black">
-            @for (int i = 0; i < categories.Count; i++)
+            @for (int i = 0; i < (categories?.Count ?? 0); i++)
             {
                 var category = categories[i];
                 var catItems = menuItems?.Where(mi => mi.CategoryId == category.Id).ToList() ?? new List<EntityLayer.Concrete.MenuItem>();
@@ -65,19 +80,38 @@
         </div>
 
         <!-- Footer -->
-        <footer class="p-10 grid md:grid-cols-3 gap-10 bg-black text-white">
-            <div>
-                <span class="block text-[10px] font-black uppercase mb-4 text-yellow-300">Target</span>
-                <p class="text-sm font-bold uppercase">Merkez Mahallesi, Gastronomi Sokak No: 7</p>
+        <footer class="p-10 bg-black text-white">
+            <div class="grid md:grid-cols-3 gap-10 mb-8">
+                <div>
+                    <span class="block text-[10px] font-black uppercase mb-4 text-yellow-300">Target / Adres</span>
+                    <p class="text-sm font-bold uppercase">@(string.IsNullOrWhiteSpace(restaurant?.Address) ? "Merkez Mahallesi, Gastronomi Sokak No: 7" : restaurant.Address)</p>
+                </div>
+                <div>
+                    <span class="block text-[10px] font-black uppercase mb-4 text-yellow-300">Status / Saatler</span>
+                    <p class="text-sm font-bold uppercase tracking-widest">@(string.IsNullOrWhiteSpace(restaurant?.WorkingHours) ? "11:00 - 23:00" : restaurant.WorkingHours)</p>
+                </div>
+                <div>
+                    <span class="block text-[10px] font-black uppercase mb-4 text-yellow-300">Ping / İletişim</span>
+                    <p class="text-sm font-bold uppercase">@(string.IsNullOrWhiteSpace(restaurant?.Phone) ? "+90 (212) 555 01 23" : restaurant.Phone)</p>
+                </div>
             </div>
-            <div>
-                <span class="block text-[10px] font-black uppercase mb-4 text-yellow-300">Status</span>
-                <p class="text-sm font-bold uppercase tracking-widest">11:00 - 23:00</p>
-            </div>
-            <div>
-                <span class="block text-[10px] font-black uppercase mb-4 text-yellow-300">Ping</span>
-                <p class="text-sm font-bold uppercase">+90 (212) 555 01 23</p>
-            </div>
+
+            @if (!string.IsNullOrWhiteSpace(restaurant?.GoogleMapsUrl))
+            {
+                var mapsUrl = restaurant.GoogleMapsUrl;
+                <div class="border-[2px] border-yellow-300 p-4 text-center mt-6">
+                    @if (mapsUrl.Contains("embed"))
+                    {
+                        <iframe src="@mapsUrl" class="w-full h-48 border-0" allowfullscreen="" loading="lazy"></iframe>
+                    }
+                    else
+                    {
+                        <a href="@mapsUrl" target="_blank" rel="noopener" class="inline-block bg-yellow-300 text-black px-6 py-2 font-black text-xs uppercase hover:bg-white transition-colors">
+                            [ GOOGLE MAPS HARİTADA GÖR &amp; YOL TARİFİ ]
+                        </a>
+                    }
+                </div>
+            }
         </footer>
     </div>
 </div>

@@ -746,8 +746,37 @@
                     <input type="text" id="restaurantPhone" class="builder-input" value="@restaurant?.Phone"
                            placeholder="Örn: +90 555 000 00 00" />
 
+                    <label class="builder-label">Çalışma Saatleri</label>
+                    <input type="text" id="restaurantWorkingHours" class="builder-input" value="@restaurant?.WorkingHours"
+                           placeholder="Örn: Hafta içi: 09:00 - 23:00, Hafta sonu: 10:00 - 00:00" />
+
                     <button class="btn-builder-primary" onclick="submitLocationSettings()">
-                        💾 Harita & Konum Bilgilerini Kaydet
+                        💾 Harita, Konum &amp; Saat Bilgilerini Kaydet
+                    </button>
+                </div>
+            </div>
+
+            <!-- 5. Önemli Bilgilendirme & Duyuru Notu -->
+            <div class="section-card" id="sec-notice">
+                <button class="section-trigger" onclick="toggleSection('sec-notice')">
+                    <span class="step-badge">5</span>
+                    <span>
+                        <div class="step-title">📢 Duyuru &amp; Bilgilendirme Notu</div>
+                        <div class="step-desc">Kuver, KDV veya servis bilgisi (İsteğe bağlı)</div>
+                    </span>
+                    <span class="chevron">&#9660;</span>
+                </button>
+                <div class="section-body" id="body-notice">
+                    <label class="builder-label">Menü Üstü Bilgilendirme Notu</label>
+                    <textarea id="restaurantNotice" class="builder-input" rows="3"
+                              placeholder="Örn: Menü fiyatlarımıza KDV dahildir. Masanıza kişi başı 100 TL servis ücreti (kuver) yansıtılacaktır."
+                              style="resize: vertical; min-height: 80px; font-family: inherit;">@restaurant?.ImportantNotice</textarea>
+                    <p style="font-size: 0.72rem; color: #7d8590; margin-top: 4px; margin-bottom: 12px;">
+                        💡 <em>Boş bırakırsanız menünüzde bilgilendirme kutusu gösterilmez.</em>
+                    </p>
+
+                    <button class="btn-builder-primary" onclick="submitNoticeSettings()">
+                        💾 Bilgilendirme Notunu Kaydet
                     </button>
                 </div>
             </div>
@@ -985,13 +1014,30 @@
         const googleMapsUrl = document.getElementById('googleMapsUrl').value.trim();
         const address = document.getElementById('restaurantAddress').value.trim();
         const phone = document.getElementById('restaurantPhone').value.trim();
+        const workingHours = document.getElementById('restaurantWorkingHours').value.trim();
 
-        postForm('/Restaurant/Builder/UpdateLocation', { googleMapsUrl, address, phone })
+        postForm('/Restaurant/Builder/UpdateLocation', { googleMapsUrl, address, phone, workingHours })
         .then(r => r.json())
         .then(d => {
             if (d.success) {
                 refreshPreview();
-                showToast('📍 Konum ve harita bilgileri kaydedildi!');
+                showToast('📍 Konum, saat ve harita bilgileri kaydedildi!');
+            } else {
+                alert(d.message || 'Hata oluştu.');
+            }
+        })
+        .catch(e => console.error(e));
+    }
+
+    function submitNoticeSettings() {
+        const notice = document.getElementById('restaurantNotice').value.trim();
+
+        postForm('/Restaurant/Builder/UpdateNotice', { notice })
+        .then(r => r.json())
+        .then(d => {
+            if (d.success) {
+                refreshPreview();
+                showToast('📢 Bilgilendirme notu kaydedildi!');
             } else {
                 alert(d.message || 'Hata oluştu.');
             }

@@ -118,18 +118,25 @@
       </section>
     }
 
-    <!-- Notes -->
-    <div class="border border-[#1b4332] p-8 md:p-12 bg-[#042f1a]/50 rounded-2xl relative max-w-2xl mx-auto text-center mt-20">
-      <span class="font-sans text-[10px] uppercase tracking-[0.3em] text-[#d4af37] block mb-3">
-        BİLGİLENDİRME
-      </span>
-      <p class="text-xl md:text-2xl font-serif text-[#e6f4ea] leading-relaxed mb-4">
-        "Kendi alkolünü yanında getiren misafirlerimizden kişi başı <span class="text-[#d4af37] font-bold">100 TL</span> servis ücreti alınmaktadır."
-      </p>
-      <p class="font-sans text-[10px] italic text-stone-500">
-        * Menü fiyatlarımız ve içeriklerimiz taze hammaddelere göre güncellenebilmektedir.
-      </p>
-    </div>
+    <!-- Notes (İsteğe Bağlı) -->
+    @if (!string.IsNullOrWhiteSpace(restaurant?.ImportantNotice) || restaurant?.Id == 0)
+    {
+      var notice = !string.IsNullOrWhiteSpace(restaurant?.ImportantNotice)
+        ? restaurant.ImportantNotice
+        : "Menü fiyatlarımıza KDV dahildir. Özel istek ve alerjenleriniz için lütfen servis personelimize danışınız.";
+
+      <div class="border border-[#1b4332] p-8 md:p-12 bg-[#042f1a]/50 rounded-2xl relative max-w-2xl mx-auto text-center mt-20">
+        <span class="font-sans text-[10px] uppercase tracking-[0.3em] text-[#d4af37] block mb-3">
+          ÖNEMLİ BİLGİLENDİRME
+        </span>
+        <p class="text-xl md:text-2xl font-serif text-[#e6f4ea] leading-relaxed mb-4">
+          "@notice"
+        </p>
+        <p class="font-sans text-[10px] italic text-stone-500">
+          * Menü fiyatlarımız ve içeriklerimiz taze hammaddelere göre güncellenebilmektedir.
+        </p>
+      </div>
+    }
   </main>
 
   <!-- Serene Footer -->
@@ -147,9 +154,8 @@
         <p class="mt-2 text-stone-500">📍 @(string.IsNullOrWhiteSpace(restaurant?.Address) ? "Atatürk Caddesi, Hatay" : restaurant.Address)</p>
       </div>
       <div>
-        <h5 class="text-white font-bold uppercase tracking-widest mb-4">ÇALIŞMA GÜNLERİ</h5>
-        <p>Hafta İçi: 11:00 - 23:00</p>
-        <p>Hafta Sonu: 10:00 - 00:00</p>
+        <h5 class="text-[#d4af37] font-serif text-sm uppercase tracking-widest mb-4">ÇALIŞMA SAATLERİ</h5>
+        <p>@(string.IsNullOrWhiteSpace(restaurant?.WorkingHours) ? "Haftanın Her Günü: 11:00 - 23:00" : restaurant.WorkingHours)</p>
       </div>
     </div>
 
