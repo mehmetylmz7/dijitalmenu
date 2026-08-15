@@ -613,62 +613,6 @@
         min-height: 48px;
     }
 
-    .theme-progress-box {
-        background: var(--surface-low);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-md);
-        padding: 14px 18px;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .theme-progress-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        font-size: 0.8rem;
-        font-weight: 600;
-        color: var(--text-secondary);
-    }
-
-    .theme-progress-pulse {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .pulse-indicator {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--primary);
-        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-        animation: pulseDot 1.8s infinite;
-    }
-
-    @@keyframes pulseDot {
-        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-        70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
-        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-    }
-
-    .progress-track {
-        width: 100%;
-        height: 6px;
-        background: #e5e7eb;
-        border-radius: 999px;
-        overflow: hidden;
-        position: relative;
-    }
-
-    .progress-fill {
-        height: 100%;
-        width: 0%;
-        background: linear-gradient(90deg, var(--primary), #3b82f6);
-        border-radius: 999px;
-        will-change: width;
-    }
 
     .theme-controls-row {
         display: flex;
@@ -1477,7 +1421,7 @@
             <span>18 Farklı Konsept & Canlı Demo</span>
         </div>
         <h2>🎨 Canlı Tema Galerisi</h2>
-        <p>Her konsepte özel tasarlanmış mobil menüler. Temalar 3 saniyede bir otomatik akar; dilediğiniz temaya tıklayarak 3 saniye beklemeden anında test edebilirsiniz.</p>
+        <p>Her konsepte özel tasarlanmış mobil menüler. Temalar 10 saniyede bir otomatik akar; dilediğiniz temaya tıklayarak anında test edebilirsiniz.</p>
     </div>
 
     <!-- ─── Flagship Interactive Stage ─── -->
@@ -1502,20 +1446,6 @@
                 </div>
 
                 <p class="theme-active-desc" id="activeThemeDesc">@initialTheme.Desc</p>
-
-                <!-- 3 Saniye Otomatik İlerleme Çubuğu -->
-                <div class="theme-progress-box">
-                    <div class="theme-progress-header">
-                        <div class="theme-progress-pulse">
-                            <span class="pulse-indicator"></span>
-                            <span id="progressStatusText">3s döngü aktif</span>
-                        </div>
-                        <span style="font-size: 0.75rem; color: var(--text-muted);">Sıradaki temaya geçiş</span>
-                    </div>
-                    <div class="progress-track">
-                        <div class="progress-fill" id="themeProgressBar"></div>
-                    </div>
-                </div>
 
                 <!-- Kontrol Butonları ve Aksiyonlar -->
                 <div class="theme-controls-row">
@@ -1674,7 +1604,7 @@
     if (!themes || !themes.length) return;
 
     let currentIndex = 0;
-    const CYCLE_DURATION = 3000; // 3 seconds
+    const CYCLE_DURATION = 10000; // 10 seconds
     let animFrameId = null;
     let cycleStartTime = null;
     let isPaused = false;
@@ -1689,8 +1619,6 @@
     const activeTag = document.getElementById('activeThemeTag');
     const activeCounter = document.getElementById('activeThemeCounter');
     const activeCardGlowBar = document.getElementById('activeCardGlowBar');
-    const progressBar = document.getElementById('themeProgressBar');
-    const progressStatusText = document.getElementById('progressStatusText');
     const playPauseBtn = document.getElementById('themePlayPauseBtn');
     const playPauseIcon = document.getElementById('themePlayPauseIcon');
     const previewLinkBtn = document.getElementById('themePreviewLinkBtn');
@@ -1758,34 +1686,26 @@
             card.classList.toggle('active', i === currentIndex);
         });
 
-        // 7. Restart 3s Progress Timer
+        // 7. Restart 10s Timer
         startProgressCycle();
     }
 
     function startProgressCycle() {
         cancelAnimationFrame(animFrameId);
-        if (progressBar) progressBar.style.width = '0%';
 
-        if (isPaused || isHoverPaused) {
-            if (progressStatusText) progressStatusText.textContent = isPaused ? 'Durduruldu' : 'İnceleniyor';
-            return;
-        }
+        if (isPaused || isHoverPaused) return;
 
-        if (progressStatusText) progressStatusText.textContent = '3s döngü aktif';
         cycleStartTime = performance.now();
 
         function step(timestamp) {
             if (isPaused || isHoverPaused) return;
 
             const elapsed = timestamp - cycleStartTime;
-            const progress = Math.min(elapsed / CYCLE_DURATION, 1);
-            if (progressBar) progressBar.style.width = (progress * 100) + '%';
-
-            if (progress < 1) {
-                animFrameId = requestAnimationFrame(step);
-            } else {
-                // Auto switch to next theme after 3 seconds
+            if (elapsed >= CYCLE_DURATION) {
+                // Auto switch to next theme after 10 seconds
                 renderTheme(currentIndex + 1, false);
+            } else {
+                animFrameId = requestAnimationFrame(step);
             }
         }
 
@@ -1833,8 +1753,6 @@
             startProgressCycle();
         } else {
             cancelAnimationFrame(animFrameId);
-            if (progressBar) progressBar.style.width = '0%';
-            if (progressStatusText) progressStatusText.textContent = 'Durduruldu';
         }
     };
 
@@ -1843,7 +1761,6 @@
         phoneStage.addEventListener('mouseenter', function () {
             isHoverPaused = true;
             cancelAnimationFrame(animFrameId);
-            if (progressStatusText) progressStatusText.textContent = 'İnceleniyor';
         });
 
         phoneStage.addEventListener('mouseleave', function () {
