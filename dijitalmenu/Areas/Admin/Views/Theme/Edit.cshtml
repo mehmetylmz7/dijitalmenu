@@ -11,7 +11,16 @@
                 <label class="form-label">Tema Adı</label>
                 <input type="text" name="Name" value="@Model.Name" class="form-control" required />
             </div>
-            <div style="display:flex;gap:10px;margin-top:8px;">
+
+            <div class="form-group" style="margin-top: 16px;">
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                    <input type="checkbox" name="IsActive" value="true" @(Model.IsActive ? "checked" : "") style="width: 18px; height: 18px; accent-color: var(--accent);" />
+                    <span style="font-weight: 500; font-size: 0.9rem;">Tema Aktif (Menü galerisinde ve oluşturucuda görünsün)</span>
+                </label>
+                <input type="hidden" name="IsActive" value="false" />
+            </div>
+
+            <div style="display:flex;gap:10px;margin-top:24px;">
                 <button type="submit" class="btn btn-primary">💾 Güncelle</button>
                 <a asp-action="Index" class="btn btn-secondary">İptal</a>
             </div>

@@ -82,17 +82,19 @@ using (var scope = app.Services.CreateScope())
         {
             context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Restaurants"" ADD COLUMN IF NOT EXISTS ""ImportantNotice"" character varying(1000);");
             context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Restaurants"" ADD COLUMN IF NOT EXISTS ""WorkingHours"" character varying(200);");
+            context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Themes"" ADD COLUMN IF NOT EXISTS ""IsActive"" boolean NOT NULL DEFAULT true;");
         }
         else
         {
             context.Database.ExecuteSqlRaw(@"IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[Restaurants]') AND name = 'ImportantNotice') ALTER TABLE [Restaurants] ADD [ImportantNotice] nvarchar(1000) NULL;");
             context.Database.ExecuteSqlRaw(@"IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[Restaurants]') AND name = 'WorkingHours') ALTER TABLE [Restaurants] ADD [WorkingHours] nvarchar(200) NULL;");
+            context.Database.ExecuteSqlRaw(@"IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[Themes]') AND name = 'IsActive') ALTER TABLE [Themes] ADD [IsActive] bit NOT NULL DEFAULT 1;");
         }
     }
     catch (Exception ex)
     {
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-        logger.LogWarning(ex, "ImportantNotice / WorkingHours sütun kontrolü atlandı veya zaten mevcut.");
+        logger.LogWarning(ex, "ImportantNotice / WorkingHours / IsActive sütun kontrolü atlandı veya zaten mevcut.");
     }
 
     // Populate missing slugs for existing restaurants

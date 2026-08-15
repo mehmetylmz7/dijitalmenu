@@ -19,8 +19,8 @@ namespace EntityLayer.Concrete
         public string BackgroundColor { get; set; } = string.Empty;
         public string FontFamily { get; set; } = string.Empty;
         public LayoutType Layout { get; set; }
+        public bool IsActive { get; set; } = true;
 
         public ICollection<Restaurant> Restaurants { get; set; }
     }
 }
-

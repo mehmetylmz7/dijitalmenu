@@ -97,7 +97,7 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 return View();
             }
 
-            var themes = _themeService.TGetListAll().OrderBy(theme => theme.Id).ToList();
+            var themes = _themeService.TGetListAll().Where(t => t.IsActive).OrderBy(theme => theme.Id).ToList();
             var selectedTheme = themeId > 0
                 ? themes.FirstOrDefault(theme => theme.Id == themeId)
                 : themes.FirstOrDefault();
@@ -110,8 +110,6 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
 
             try
             {
-                using var transaction = _context.Database.BeginTransaction();
-
                 var restaurant = new EntityLayer.Concrete.Restaurant
                 {
                     Name = restaurantName,
@@ -130,7 +128,6 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 var menu = new Menu { RestaurantId = restaurant.Id };
                 _menuService.TInsert(menu);
                 _defaultCategoryService.TApplyToMenu(menu.Id);
-                transaction.Commit();
 
                 SignIn(user);
                 return RedirectToAction("Index", "Dashboard", new { area = "Restaurant" });
@@ -143,7 +140,7 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpGet]
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
@@ -158,7 +155,7 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
         }
 
         private void PopulateThemes(List<Theme>? themes = null) =>
-            ViewBag.Themes = themes ?? _themeService.TGetListAll().OrderBy(theme => theme.Id).ToList();
+            ViewBag.Themes = themes ?? _themeService.TGetListAll().Where(t => t.IsActive).OrderBy(theme => theme.Id).ToList();
 
         private static bool IsValidRegistration(string restaurantName, string username, string password, out string error)
         {

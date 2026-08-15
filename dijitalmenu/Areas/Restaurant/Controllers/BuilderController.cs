@@ -65,7 +65,7 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             ViewBag.Restaurant = restaurant;
             ViewBag.Categories = categories;
             ViewBag.MenuItems = menuItems;
-            ViewBag.Themes = _themeService.TGetListAll();
+            ViewBag.Themes = _themeService.TGetListAll().Where(t => t.IsActive).OrderBy(t => t.Id).ToList();
             ViewBag.Suggestions = suggestions;
             ViewBag.RestaurantUsername = HttpContext.Session.GetString("RestaurantUsername");
 
@@ -80,7 +80,7 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             if (restaurant == null) return Json(new { success = false, message = "Restoran bulunamadı." });
 
             var theme = _themeService.TGetByID(themeId);
-            if (theme == null) return Json(new { success = false, message = "Tema bulunamadı." });
+            if (theme == null || !theme.IsActive) return Json(new { success = false, message = "Bu tema şu anda kullanıma kapalıdır." });
 
             restaurant.ThemeId = themeId;
             _restaurantService.TUpdate(restaurant);

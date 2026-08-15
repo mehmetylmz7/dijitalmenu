@@ -33,7 +33,7 @@ public class HomeController : Controller
     // GET: / — Landing page with demo themes
     public IActionResult Index()
     {
-        var themes = _themeService.TGetListAll().ToList();
+        var themes = _themeService.TGetListAll().Where(t => t.IsActive).OrderBy(t => t.Id).ToList();
         ViewBag.Themes = themes;
         return View();
     }
@@ -41,18 +41,22 @@ public class HomeController : Controller
     // GET: /Home/Preview?themeId=1 — Canlı tema önizleme ve cihaz simülatörü
     public IActionResult Preview(int themeId = 1)
     {
-        var themes = _themeService.TGetListAll().ToList();
+        var themes = _themeService.TGetListAll().Where(t => t.IsActive).OrderBy(t => t.Id).ToList();
+        var selectedTheme = themes.FirstOrDefault(t => t.Id == themeId) ?? themes.FirstOrDefault();
         ViewBag.Themes = themes;
-        ViewBag.SelectedThemeId = themeId;
+        ViewBag.SelectedThemeId = selectedTheme?.Id ?? themeId;
         return View();
     }
 
     // GET: /Home/Demo?themeId=1 — Statik JSON menü ile tema önizleme
     public IActionResult Demo(int themeId = 1)
     {
-        // Temayı DB'den al
-        var theme = _themeService.TGetByID(themeId)
-                    ?? _themeService.TGetListAll().FirstOrDefault();
+        // Temayı DB'den al (yalnızca aktif temalar)
+        var theme = _themeService.TGetByID(themeId);
+        if (theme == null || !theme.IsActive)
+        {
+            theme = _themeService.TGetListAll().FirstOrDefault(t => t.IsActive);
+        }
         ViewBag.Theme = theme;
 
         // JSON dosyasını oku
@@ -129,17 +133,25 @@ public class HomeController : Controller
         EntityLayer.Concrete.Theme? theme = null;
         if (previewThemeId.HasValue)
         {
-            theme = _themeService.TGetByID(previewThemeId.Value);
+            var pt = _themeService.TGetByID(previewThemeId.Value);
+            if (pt != null && pt.IsActive)
+            {
+                theme = pt;
+            }
         }
         
         if (theme == null)
         {
-            theme = _themeService.TGetByID(restaurant.ThemeId);
+            var restTheme = _themeService.TGetByID(restaurant.ThemeId);
+            if (restTheme != null && restTheme.IsActive)
+            {
+                theme = restTheme;
+            }
         }
 
         if (theme == null)
         {
-            theme = _themeService.TGetListAll().FirstOrDefault();
+            theme = _themeService.TGetListAll().FirstOrDefault(t => t.IsActive);
         }
 
         ViewBag.Theme = theme;

@@ -50,6 +50,19 @@ namespace dijitalmenu.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        public IActionResult ToggleStatus(int id)
+        {
+            var theme = _themeService.TGetByID(id);
+            if (theme != null)
+            {
+                theme.IsActive = !theme.IsActive;
+                _themeService.TUpdate(theme);
+                TempData["Success"] = $"\"{theme.Name}\" teması {(theme.IsActive ? "aktifleştirildi" : "pasife alındı")}.";
+            }
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
         public IActionResult Delete(int id)
         {
             var theme = _themeService.TGetByID(id);

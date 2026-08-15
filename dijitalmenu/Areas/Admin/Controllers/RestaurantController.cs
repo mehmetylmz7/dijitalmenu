@@ -29,7 +29,7 @@ namespace dijitalmenu.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            ViewBag.Themes = _themeService.TGetListAll();
+            ViewBag.Themes = _themeService.TGetListAll().Where(t => t.IsActive).ToList();
             return View();
         }
 
@@ -43,7 +43,7 @@ namespace dijitalmenu.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult Edit(int id)
         {
-            ViewBag.Themes = _themeService.TGetListAll();
+            ViewBag.Themes = _themeService.TGetListAll().Where(t => t.IsActive).ToList();
             var restaurant = _restaurantService.TGetByID(id);
             return View(restaurant);
         }

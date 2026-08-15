@@ -1,25 +1,93 @@
 @model List<EntityLayer.Concrete.Theme>
 @{
     ViewData["Title"] = "Temalar";
+    var activeCount = Model.Count(t => t.IsActive);
+    var passiveCount = Model.Count(t => !t.IsActive);
 }
+
+@if (TempData["Success"] != null)
+{
+    <div style="background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.3); color: #4ade80; padding: 12px 16px; border-radius: 10px; margin-bottom: 20px; font-size: 0.875rem;">
+        ✅ @TempData["Success"]
+    </div>
+}
+
+<div class="stat-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 24px;">
+    <div class="stat-card stat-purple">
+        <div class="stat-icon">🎨</div>
+        <div class="stat-label">Toplam Tema</div>
+        <div class="stat-value">@Model.Count</div>
+    </div>
+    <div class="stat-card stat-green">
+        <div class="stat-icon">✅</div>
+        <div class="stat-label">Aktif Temalar</div>
+        <div class="stat-value">@activeCount</div>
+    </div>
+    <div class="stat-card stat-orange">
+        <div class="stat-icon">⛔</div>
+        <div class="stat-label">Pasif Temalar</div>
+        <div class="stat-value">@passiveCount</div>
+    </div>
+</div>
+
 <div class="card">
     <div class="card-header">
-        <h5>🎨 Tema Listesi</h5>
+        <div>
+            <h5>🎨 Tema Listesi &amp; Görünürlük Yönetimi</h5>
+            <small style="color: var(--text-muted); font-size: 0.75rem;">Pasif yapılan temalar müşteri menü galerisinde ve restoran menü oluşturucusunda gizlenir.</small>
+        </div>
         <a asp-action="Create" class="btn btn-primary btn-sm">➕ Yeni Ekle</a>
     </div>
     <table>
         <thead>
-            <tr><th>#</th><th>Ad</th><th>İşlemler</th></tr>
+            <tr>
+                <th style="width: 50px;">#</th>
+                <th>Tema Adı</th>
+                <th style="width: 140px;">Durum</th>
+                <th style="width: 280px; text-align: right;">İşlemler</th>
+            </tr>
         </thead>
         <tbody>
-            @foreach (var item in Model)
+            @foreach (var item in Model.OrderByDescending(t => t.IsActive).ThenBy(t => t.Id))
             {
-                <tr>
+                <tr style="@(!item.IsActive ? "opacity: 0.65; background: rgba(0,0,0,0.15);" : "")">
                     <td><span class="badge badge-purple">@item.Id</span></td>
-                    <td>@item.Name</td>
-                    <td style="display:flex;gap:8px;">
-                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">✏️ Düzenle</a>
-                        <partial name="~/Views/Shared/_DeleteButton.cshtml" model="item.Id" />
+                    <td>
+                        <strong style="font-size: 0.95rem; color: var(--text);">@item.Name</strong>
+                    </td>
+                    <td>
+                        @if (item.IsActive)
+                        {
+                            <span class="badge" style="background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3);">
+                                ✅ Aktif
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);">
+                                ⛔ Pasif (Gizli)
+                            </span>
+                        }
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 6px; justify-content: flex-end; align-items: center;">
+                            <form asp-action="ToggleStatus" asp-route-id="@item.Id" method="post" style="margin: 0; display: inline;">
+                                @if (item.IsActive)
+                                {
+                                    <button type="submit" class="btn btn-sm btn-warning" title="Temayı gizlemek için pasife al">
+                                        ⛔ Pasife Al
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="submit" class="btn btn-sm" style="background: rgba(34, 197, 94, 0.2); color: #4ade80;" title="Temayı görünür yapmak için aktifleştir">
+                                        ✅ Aktif Et
+                                    </button>
+                                }
+                            </form>
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-secondary">✏️ Düzenle</a>
+                            <partial name="~/Views/Shared/_DeleteButton.cshtml" model="item.Id" />
+                        </div>
                     </td>
                 </tr>
             }
