@@ -1,0 +1,207 @@
+@{
+    var restaurant = ViewBag.Restaurant as EntityLayer.Concrete.Restaurant;
+    var categories = ViewBag.Categories as List<EntityLayer.Concrete.Category> ?? new();
+    var menuItems  = ViewBag.MenuItems  as List<EntityLayer.Concrete.MenuItem>  ?? new();
+
+    var defaultHeroImage = "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1400";
+
+    var defaultCategoryImages = new[]
+    {
+        "https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&q=80&w=800"
+    };
+
+    var defaultItemImages = new[]
+    {
+        "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=600",
+        "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&q=80&w=600",
+        "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80&w=600",
+        "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=600",
+        "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&q=80&w=600",
+        "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&q=80&w=600"
+    };
+
+    int globalItemCounter = 0;
+}
+
+<div class="bg-[#f8f9fa] text-[#191c1d] min-h-screen font-sans selection:bg-[#10b981] selection:text-white pb-20">
+    <!-- Hero Section -->
+    <header class="relative w-full h-[45vh] min-h-[360px] flex items-center justify-center overflow-hidden">
+        <!-- Background Image -->
+        <div class="absolute inset-0 z-0">
+            <div class="w-full h-full bg-cover bg-center" style="background-image: url('@defaultHeroImage')"></div>
+            <!-- Light gradient overlay to ensure text legibility -->
+            <div class="absolute inset-0 bg-gradient-to-t from-[#f8f9fa] via-[#f8f9fa]/50 to-black/30"></div>
+        </div>
+
+        <!-- Hero Content -->
+        <div class="relative z-10 text-center px-4 flex flex-col items-center max-w-2xl mx-auto">
+            <span class="inline-flex items-center gap-1.5 bg-[#006c49]/10 text-[#006c49] border border-[#006c49]/20 font-bold text-xs px-4 py-1.5 rounded-full uppercase tracking-[0.2em] mb-3 backdrop-blur-md">
+                <i class="fa-solid fa-gem text-[11px]"></i> Premium Experience
+            </span>
+            <h1 class="font-serif text-4xl sm:text-5xl md:text-6xl font-bold text-[#191c1d] mb-2 tracking-tight">
+                @(restaurant?.Name ?? "KOCAOĞLU")
+            </h1>
+            <p class="text-[#575e70] text-sm sm:text-base flex items-center justify-center gap-1.5 font-medium">
+                <i class="fa-solid fa-location-dot text-[#006c49]"></i>
+                @(string.IsNullOrEmpty(restaurant?.Address) ? "Seçkin Lezzet Deneyimi" : restaurant.Address)
+            </p>
+        </div>
+    </header>
+
+    <!-- Floating Category Bar (Sticky) -->
+    <nav class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-y border-stone-200/80 py-3 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 md:px-8 overflow-x-auto no-scrollbar flex items-center gap-4 md:gap-8 justify-start md:justify-center">
+            @for (int i = 0; i < categories.Count; i++)
+            {
+                var cat = categories[i];
+                <button onclick="scrollToEmeraldCategory(this, 'emerald-cat-@cat.Id')"
+                        class="emerald-nav-btn @(i == 0 ? "text-[#006c49] border-b-2 border-[#006c49] font-bold" : "text-[#575e70] border-b-2 border-transparent hover:text-[#006c49] font-medium") text-xs sm:text-sm uppercase tracking-wider pb-1 whitespace-nowrap shrink-0 transition-colors bg-transparent cursor-pointer">
+                    @cat.Name
+                </button>
+            }
+        </div>
+    </nav>
+
+    <!-- Menu Content Wrapper -->
+    <main class="max-w-6xl mx-auto px-4 md:px-8 pt-8 flex flex-col gap-12">
+        <!-- Service Note Box -->
+        <div class="bg-white border border-stone-200/80 rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 relative overflow-hidden shadow-sm">
+            <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-[#006c49] rounded-l-2xl"></div>
+            <div class="bg-[#006c49]/10 p-3.5 rounded-2xl text-[#006c49] shrink-0">
+                <i class="fa-solid fa-circle-info text-xl"></i>
+            </div>
+            <div>
+                <h3 class="text-sm font-bold text-[#191c1d] mb-1">Önemli Bilgilendirme</h3>
+                <p class="text-xs sm:text-sm text-[#575e70] leading-relaxed">
+                    Menü fiyatlarımıza KDV dahildir. Tüm yemeklerimiz günlük taze malzemeler ve mevsimlik ürünlerle usta şeflerimiz tarafından özenle hazırlanmaktadır.
+                </p>
+            </div>
+        </div>
+
+        @if (!categories.Any())
+        {
+            <div class="bg-white border border-stone-200 rounded-3xl p-12 text-center shadow-sm my-10">
+                <span class="text-5xl block mb-4">🌿</span>
+                <h3 class="text-lg font-bold text-stone-800 mb-2">Henüz kategori bulunmuyor</h3>
+                <p class="text-stone-500 text-sm">Restoran yönetim panelinden menü ürünleri ekleyebilirsiniz.</p>
+            </div>
+        }
+
+        <!-- Categories & Items Loop -->
+        @for (int cIdx = 0; cIdx < categories.Count; cIdx++)
+        {
+            var cat = categories[cIdx];
+            var items = menuItems.Where(i => i.CategoryId == cat.Id).ToList();
+            if (!items.Any()) continue;
+
+            var catImg = !string.IsNullOrEmpty(cat.ImageUrl) 
+                ? cat.ImageUrl 
+                : defaultCategoryImages[cIdx % defaultCategoryImages.Length];
+
+            <section class="scroll-mt-20" id="emerald-cat-@cat.Id">
+                <!-- Category Header Banner -->
+                <div class="relative h-40 sm:h-48 rounded-2xl overflow-hidden mb-6 group shadow-sm">
+                    <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" 
+                         style="background-image: url('@catImg')"></div>
+                    <div class="absolute inset-0 bg-gradient-to-r from-[#006c49]/90 via-[#006c49]/70 to-transparent"></div>
+                    <div class="absolute inset-0 flex items-center px-6 sm:px-10">
+                        <div>
+                            <span class="text-emerald-200 text-xs font-bold uppercase tracking-[0.25em] block mb-1">Kategori</span>
+                            <h2 class="text-2xl sm:text-3xl md:text-4xl font-serif font-bold text-white tracking-wide">
+                                @cat.Name
+                            </h2>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Items Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    @for (int iIdx = 0; iIdx < items.Count; iIdx++)
+                    {
+                        var item = items[iIdx];
+                        globalItemCounter++;
+
+                        var itemImg = !string.IsNullOrEmpty(item.ImageUrl) 
+                            ? item.ImageUrl 
+                            : defaultItemImages[globalItemCounter % defaultItemImages.Length];
+
+                        <article class="bg-white rounded-2xl border border-stone-200/70 overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col">
+                            <!-- Image & Badge Container -->
+                            <div class="relative h-52 w-full bg-stone-100 overflow-hidden">
+                                <img class="w-full h-full object-cover transition-transform duration-500 hover:scale-105" 
+                                     src="@itemImg" 
+                                     alt="@item.Name" 
+                                     loading="lazy" />
+                                
+                                @if (globalItemCounter % 3 == 0)
+                                {
+                                    <div class="absolute top-3.5 left-3.5 bg-[#006c49] text-white text-[11px] font-bold px-3 py-1 rounded-full flex items-center gap-1.5 shadow-md backdrop-blur-md">
+                                        <i class="fa-solid fa-star text-amber-300 text-[10px]"></i>
+                                        <span>Şefin Tavsiyesi</span>
+                                    </div>
+                                }
+                                else if (globalItemCounter % 4 == 0)
+                                {
+                                    <div class="absolute top-3.5 left-3.5 bg-amber-600 text-white text-[11px] font-bold px-3 py-1 rounded-full flex items-center gap-1.5 shadow-md backdrop-blur-md">
+                                        <i class="fa-solid fa-fire text-amber-200 text-[10px]"></i>
+                                        <span>İmza Lezzet</span>
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Card Body -->
+                            <div class="p-5 flex flex-col flex-grow justify-between">
+                                <div>
+                                    <div class="flex justify-between items-start gap-3 mb-2">
+                                        <h3 class="font-serif text-lg sm:text-xl font-bold text-[#191c1d] leading-snug">
+                                            @item.Name
+                                        </h3>
+                                        <span class="text-base sm:text-lg font-bold text-[#006c49] whitespace-nowrap shrink-0 bg-emerald-50 border border-emerald-100 px-2.5 py-0.5 rounded-lg">
+                                            @item.Price.ToString("N0") ₺
+                                        </span>
+                                    </div>
+
+                                    @if (!string.IsNullOrEmpty(item.Description))
+                                    {
+                                        <p class="text-xs sm:text-sm text-[#575e70] leading-relaxed line-clamp-2">
+                                            @item.Description
+                                        </p>
+                                    }
+                                </div>
+                            </div>
+                        </article>
+                    }
+                </div>
+            </section>
+        }
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-20 pt-12 pb-8 bg-white border-t border-stone-200 text-center">
+        <div class="max-w-6xl mx-auto px-4">
+            <h3 class="font-serif text-xl font-bold text-[#191c1d] mb-1">@(restaurant?.Name ?? "Restoran Menüsü")</h3>
+            <p class="text-xs text-[#575e70] mb-4">Dijital QR Menü Çözümleri ile hazırlanmıştır.</p>
+            <p class="text-[11px] text-stone-400">© @DateTime.Now.Year Tüm Hakları Saklıdır.</p>
+        </div>
+    </footer>
+</div>
+
+<script>
+function scrollToEmeraldCategory(btn, sectionId) {
+    const section = document.getElementById(sectionId);
+    if (section) {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    document.querySelectorAll('.emerald-nav-btn').forEach(b => {
+        b.classList.remove('text-[#006c49]', 'border-[#006c49]', 'font-bold');
+        b.classList.add('text-[#575e70]', 'border-transparent', 'font-medium');
+    });
+    btn.classList.add('text-[#006c49]', 'border-[#006c49]', 'font-bold');
+    btn.classList.remove('text-[#575e70]', 'border-transparent', 'font-medium');
+}
+</script>
