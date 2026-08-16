@@ -342,6 +342,15 @@ using (var scope = app.Services.CreateScope())
             BackgroundColor = "#f8f9fa", 
             FontFamily = "Sora, Inter, sans-serif", 
             Layout = EntityLayer.Concrete.LayoutType.Grid 
+        },
+        new EntityLayer.Concrete.Theme 
+        { 
+            Name = "Zarif Noktalı", 
+            PrimaryColor = "#006c49", 
+            SecondaryColor = "#575e70", 
+            BackgroundColor = "#f8f9fa", 
+            FontFamily = "Sora, Inter, sans-serif", 
+            Layout = EntityLayer.Concrete.LayoutType.List 
         }
     };
 

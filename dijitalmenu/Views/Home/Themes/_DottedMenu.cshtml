@@ -1,0 +1,462 @@
+@{
+    var restaurant = ViewBag.Restaurant as EntityLayer.Concrete.Restaurant;
+    var categories = ViewBag.Categories as List<EntityLayer.Concrete.Category> ?? new();
+    var menuItems  = ViewBag.MenuItems  as List<EntityLayer.Concrete.MenuItem>  ?? new();
+
+    // Default item images matching the prompt's aesthetic
+    var defaultItemImages = new[]
+    {
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuAGQrxPhyGQjbCXiY06rXgrMVeCOnCWIy01m8iAI2RlMnaYvZYOyHHfx7wjraZX9aOU-qsk5dtMpY2ojZilIElliZGw5u8ecen05gHVmypR54e-ByOpq4PfpHpjeriY7q0JoU1wR6aykezEChu2GWyg9Ow4Tzj4B3teN8CL9-YTSjh5u85TKNbj-XIZeQdXLFY50C5yl6Lh7nYJmzZ4nJhJCBLX1vJJhjVBhaj8CB4-fSLLOTZepm7l",
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuCuMGiMvlhw1AX9GKGn0nGzeEtA4qaA_gFECip7ohLvH457_hdyzWvbMmQs3sin2Lsed-PjqwQBEwY657fhccqXwrPs9dBrCXLlPLTXF79s8J9cgrjUc4_jwT6jFNSpfcBE_drGShHku36lK8CJ4OyRI68LyvlCHpUNhUnfGoS58_lXiS-zosYbkHM_c1QG0PMpj_sQay-Wo9IaAQQs6jo8ZuJ8ZzvpNWZN31gXoRx-6e5u5A04D1Ro",
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuD1L8Trsnmul6EXmPfaLD2amgg7whxBQoopZzSlDpAevJ3qdDF8AosXqr34yghy32fBhPffJxCaYjUDa9N_u619NALBKggk6dHkzc29-5ABQkB6DhGliPatgxZsBZR1wppCl4H6v0CVVv5CjOrwdt35PJb-npegK2GR8zHIYwxhSUvvjO9-HfTHww2FdJMfi4Q4B-bnfiwLW_Z_m4eqUKY-Gg8BOyOJt_UwysQ2GMRuFyZculKPoFKs",
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuDbmSyLbD42rG122oT8UPEUYX0uZs_caY-V-YV-lgEz2PEe0dCcVKgeE_cM_fSVvlHeyG8nOBQNbd9U0rzyQz4wLqsqotqCeQbq70PyCrnEPlEar2TP9GPQCcKmdCUn2Hxg2CZ86QlvbAQTFoJTLa2MCwrZE7KAIG55kNX_bDUYcnIVrJCVTKPmz7ABY-j9bbXsKqjcljo0k1zjWMkN5sR5IwUUhzbHcyaQQ-_zeO3SItXZlFuwWoWf",
+        "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=600",
+        "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&q=80&w=600",
+        "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80&w=600",
+        "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=600"
+    };
+
+    var categoryIcons = new[] { "tapas", "restaurant", "icecream", "local_bar", "lunch_dining", "bakery_dining", "coffee", "set_meal" };
+    int globalItemCounter = 0;
+}
+
+<!-- Google Fonts & Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<style>
+    .dotted-theme {
+        --color-primary: #006c49;
+        --color-primary-container: #10b981;
+        --color-on-primary-container: #00422b;
+        --color-surface: #f8f9fa;
+        --color-on-surface: #191c1d;
+        --color-surface-low: #f3f4f5;
+        --color-surface-container: #edeeef;
+        --color-secondary: #575e70;
+        --color-outline-variant: #bbcabf;
+        background-color: var(--color-surface);
+        color: var(--color-on-surface);
+        font-family: 'Inter', system-ui, sans-serif;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .dotted-theme .font-sora {
+        font-family: 'Sora', sans-serif;
+    }
+
+    .dotted-theme .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .dotted-theme .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .dotted-theme .dotted-leader {
+        border-bottom: 2px dotted #bbcabf;
+        flex-grow: 1;
+        margin: 0 12px;
+        position: relative;
+        top: -6px;
+    }
+
+    .dotted-theme .modal-enter {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+    }
+    .dotted-theme .modal-enter-active {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+        transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1), transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .dotted-theme .modal-leave {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+    .dotted-theme .modal-leave-active {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+        transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1), transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .dotted-theme .overlay-enter {
+        opacity: 0;
+    }
+    .dotted-theme .overlay-enter-active {
+        opacity: 1;
+        transition: opacity 300ms;
+    }
+    .dotted-theme .overlay-leave {
+        opacity: 1;
+    }
+    .dotted-theme .overlay-leave-active {
+        opacity: 0;
+        transition: opacity 200ms;
+    }
+
+    .dotted-tab-active {
+        background-color: #006c49 !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        box-shadow: 0 2px 8px rgba(0, 108, 73, 0.25);
+    }
+</style>
+
+<div class="dotted-theme min-h-screen antialiased selection:bg-[#10b981] selection:text-white pb-20">
+
+    <!-- TopNavBar (Fixed Header) -->
+    <header class="fixed top-0 w-full z-40 bg-[#f8f9fa]/90 backdrop-blur-md border-b border-[#bbcabf]/30 shadow-sm flex flex-col justify-between max-w-7xl mx-auto h-auto">
+        <div class="px-4 sm:px-6 md:px-10 h-16 flex justify-between items-center">
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-[#006c49] text-white flex items-center justify-center font-bold text-sm shadow-sm shrink-0">
+                    <span class="material-symbols-outlined text-lg">restaurant</span>
+                </div>
+                <div>
+                    <span class="text-base sm:text-xl font-sora font-bold text-[#191c1d] tracking-tight">
+                        @(restaurant?.Name ?? "Dijital Menü")
+                    </span>
+                </div>
+            </div>
+
+            <button onclick="toggleDottedSearch()" 
+                    class="text-[#006c49] hover:text-[#005236] p-2 rounded-lg hover:bg-[#edeeef] transition-colors duration-200 cursor-pointer focus:outline-none"
+                    aria-label="Arama">
+                <span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 0;">search</span>
+            </button>
+        </div>
+
+        <!-- Horizontal Category Nav -->
+        @if (categories.Any())
+        {
+            <nav class="flex overflow-x-auto hide-scrollbar px-4 sm:px-6 md:px-10 gap-2.5 pb-2.5">
+                @for (int i = 0; i < categories.Count; i++)
+                {
+                    var cat = categories[i];
+                    <button id="dotted-tab-btn-@cat.Id" 
+                            class="dotted-nav-tab whitespace-nowrap px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all duration-150 active:scale-95 cursor-pointer @(i == 0 ? "dotted-tab-active" : "text-[#575e70] bg-[#edeeef] hover:bg-[#e1e3e4]")" 
+                            onclick="scrollToDottedSection('dotted-cat-@cat.Id', this)">
+                        @cat.Name
+                    </button>
+                }
+            </nav>
+        }
+    </header>
+
+    <!-- Search Dropdown Bar (Collapsible Live Filter) -->
+    <div id="dottedSearchBar" class="hidden fixed top-24 left-0 w-full z-45 bg-white/95 backdrop-blur-md border-b border-[#bbcabf]/40 px-4 py-3 shadow-md transition-all">
+        <div class="max-w-xl mx-auto relative flex items-center">
+            <span class="material-symbols-outlined absolute left-3.5 text-[#575e70] text-xl">search</span>
+            <input id="dottedSearchInput" 
+                   type="text" 
+                   placeholder="Menüde lezzet veya içecek ara..." 
+                   oninput="filterDottedMenuItems(this.value)" 
+                   class="w-full pl-11 pr-10 py-2.5 rounded-full bg-[#f3f4f5] border border-[#bbcabf]/40 text-sm focus:outline-none focus:border-[#006c49] text-[#191c1d]" />
+            <button onclick="clearDottedSearch()" class="absolute right-3.5 text-[#575e70] hover:text-[#191c1d] cursor-pointer">
+                <span class="material-symbols-outlined text-lg">close</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="pt-28 sm:pt-32 pb-20 px-4 max-w-2xl mx-auto space-y-10">
+
+        <!-- Service / Important Notice Alert Box -->
+        @if (!string.IsNullOrWhiteSpace(restaurant?.ImportantNotice) || restaurant?.Id == 0)
+        {
+            var notice = !string.IsNullOrWhiteSpace(restaurant?.ImportantNotice)
+                ? restaurant.ImportantNotice
+                : "Menü fiyatlarımıza KDV dahildir. Tüm yemeklerimiz günlük taze malzemeler ve mevsimlik ürünlerle usta şeflerimiz tarafından özenle hazırlanmaktadır.";
+
+            <div class="bg-white border border-[#bbcabf]/40 rounded-2xl p-4 sm:p-5 flex items-start gap-3.5 shadow-sm relative overflow-hidden">
+                <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-[#006c49] rounded-l-2xl"></div>
+                <div class="w-9 h-9 rounded-xl bg-[#006c49]/10 text-[#006c49] flex items-center justify-center shrink-0 mt-0.5">
+                    <span class="material-symbols-outlined text-xl">info</span>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-[#006c49] mb-0.5">Önemli Bilgilendirme</h4>
+                    <p class="text-xs sm:text-sm text-[#575e70] leading-relaxed">
+                        @notice
+                    </p>
+                </div>
+            </div>
+        }
+
+        @if (!categories.Any())
+        {
+            <div class="bg-white border border-[#bbcabf]/40 rounded-3xl p-12 text-center shadow-sm my-6">
+                <span class="text-5xl block mb-4">📜</span>
+                <h3 class="font-sora text-lg font-bold text-[#191c1d] mb-2">Henüz menü eklenmemiş</h3>
+                <p class="text-sm text-[#575e70]">Restoran panelinden kategori ve ürünler ekleyebilirsiniz.</p>
+            </div>
+        }
+
+        <!-- Menu Categories & Dotted Items -->
+        <div class="flex flex-col gap-10" id="dotted-menu-list">
+            @for (int cIdx = 0; cIdx < categories.Count; cIdx++)
+            {
+                var category = categories[cIdx];
+                var catItems = menuItems.Where(mi => mi.CategoryId == category.Id).ToList();
+                if (!catItems.Any()) continue;
+
+                var icon = categoryIcons[cIdx % categoryIcons.Length];
+
+                <section id="dotted-cat-@category.Id" class="scroll-mt-32 dotted-cat-section" data-cat-id="@category.Id">
+                    <h2 class="font-sora text-xl sm:text-2xl font-bold text-[#006c49] mb-4 pb-1.5 border-b border-[#bbcabf]/25 flex items-center justify-between">
+                        <span class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[#10b981] text-2xl">@icon</span>
+                            @category.Name
+                        </span>
+                        <span class="text-xs font-semibold text-[#575e70] bg-[#edeeef] px-2.5 py-0.5 rounded-full">
+                            @catItems.Count Çeşit
+                        </span>
+                    </h2>
+
+                    <div class="space-y-4">
+                        @for (int i = 0; i < catItems.Count; i++)
+                        {
+                            var item = catItems[i];
+                            globalItemCounter++;
+
+                            var itemImg = !string.IsNullOrWhiteSpace(item.ImageUrl) 
+                                ? item.ImageUrl 
+                                : defaultItemImages[globalItemCounter % defaultItemImages.Length];
+
+                            <div class="dotted-menu-item cursor-pointer group flex items-end w-full py-1.5 hover:bg-white/60 rounded-xl px-1.5 -mx-1.5 transition-colors duration-150" 
+                                 data-title="@item.Name" 
+                                 data-price="@item.Price.ToString("N0") TL" 
+                                 data-desc="@(string.IsNullOrWhiteSpace(item.Description) ? "Özel malzemeler ve şefin dokunuşuyla taze hazırlanmış lezzet." : item.Description)" 
+                                 data-img="@itemImg"
+                                 onclick="openDottedModal('@item.Name', '@item.Price.ToString("N0") TL', '@(string.IsNullOrWhiteSpace(item.Description) ? "Özel malzemeler ve şefin dokunuşuyla taze hazırlanmış lezzet." : item.Description)', '@itemImg')">
+                                
+                                <!-- Left: Avatar + Title -->
+                                <div class="flex items-center gap-3 shrink-0 min-w-0 max-w-[70%]">
+                                    <img class="w-12 h-12 rounded-full object-cover border border-[#bbcabf] group-hover:border-[#006c49] transition-colors shrink-0 shadow-xs" 
+                                         src="@itemImg" 
+                                         alt="@item.Name" 
+                                         loading="lazy" />
+                                    <div class="min-w-0">
+                                        <span class="font-sora text-sm sm:text-base font-semibold text-[#191c1d] group-hover:text-[#006c49] transition-colors truncate block">
+                                            @item.Name
+                                        </span>
+                                        @if (!string.IsNullOrWhiteSpace(item.Description))
+                                        {
+                                            <span class="text-[11px] text-[#575e70] line-clamp-1 block">
+                                                @item.Description
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+
+                                <!-- Middle: Dotted Leader Line -->
+                                <div class="dotted-leader"></div>
+
+                                <!-- Right: Price -->
+                                <span class="font-sora text-sm sm:text-base font-bold text-[#006c49] whitespace-nowrap shrink-0 group-hover:scale-105 transition-transform">
+                                    @item.Price.ToString("N0") TL
+                                </span>
+                            </div>
+                        }
+                    </div>
+                </section>
+            }
+
+            <div id="dottedNoResults" class="hidden bg-white border border-[#bbcabf]/40 rounded-3xl p-10 text-center shadow-sm my-6">
+                <span class="material-symbols-outlined text-4xl text-[#575e70] mb-2">search_off</span>
+                <h4 class="font-sora text-base font-bold text-[#191c1d] mb-1">Aramanızla eşleşen ürün bulunamadı</h4>
+                <p class="text-xs text-[#575e70]">Lütfen farklı bir arama terimi deneyiniz.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full py-12 bg-[#f3f4f5] border-t border-[#bbcabf]/40 max-w-7xl mx-auto px-4 sm:px-6 md:px-10">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <div>
+                <span class="text-xl font-sora font-bold text-[#191c1d]">@(restaurant?.Name ?? "Dijital Menü")</span>
+                <p class="text-xs sm:text-sm text-[#575e70] mt-2 leading-relaxed">
+                    @(string.IsNullOrWhiteSpace(restaurant?.Address) ? "Merkez, Türkiye" : restaurant.Address)
+                </p>
+                <div class="mt-3 flex items-center gap-4 text-xs text-[#575e70]">
+                    @if (!string.IsNullOrWhiteSpace(restaurant?.Phone))
+                    {
+                        <a href="tel:@restaurant.Phone" class="hover:text-[#006c49] font-medium flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm">call</span> @restaurant.Phone
+                        </a>
+                    }
+                    <span class="flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">schedule</span> @(string.IsNullOrWhiteSpace(restaurant?.WorkingHours) ? "10:00 - 23:00" : restaurant.WorkingHours)
+                    </span>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row md:justify-end items-start sm:items-center gap-4 text-xs text-[#575e70]">
+                @if (!string.IsNullOrWhiteSpace(restaurant?.GoogleMapsUrl))
+                {
+                    var mapsUrl = restaurant.GoogleMapsUrl;
+                    <a href="@mapsUrl" target="_blank" rel="noopener" class="inline-flex items-center gap-2 bg-[#006c49] hover:bg-[#005236] text-white px-4 py-2 rounded-xl font-semibold text-xs transition-all shadow-sm">
+                        <span class="material-symbols-outlined text-base">map</span>
+                        <span>Google Haritalar'da Aç</span>
+                    </a>
+                }
+            </div>
+        </div>
+
+        <div class="pt-6 border-t border-[#bbcabf]/30 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-[#575e70]">
+            <p>© @DateTime.Now.Year @(restaurant?.Name ?? "Dijital Menü"). Tüm Hakları Saklıdır.</p>
+            <p>Zarif Noktalı QR Menü Deneyimi</p>
+        </div>
+    </footer>
+
+    <!-- Modal Overlay (Interactive Detail Popup) -->
+    <div class="fixed inset-0 bg-[#191c1d]/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4 overlay-enter transition-opacity duration-300" id="itemModalOverlay">
+        <!-- Modal Content -->
+        <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden modal-enter flex flex-col max-h-[85vh] border border-[#bbcabf]/30" id="itemModalContent">
+            <!-- Image Area -->
+            <div class="relative w-full h-60 bg-[#edeeef] overflow-hidden">
+                <img class="w-full h-full object-cover" id="modalImg" src="" alt="Ürün Görseli" />
+                <button onclick="closeDottedModal()" class="absolute top-3.5 right-3.5 bg-white/80 hover:bg-white p-2 rounded-full text-[#191c1d] hover:text-[#006c49] transition-all backdrop-blur-md shadow-md cursor-pointer" id="closeModalBtn">
+                    <span class="material-symbols-outlined text-xl">close</span>
+                </button>
+            </div>
+            <!-- Details Area -->
+            <div class="p-5 sm:p-6 flex-1 overflow-y-auto flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-start gap-3 mb-3">
+                        <h3 class="font-sora text-lg sm:text-xl font-bold text-[#191c1d] leading-snug" id="modalTitle"></h3>
+                        <span class="font-sora text-sm font-bold text-[#006c49] bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full whitespace-nowrap" id="modalPrice"></span>
+                    </div>
+                    <div class="mt-4">
+                        <h4 class="text-xs font-bold text-[#575e70] uppercase tracking-wider mb-1">Açıklama</h4>
+                        <p class="text-sm text-[#3c4a42] leading-relaxed" id="modalDesc"></p>
+                    </div>
+                </div>
+                <div class="mt-6 border-t border-[#bbcabf]/30 pt-4">
+                    <button onclick="closeDottedModal()" class="w-full bg-[#006c49] text-white font-sora text-sm font-bold py-3 rounded-xl hover:bg-[#005236] transition-colors shadow-sm active:scale-95 cursor-pointer">
+                        Kapat
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function scrollToDottedSection(id, btnElement) {
+        const element = document.getElementById(id);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        if (btnElement) {
+            document.querySelectorAll('.dotted-nav-tab').forEach(b => {
+                b.classList.remove('dotted-tab-active');
+                b.classList.add('text-[#575e70]', 'bg-[#edeeef]');
+            });
+            btnElement.classList.add('dotted-tab-active');
+            btnElement.classList.remove('text-[#575e70]', 'bg-[#edeeef]');
+        }
+    }
+
+    function toggleDottedSearch() {
+        const bar = document.getElementById('dottedSearchBar');
+        const input = document.getElementById('dottedSearchInput');
+        if (bar.classList.contains('hidden')) {
+            bar.classList.remove('hidden');
+            setTimeout(() => input.focus(), 50);
+        } else {
+            bar.classList.add('hidden');
+            clearDottedSearch();
+        }
+    }
+
+    function clearDottedSearch() {
+        const input = document.getElementById('dottedSearchInput');
+        if (input) {
+            input.value = '';
+            filterDottedMenuItems('');
+        }
+    }
+
+    function filterDottedMenuItems(query) {
+        const q = (query || '').trim().toLowerCase();
+        const items = document.querySelectorAll('.dotted-menu-item');
+        const sections = document.querySelectorAll('.dotted-cat-section');
+        const noResults = document.getElementById('dottedNoResults');
+        let totalVisible = 0;
+
+        items.forEach(item => {
+            const title = (item.getAttribute('data-title') || '').toLowerCase();
+            const desc = (item.getAttribute('data-desc') || '').toLowerCase();
+            const match = !q || title.includes(q) || desc.includes(q);
+            item.style.display = match ? 'flex' : 'none';
+            if (match) totalVisible++;
+        });
+
+        sections.forEach(sec => {
+            const visibleInSec = sec.querySelectorAll('.dotted-menu-item:not([style*="display: none"])').length;
+            sec.style.display = visibleInSec > 0 ? 'block' : 'none';
+        });
+
+        if (noResults) {
+            noResults.classList.toggle('hidden', totalVisible > 0 || !q);
+        }
+    }
+
+    function openDottedModal(title, price, desc, imgSrc) {
+        const modalOverlay = document.getElementById('itemModalOverlay');
+        const modalContent = document.getElementById('itemModalContent');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalPrice = document.getElementById('modalPrice');
+        const modalDesc = document.getElementById('modalDesc');
+        const modalImg = document.getElementById('modalImg');
+
+        modalTitle.textContent = title;
+        modalPrice.textContent = price;
+        modalDesc.textContent = desc;
+        modalImg.src = imgSrc || '';
+
+        modalOverlay.classList.remove('hidden');
+        modalOverlay.classList.add('flex');
+
+        void modalOverlay.offsetWidth;
+
+        modalOverlay.classList.remove('overlay-enter');
+        modalOverlay.classList.add('overlay-enter-active');
+
+        modalContent.classList.remove('modal-enter');
+        modalContent.classList.add('modal-enter-active');
+
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeDottedModal() {
+        const modalOverlay = document.getElementById('itemModalOverlay');
+        const modalContent = document.getElementById('itemModalContent');
+
+        modalOverlay.classList.remove('overlay-enter-active');
+        modalOverlay.classList.add('overlay-leave-active');
+
+        modalContent.classList.remove('modal-enter-active');
+        modalContent.classList.add('modal-leave-active');
+
+        setTimeout(() => {
+            modalOverlay.classList.add('hidden');
+            modalOverlay.classList.remove('flex', 'overlay-leave-active');
+            modalContent.classList.remove('modal-leave-active');
+            modalOverlay.classList.add('overlay-enter');
+            modalContent.classList.add('modal-enter');
+            document.body.style.overflow = '';
+        }, 250);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const modalOverlay = document.getElementById('itemModalOverlay');
+        if (modalOverlay) {
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) {
+                    closeDottedModal();
+                }
+            });
+        }
+    });
+</script>
