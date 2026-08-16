@@ -19,6 +19,7 @@ namespace EntityLayer.Concrete
         [StringLength(1000)]
         public string Description { get; set; } = string.Empty;
 
+
         [Column(TypeName = "decimal(18,2)")]
         [Range(typeof(decimal), "0", "999999.99", ParseLimitsInInvariantCulture = true)]
         public decimal Price { get; set; }
@@ -26,8 +27,9 @@ namespace EntityLayer.Concrete
         [StringLength(2048)]
         public string? ImageUrl { get; set; }
 
+        public int DisplayOrder { get; set; } = 0;
+
         public int CategoryId { get; set; }
         public Category Category { get; set; }
     }
 }
-

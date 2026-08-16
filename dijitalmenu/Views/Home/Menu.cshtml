@@ -126,4 +126,19 @@ else
             </div>
         </div>
     </div>
+
+    @if (!string.IsNullOrWhiteSpace(restaurant.InstagramUrl))
+    {
+        var igUrl = restaurant.InstagramUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase) 
+            ? restaurant.InstagramUrl 
+            : $"https://instagram.com/{restaurant.InstagramUrl.TrimStart('@')}";
+
+        <!-- Sağ Altta Sabit Instagram Butonu -->
+        <a href="@igUrl" target="_blank" rel="noopener noreferrer" 
+           class="fixed bottom-6 right-6 z-[9999] flex items-center gap-2 bg-gradient-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] text-white hover:opacity-95 backdrop-blur-md px-4 py-2.5 rounded-full shadow-2xl transition-all duration-300 hover:scale-105 text-xs font-bold uppercase tracking-wider decoration-none cursor-pointer" 
+           style="text-decoration: none !important;">
+            <i class="fa-brands fa-instagram text-base"></i>
+            <span>Instagram</span>
+        </a>
+    }
 }

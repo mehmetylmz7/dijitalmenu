@@ -292,6 +292,117 @@
         background: #1a2e1a;
     }
 
+    /* ─── Sortable Lists ─── */
+    .sortable-list {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-top: 10px;
+        margin-bottom: 6px;
+    }
+
+    .sortable-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #21262d;
+        border: 1px solid #30363d;
+        border-radius: 8px;
+        padding: 8px 10px;
+        font-size: 0.78rem;
+        color: #e6edf3;
+        transition: all 0.2s ease;
+        user-select: none;
+    }
+
+    .sortable-item:hover {
+        border-color: #484f58;
+        background: #262c36;
+    }
+
+    .sortable-item.dragging {
+        opacity: 0.35;
+        border-color: #22c55e;
+        background: #16261c;
+    }
+
+    .sortable-item.drag-over {
+        border-top: 2px solid #22c55e;
+        transform: translateY(-2px);
+    }
+
+    .drag-handle {
+        cursor: grab;
+        color: #7d8590;
+        font-size: 1rem;
+        margin-right: 8px;
+        display: inline-flex;
+        align-items: center;
+        transition: color 0.15s;
+    }
+
+    .drag-handle:hover, .sortable-item:hover .drag-handle {
+        color: #4ade80;
+    }
+
+    .drag-handle:active {
+        cursor: grabbing;
+    }
+
+    .item-actions-group {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .sort-btn {
+        background: #161b22;
+        border: 1px solid #30363d;
+        color: #8b949e;
+        border-radius: 4px;
+        width: 22px;
+        height: 22px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.65rem;
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+
+    .sort-btn:hover:not(:disabled) {
+        color: #4ade80;
+        border-color: #22c55e;
+        background: #21262d;
+    }
+
+    .sort-btn:disabled {
+        opacity: 0.25;
+        cursor: not-allowed;
+    }
+
+    .delete-item-btn {
+        background: #161b22;
+        border: 1px solid #30363d;
+        color: #f85149;
+        border-radius: 4px;
+        width: 22px;
+        height: 22px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        cursor: pointer;
+        transition: all 0.15s;
+        margin-left: 2px;
+    }
+
+    .delete-item-btn:hover {
+        background: rgba(248, 81, 73, 0.15);
+        border-color: #f85149;
+        color: #ff7b72;
+    }
+
     .builder-toast {
         position: fixed;
         bottom: 24px;
@@ -651,15 +762,15 @@
                 <button class="section-trigger" onclick="toggleSection('sec-cat')">
                     <span class="step-badge">2</span>
                     <span>
-                        <div class="step-title">Kategori Ekle</div>
-                        <div class="step-desc">Ornek: Baslangicllar, Ana Yemekler</div>
+                        <div class="step-title">Kategori Ekle &amp; Sırala</div>
+                        <div class="step-desc">Kategorileri düzenleyin ve sürükleyerek sıralayın</div>
                     </span>
                     <span class="chevron">&#9660;</span>
                 </button>
                 <div class="section-body" id="body-cat">
                     @if (suggestions != null && suggestions.Any())
                     {
-                        <label class="builder-label" style="margin-top:12px;">&#128161; Oneriler</label>
+                        <label class="builder-label" style="margin-top:12px;">&#128161; Öneriler</label>
                         <div class="pill-row" id="suggestion-pills">
                             @foreach (var sug in suggestions)
                             {
@@ -672,15 +783,23 @@
                         <div id="suggestion-pills" style="margin-top:12px;"></div>
                     }
 
-                    <label class="builder-label">Kategori Adi</label>
+                    <label class="builder-label">Yeni Kategori Adı</label>
                     <div style="display:flex;gap:6px;">
                         <input type="text" id="categoryName" class="builder-input"
-                               placeholder="Ornek: Tatlilar, Icecekler..."
+                               placeholder="Örnek: Başlangıçlar, Tatlılar..."
                                onkeydown="if(event.key==='Enter'){event.preventDefault();addCategoryFromInput()}" />
                         <button onclick="addCategoryFromInput()"
                                 style="padding:9px 14px;background:#22c55e;border:none;border-radius:8px;color:#0d1117;font-weight:700;cursor:pointer;font-size:1rem;flex-shrink:0;transition:background 0.15s;"
                                 onmouseenter="this.style.background='#4ade80'"
                                 onmouseleave="this.style.background='#22c55e'">+</button>
+                    </div>
+
+                    <label class="builder-label" style="margin-top:16px;display:flex;justify-content:space-between;align-items:center;">
+                        <span>Mevcut Kategoriler</span>
+                        <span style="font-size:0.65rem;color:#7d8590;text-transform:none;">Sürükle-bırak veya oklarla sıralayın</span>
+                    </label>
+                    <div class="sortable-list" id="category-sortable-list">
+                        <!-- Javascript ile doldurulacak -->
                     </div>
                 </div>
             </div>
@@ -690,46 +809,64 @@
                 <button class="section-trigger" onclick="toggleSection('sec-item')">
                     <span class="step-badge">3</span>
                     <span>
-                        <div class="step-title">Urun Ekle</div>
-                        <div class="step-desc">Yemek, icecek, tatli...</div>
+                        <div class="step-title">Ürün Ekle &amp; Sırala</div>
+                        <div class="step-desc">Yemek, içecek ekleyin ve sıralayın</div>
                     </span>
                     <span class="chevron">&#9660;</span>
                 </button>
                 <div class="section-body" id="body-item">
-                    <label class="builder-label">Urun Adi</label>
+                    <label class="builder-label">Ürün Adı</label>
                     <input type="text" id="itemName" class="builder-input"
-                           placeholder="Ornek: Urfa Kebabi, Firin Sutlac" />
+                           placeholder="Örnek: Urfa Kebabı, Fırın Sütlaç" />
 
                     <label class="builder-label">Kategori</label>
-                    <select id="itemCategory" class="builder-input">
-                        <option value="">Kategori secin...</option>
+                    <select id="itemCategory" class="builder-input" onchange="syncBuilderItemFilter(this.value)">
+                        <option value="">Kategori seçin...</option>
                         @foreach (var cat in categories)
                         {
                             <option value="@cat.Id">@cat.Name</option>
                         }
                     </select>
 
-                    <label class="builder-label">Aciklama</label>
+                    <label class="builder-label">Açıklama</label>
                     <textarea id="itemDescription" class="builder-input" rows="2"
-                              placeholder="Ornek: 200gr kuzu eti, kozlenmis biber esliginde..."></textarea>
+                              placeholder="Örnek: 200gr kuzu eti, közlenmiş biber eşliğinde..."></textarea>
 
                     <label class="builder-label">Fiyat (TL)</label>
                     <input type="number" id="itemPrice" class="builder-input"
                            step="0.01" min="0" placeholder="0.00" />
 
                     <button class="btn-builder-primary" onclick="submitMenuItemFn()">
-                        &#10003; Menuye Ekle
+                        &#10003; Menüye Ekle
                     </button>
+
+                    <div style="margin-top:20px;border-top:1px solid #30363d;padding-top:12px;">
+                        <label class="builder-label" style="display:flex;justify-content:space-between;align-items:center;margin-top:0;">
+                            <span>Ürünleri Sırala &amp; Yönet</span>
+                            <span style="font-size:0.65rem;color:#7d8590;text-transform:none;">Kategoriye göre listele &amp; sırala</span>
+                        </label>
+                        
+                        <select id="builderItemFilterSelect" class="builder-input" onchange="renderBuilderItemsList(this.value)" style="margin-top:6px;margin-bottom:8px;">
+                            @foreach (var cat in categories)
+                            {
+                                <option value="@cat.Id">@cat.Name (@menuItems.Count(mi => mi.CategoryId == cat.Id) Ürün)</option>
+                            }
+                        </select>
+
+                        <div class="sortable-list" id="item-sortable-list">
+                            <!-- Javascript ile kategori bazlı doldurulacak -->
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- 4. Harita & Konum Ayarları -->
+            <!-- 4. Harita & Konum & Instagram Ayarları -->
             <div class="section-card" id="sec-location">
                 <button class="section-trigger" onclick="toggleSection('sec-location')">
                     <span class="step-badge">4</span>
                     <span>
-                        <div class="step-title">📍 Harita & Konum</div>
-                        <div class="step-desc">Google Haritalar adresi ve iletisim</div>
+                        <div class="step-title">📍 Harita, Konum &amp; Sosyal Medya</div>
+                        <div class="step-desc">Google Haritalar, Instagram ve iletişim</div>
                     </span>
                     <span class="chevron">&#9660;</span>
                 </button>
@@ -737,6 +874,23 @@
                     <label class="builder-label">Google Haritalar Bağlantısı (URL veya Embed Kodu)</label>
                     <input type="text" id="googleMapsUrl" class="builder-input" value="@restaurant?.GoogleMapsUrl"
                            placeholder="https://maps.google.com/?q=... veya <iframe src='...'></iframe>" />
+
+                    <label class="builder-label">📸 Instagram Profili veya Bağlantısı</label>
+                    <div style="display:flex;gap:6px;">
+                        <input type="text" id="restaurantInstagram" class="builder-input" value="@restaurant?.InstagramUrl"
+                               placeholder="Örn: @@kocaoglurestoran veya https://instagram.com/kocaoglurestoran" />
+                        @if (!string.IsNullOrWhiteSpace(restaurant?.InstagramUrl))
+                        {
+                            var igTestUrl = restaurant.InstagramUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase)
+                                ? restaurant.InstagramUrl
+                                : $"https://instagram.com/{restaurant.InstagramUrl.TrimStart('@')}";
+                            <a href="@igTestUrl" target="_blank" rel="noopener noreferrer" 
+                               style="padding:8px 12px;background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:white;border-radius:8px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;font-size:0.8rem;flex-shrink:0;" title="Instagram'da Gör">
+                                <i class="fa-brands fa-instagram"></i>
+                            </a>
+                        }
+                    </div>
+                    <p style="font-size:0.7rem;color:#7d8590;margin-top:3px;margin-bottom:8px;">💡 <em>Menünüzün sağ altında ziyaretçilerin tıklayabileceği Instagram butonu açılır.</em></p>
 
                     <label class="builder-label">Adres</label>
                     <input type="text" id="restaurantAddress" class="builder-input" value="@restaurant?.Address"
@@ -751,7 +905,7 @@
                            placeholder="Örn: Hafta içi: 09:00 - 23:00, Hafta sonu: 10:00 - 00:00" />
 
                     <button class="btn-builder-primary" onclick="submitLocationSettings()">
-                        💾 Harita, Konum &amp; Saat Bilgilerini Kaydet
+                        💾 Harita, İletişim &amp; Instagram Bilgilerini Kaydet
                     </button>
                 </div>
             </div>
@@ -867,6 +1021,10 @@
     let currentThemeId  = '@currentThemeId';
     let currentViewMode = 'desktop';
 
+    // Modelden gelen kategoriler ve menü öğeleri
+    let builderCategories = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(categories.Select(c => new { id = c.Id, name = c.Name, displayOrder = c.DisplayOrder })));
+    let builderMenuItems = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(menuItems.Select(mi => new { id = mi.Id, name = mi.Name, description = mi.Description, price = mi.Price, categoryId = mi.CategoryId, displayOrder = mi.DisplayOrder })));
+
     function postForm(url, params) {
         const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
         const body = new URLSearchParams(params);
@@ -875,6 +1033,17 @@
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body
+        });
+    }
+
+    function postJson(url, data) {
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers['RequestVerificationToken'] = token;
+        return fetch(url, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(data)
         });
     }
 
@@ -927,10 +1096,165 @@
         postForm('/Restaurant/Builder/SelectTheme', { themeId })
         .then(r => r.json())
         .then(d => {
-            if (d.success) { refreshPreview(); showToast('Tema guncellendi!'); }
-            else alert(d.message || 'Tema secilirken hata olustu.');
+            if (d.success) { refreshPreview(); showToast('Tema güncellendi!'); }
+            else alert(d.message || 'Tema seçilirken hata oluştu.');
         })
         .catch(e => console.error(e));
+    }
+
+    // ─── KATEGORİ YÖNETİMİ & SIRALAMA ───
+    function renderCategorySortableList() {
+        const container = document.getElementById('category-sortable-list');
+        if (!container) return;
+
+        if (builderCategories.length === 0) {
+            container.innerHTML = '<div style="font-size:0.75rem;color:#7d8590;text-align:center;padding:12px;border:1px dashed #30363d;border-radius:8px;">Henüz kategori eklenmedi.</div>';
+            return;
+        }
+
+        container.innerHTML = '';
+        builderCategories.forEach((cat, index) => {
+            const catItemCount = builderMenuItems.filter(mi => mi.categoryId === cat.id).length;
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'sortable-item';
+            itemDiv.draggable = true;
+            itemDiv.dataset.id = cat.id;
+            itemDiv.dataset.index = index;
+
+            itemDiv.innerHTML = `
+                <div style="display:flex;align-items:center;min-width:0;flex:1;">
+                    <span class="drag-handle" title="Sıralamak için sürükleyin">⠿</span>
+                    <span style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#e6edf3;max-width:140px;">${escapeHtml(cat.name)}</span>
+                    <span style="font-size:0.65rem;background:#161b22;color:#8b949e;padding:2px 6px;border-radius:10px;margin-left:6px;border:1px solid #30363d;">
+                        ${catItemCount} Ürün
+                    </span>
+                </div>
+                <div class="item-actions-group">
+                    <button type="button" class="sort-btn" onclick="moveCategory(${index}, -1)" title="Yukarı Taşı" ${index === 0 ? 'disabled' : ''}>▲</button>
+                    <button type="button" class="sort-btn" onclick="moveCategory(${index}, 1)" title="Aşağı Taşı" ${index === builderCategories.length - 1 ? 'disabled' : ''}>▼</button>
+                    <button type="button" class="delete-item-btn" onclick="deleteCategoryFn(${cat.id}, '${escapeHtml(cat.name)}')" title="Kategoriyi Sil">✕</button>
+                </div>
+            `;
+            container.appendChild(itemDiv);
+        });
+
+        initCategoryDragAndDrop();
+        updateCategoryDropdowns();
+    }
+
+    function initCategoryDragAndDrop() {
+        const list = document.getElementById('category-sortable-list');
+        const items = list.querySelectorAll('.sortable-item');
+        let dragSrcIndex = null;
+
+        items.forEach(item => {
+            item.addEventListener('dragstart', function(e) {
+                dragSrcIndex = parseInt(this.dataset.index);
+                this.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', dragSrcIndex);
+            });
+
+            item.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                this.classList.add('drag-over');
+            });
+
+            item.addEventListener('dragleave', function() {
+                this.classList.remove('drag-over');
+            });
+
+            item.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('drag-over');
+                const targetIndex = parseInt(this.dataset.index);
+                if (dragSrcIndex !== null && dragSrcIndex !== targetIndex) {
+                    const movedItem = builderCategories.splice(dragSrcIndex, 1)[0];
+                    builderCategories.splice(targetIndex, 0, movedItem);
+                    renderCategorySortableList();
+                    saveCategoryOrder();
+                }
+            });
+
+            item.addEventListener('dragend', function() {
+                this.classList.remove('dragging');
+                items.forEach(i => i.classList.remove('drag-over'));
+            });
+        });
+    }
+
+    function moveCategory(index, direction) {
+        const targetIndex = index + direction;
+        if (targetIndex < 0 || targetIndex >= builderCategories.length) return;
+        const temp = builderCategories[index];
+        builderCategories[index] = builderCategories[targetIndex];
+        builderCategories[targetIndex] = temp;
+        renderCategorySortableList();
+        saveCategoryOrder();
+    }
+
+    function saveCategoryOrder() {
+        const categoryIds = builderCategories.map(c => c.id);
+        postJson('/Restaurant/Builder/UpdateCategoryOrder', categoryIds)
+        .then(r => r.json())
+        .then(d => {
+            if (d.success) {
+                refreshPreview();
+                showToast('🔄 Kategori sırası güncellendi!');
+            }
+        })
+        .catch(e => console.error(e));
+    }
+
+    function deleteCategoryFn(id, name) {
+        if (!confirm(`"${name}" kategorisini ve bu kategoriye ait tüm ürünleri silmek istediğinizden emin misiniz?`)) return;
+
+        postForm('/Restaurant/Builder/DeleteCategory', { id })
+        .then(r => r.json())
+        .then(d => {
+            if (d.success) {
+                builderCategories = builderCategories.filter(c => c.id !== id);
+                builderMenuItems = builderMenuItems.filter(mi => mi.categoryId !== id);
+                renderCategorySortableList();
+                renderBuilderItemsList();
+                refreshPreview();
+                showToast(`"${name}" kategorisi silindi.`);
+            } else {
+                alert(d.message || 'Silme işleminde hata oluştu.');
+            }
+        })
+        .catch(e => console.error(e));
+    }
+
+    function updateCategoryDropdowns() {
+        const itemCatSelect = document.getElementById('itemCategory');
+        const filterSelect = document.getElementById('builderItemFilterSelect');
+
+        if (itemCatSelect) {
+            const currentVal = itemCatSelect.value;
+            itemCatSelect.innerHTML = '<option value="">Kategori seçin...</option>';
+            builderCategories.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.textContent = c.name;
+                if (c.id == currentVal) opt.selected = true;
+                itemCatSelect.appendChild(opt);
+            });
+        }
+
+        if (filterSelect) {
+            const currentFilterVal = filterSelect.value;
+            filterSelect.innerHTML = '';
+            builderCategories.forEach(c => {
+                const count = builderMenuItems.filter(mi => mi.categoryId === c.id).length;
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.textContent = `${c.name} (${count} Ürün)`;
+                if (c.id == currentFilterVal) opt.selected = true;
+                filterSelect.appendChild(opt);
+            });
+        }
     }
 
     function addCategoryFromInput() {
@@ -948,11 +1272,9 @@
         .then(r => r.json())
         .then(d => {
             if (d.success) {
-                const sel = document.getElementById('itemCategory');
-                const opt = document.createElement('option');
-                opt.value = d.category.id;
-                opt.textContent = d.category.name;
-                sel.appendChild(opt);
+                builderCategories.push({ id: d.category.id, name: d.category.name, displayOrder: builderCategories.length });
+                renderCategorySortableList();
+                renderBuilderItemsList(d.category.id);
                 updateSuggestions(d.suggestions);
                 refreshPreview();
                 showToast('"' + name + '" kategorisi eklendi!');
@@ -963,7 +1285,7 @@
                     body.classList.add('open');
                 }
             } else {
-                alert(d.message || 'Kategori eklenirken hata olustu.');
+                alert(d.message || 'Kategori eklenirken hata oluştu.');
             }
         })
         .catch(e => console.error(e));
@@ -971,6 +1293,7 @@
 
     function updateSuggestions(suggestions) {
         const container = document.getElementById('suggestion-pills');
+        if (!container) return;
         container.innerHTML = '';
         if (suggestions && suggestions.length > 0) {
             suggestions.forEach(sug => {
@@ -983,6 +1306,170 @@
         }
     }
 
+    // ─── ÜRÜN YÖNETİMİ & SIRALAMA ───
+    function syncBuilderItemFilter(catId) {
+        const filterSelect = document.getElementById('builderItemFilterSelect');
+        if (filterSelect && catId) {
+            filterSelect.value = catId;
+            renderBuilderItemsList(catId);
+        }
+    }
+
+    function renderBuilderItemsList(selectedCatId) {
+        const filterSelect = document.getElementById('builderItemFilterSelect');
+        const container = document.getElementById('item-sortable-list');
+        if (!container) return;
+
+        let catId = selectedCatId;
+        if (!catId && filterSelect) {
+            catId = filterSelect.value;
+        }
+        if (!catId && builderCategories.length > 0) {
+            catId = builderCategories[0].id;
+            if (filterSelect) filterSelect.value = catId;
+        }
+
+        if (!catId) {
+            container.innerHTML = '<div style="font-size:0.75rem;color:#7d8590;text-align:center;padding:12px;border:1px dashed #30363d;border-radius:8px;">Önce bir kategori ekleyin.</div>';
+            return;
+        }
+
+        const catItems = builderMenuItems.filter(mi => mi.categoryId == catId);
+
+        if (catItems.length === 0) {
+            container.innerHTML = '<div style="font-size:0.75rem;color:#7d8590;text-align:center;padding:12px;border:1px dashed #30363d;border-radius:8px;">Bu kategoride henüz ürün bulunmuyor.</div>';
+            return;
+        }
+
+        container.innerHTML = '';
+        catItems.forEach((item, index) => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'sortable-item';
+            itemDiv.draggable = true;
+            itemDiv.dataset.id = item.id;
+            itemDiv.dataset.index = index;
+            itemDiv.dataset.catId = catId;
+
+            itemDiv.innerHTML = `
+                <div style="display:flex;align-items:center;min-width:0;flex:1;">
+                    <span class="drag-handle" title="Sıralamak için sürükleyin">⠿</span>
+                    <span style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#e6edf3;max-width:130px;">${escapeHtml(item.name)}</span>
+                    <span style="font-size:0.68rem;color:#4ade80;font-weight:700;margin-left:6px;background:#16261c;padding:2px 6px;border-radius:6px;border:1px solid #22c55e44;">
+                        ${parseFloat(item.price).toFixed(2)} TL
+                    </span>
+                </div>
+                <div class="item-actions-group">
+                    <button type="button" class="sort-btn" onclick="moveItem(${index}, -1)" title="Yukarı Taşı" ${index === 0 ? 'disabled' : ''}>▲</button>
+                    <button type="button" class="sort-btn" onclick="moveItem(${index}, 1)" title="Aşağı Taşı" ${index === catItems.length - 1 ? 'disabled' : ''}>▼</button>
+                    <button type="button" class="delete-item-btn" onclick="deleteMenuItemFn(${item.id}, '${escapeHtml(item.name)}')" title="Ürünü Sil">✕</button>
+                </div>
+            `;
+            container.appendChild(itemDiv);
+        });
+
+        initItemDragAndDrop(catId);
+    }
+
+    function initItemDragAndDrop(catId) {
+        const list = document.getElementById('item-sortable-list');
+        const items = list.querySelectorAll('.sortable-item');
+        let dragSrcIndex = null;
+
+        items.forEach(item => {
+            item.addEventListener('dragstart', function(e) {
+                dragSrcIndex = parseInt(this.dataset.index);
+                this.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', dragSrcIndex);
+            });
+
+            item.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                this.classList.add('drag-over');
+            });
+
+            item.addEventListener('dragleave', function() {
+                this.classList.remove('drag-over');
+            });
+
+            item.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('drag-over');
+                const targetIndex = parseInt(this.dataset.index);
+                if (dragSrcIndex !== null && dragSrcIndex !== targetIndex) {
+                    const catItems = builderMenuItems.filter(mi => mi.categoryId == catId);
+                    const moved = catItems.splice(dragSrcIndex, 1)[0];
+                    catItems.splice(targetIndex, 0, moved);
+
+                    // builderMenuItems listesini güncelle
+                    builderMenuItems = builderMenuItems.filter(mi => mi.categoryId != catId).concat(catItems);
+
+                    renderBuilderItemsList(catId);
+                    saveMenuItemOrder(catId);
+                }
+            });
+
+            item.addEventListener('dragend', function() {
+                this.classList.remove('dragging');
+                items.forEach(i => i.classList.remove('drag-over'));
+            });
+        });
+    }
+
+    function moveItem(index, direction) {
+        const filterSelect = document.getElementById('builderItemFilterSelect');
+        const catId = filterSelect ? filterSelect.value : null;
+        if (!catId) return;
+
+        const catItems = builderMenuItems.filter(mi => mi.categoryId == catId);
+        const targetIndex = index + direction;
+        if (targetIndex < 0 || targetIndex >= catItems.length) return;
+
+        const temp = catItems[index];
+        catItems[index] = catItems[targetIndex];
+        catItems[targetIndex] = temp;
+
+        builderMenuItems = builderMenuItems.filter(mi => mi.categoryId != catId).concat(catItems);
+
+        renderBuilderItemsList(catId);
+        saveMenuItemOrder(catId);
+    }
+
+    function saveMenuItemOrder(catId) {
+        const catItems = builderMenuItems.filter(mi => mi.categoryId == catId);
+        const itemIds = catItems.map(i => i.id);
+
+        postJson('/Restaurant/Builder/UpdateMenuItemOrder', itemIds)
+        .then(r => r.json())
+        .then(d => {
+            if (d.success) {
+                refreshPreview();
+                showToast('🔄 Ürün sırası güncellendi!');
+            }
+        })
+        .catch(e => console.error(e));
+    }
+
+    function deleteMenuItemFn(id, name) {
+        if (!confirm(`"${name}" ürününü silmek istediğinizden emin misiniz?`)) return;
+
+        postForm('/Restaurant/Builder/DeleteMenuItem', { id })
+        .then(r => r.json())
+        .then(d => {
+            if (d.success) {
+                builderMenuItems = builderMenuItems.filter(mi => mi.id !== id);
+                renderCategorySortableList();
+                renderBuilderItemsList();
+                refreshPreview();
+                showToast(`"${name}" ürünü silindi.`);
+            } else {
+                alert(d.message || 'Silme işleminde hata oluştu.');
+            }
+        })
+        .catch(e => console.error(e));
+    }
+
     function submitMenuItemFn() {
         const name        = document.getElementById('itemName').value.trim();
         const description = document.getElementById('itemDescription').value.trim();
@@ -990,7 +1477,7 @@
         const categoryId  = parseInt(document.getElementById('itemCategory').value);
 
         if (!name || isNaN(price) || isNaN(categoryId)) {
-            showToast('Lutfen tum zorunlu alanlari doldurun.');
+            showToast('Lütfen tüm zorunlu alanları doldurun.');
             return;
         }
 
@@ -1001,27 +1488,41 @@
                 document.getElementById('itemName').value        = '';
                 document.getElementById('itemDescription').value = '';
                 document.getElementById('itemPrice').value       = '';
+
+                builderMenuItems.push({
+                    id: d.item.id,
+                    name: d.item.name,
+                    description: d.item.description,
+                    price: d.item.price,
+                    categoryId: d.item.categoryId,
+                    displayOrder: d.item.displayOrder
+                });
+
+                renderCategorySortableList();
+                renderBuilderItemsList(categoryId);
                 refreshPreview();
-                showToast('"' + name + '" menuye eklendi!');
+                showToast('"' + name + '" menüye eklendi!');
             } else {
-                alert(d.message || 'Urun eklenirken hata olustu.');
+                alert(d.message || 'Ürün eklenirken hata oluştu.');
             }
         })
         .catch(e => console.error(e));
     }
 
+    // ─── HARİTA, KONUM & INSTAGRAM ───
     function submitLocationSettings() {
         const googleMapsUrl = document.getElementById('googleMapsUrl').value.trim();
+        const instagramUrl = document.getElementById('restaurantInstagram').value.trim();
         const address = document.getElementById('restaurantAddress').value.trim();
         const phone = document.getElementById('restaurantPhone').value.trim();
         const workingHours = document.getElementById('restaurantWorkingHours').value.trim();
 
-        postForm('/Restaurant/Builder/UpdateLocation', { googleMapsUrl, address, phone, workingHours })
+        postForm('/Restaurant/Builder/UpdateLocation', { googleMapsUrl, address, phone, workingHours, instagramUrl })
         .then(r => r.json())
         .then(d => {
             if (d.success) {
                 refreshPreview();
-                showToast('📍 Konum, saat ve harita bilgileri kaydedildi!');
+                showToast('📍 Harita, iletişim ve Instagram bilgileri kaydedildi!');
             } else {
                 alert(d.message || 'Hata oluştu.');
             }
@@ -1044,5 +1545,20 @@
         })
         .catch(e => console.error(e));
     }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/&/g, "&amp;")
+                  .replace(/</g, "&lt;")
+                  .replace(/>/g, "&gt;")
+                  .replace(/"/g, "&quot;")
+                  .replace(/'/g, "&#039;");
+    }
+
+    // Sayfa yüklendiğinde listeleri render et
+    document.addEventListener('DOMContentLoaded', () => {
+        renderCategorySortableList();
+        renderBuilderItemsList();
+    });
 </script>
 }

@@ -33,6 +33,9 @@ namespace EntityLayer.Concrete
         [RegularExpression(@"^$|^[0-9+()\-\s]{7,25}$")]
         public string? Phone { get; set; }
 
+        [StringLength(2048)]
+        public string? InstagramUrl { get; set; }
+
         public int ThemeId { get; set; }
         public Theme Theme { get; set; }
 

@@ -97,4 +97,83 @@ public class RestaurantWorkflowTests
         Assert.IsType<ViewResult>(result);
         Assert.Single(context.Categories);
     }
+
+    [Fact]
+    public void BuilderController_UpdateCategoryOrder_ReordersCategoriesCorrectly()
+    {
+        using var context = TestSupport.CreateContext();
+        var services = TestSupport.Services(context);
+        context.Themes.Add(new Theme { Name = "Test", PrimaryColor = "#000", SecondaryColor = "#111", BackgroundColor = "#fff", FontFamily = "Arial" });
+        var restaurant = new Restaurant { Name = "Test Restaurant", ThemeId = 1 };
+        context.Restaurants.Add(restaurant); context.SaveChanges();
+        var menu = new Menu { RestaurantId = restaurant.Id }; context.Menus.Add(menu); context.SaveChanges();
+        var cat1 = new Category { Name = "Cat 1", MenuId = menu.Id, DisplayOrder = 0 };
+        var cat2 = new Category { Name = "Cat 2", MenuId = menu.Id, DisplayOrder = 1 };
+        var cat3 = new Category { Name = "Cat 3", MenuId = menu.Id, DisplayOrder = 2 };
+        context.Categories.AddRange(cat1, cat2, cat3); context.SaveChanges();
+
+        var suggestionService = new CategorySuggestionManager();
+        var controller = new BuilderController(services.Restaurants, services.Menus, services.Categories, services.Items, services.Themes, suggestionService)
+        {
+            ControllerContext = TestSupport.ControllerContext(new() { ["RestaurantId"] = restaurant.Id.ToString() })
+        };
+
+        var result = controller.UpdateCategoryOrder(new List<int> { cat3.Id, cat1.Id, cat2.Id });
+
+        Assert.IsType<JsonResult>(result);
+        Assert.Equal(0, context.Categories.Find(cat3.Id)!.DisplayOrder);
+        Assert.Equal(1, context.Categories.Find(cat1.Id)!.DisplayOrder);
+        Assert.Equal(2, context.Categories.Find(cat2.Id)!.DisplayOrder);
+    }
+
+    [Fact]
+    public void BuilderController_UpdateMenuItemOrder_ReordersMenuItemsCorrectly()
+    {
+        using var context = TestSupport.CreateContext();
+        var services = TestSupport.Services(context);
+        context.Themes.Add(new Theme { Name = "Test", PrimaryColor = "#000", SecondaryColor = "#111", BackgroundColor = "#fff", FontFamily = "Arial" });
+        var restaurant = new Restaurant { Name = "Test Restaurant", ThemeId = 1 };
+        context.Restaurants.Add(restaurant); context.SaveChanges();
+        var menu = new Menu { RestaurantId = restaurant.Id }; context.Menus.Add(menu); context.SaveChanges();
+        var cat = new Category { Name = "Cat 1", MenuId = menu.Id };
+        context.Categories.Add(cat); context.SaveChanges();
+        var item1 = new MenuItem { Name = "Item 1", CategoryId = cat.Id, Price = 10, DisplayOrder = 0 };
+        var item2 = new MenuItem { Name = "Item 2", CategoryId = cat.Id, Price = 20, DisplayOrder = 1 };
+        context.MenuItems.AddRange(item1, item2); context.SaveChanges();
+
+        var suggestionService = new CategorySuggestionManager();
+        var controller = new BuilderController(services.Restaurants, services.Menus, services.Categories, services.Items, services.Themes, suggestionService)
+        {
+            ControllerContext = TestSupport.ControllerContext(new() { ["RestaurantId"] = restaurant.Id.ToString() })
+        };
+
+        var result = controller.UpdateMenuItemOrder(new List<int> { item2.Id, item1.Id });
+
+        Assert.IsType<JsonResult>(result);
+        Assert.Equal(0, context.MenuItems.Find(item2.Id)!.DisplayOrder);
+        Assert.Equal(1, context.MenuItems.Find(item1.Id)!.DisplayOrder);
+    }
+
+    [Fact]
+    public void BuilderController_UpdateLocation_NormalizesAndSavesInstagramUrl()
+    {
+        using var context = TestSupport.CreateContext();
+        var services = TestSupport.Services(context);
+        context.Themes.Add(new Theme { Name = "Test", PrimaryColor = "#000", SecondaryColor = "#111", BackgroundColor = "#fff", FontFamily = "Arial" });
+        var restaurant = new Restaurant { Name = "Test Restaurant", ThemeId = 1 };
+        context.Restaurants.Add(restaurant); context.SaveChanges();
+
+        var suggestionService = new CategorySuggestionManager();
+        var controller = new BuilderController(services.Restaurants, services.Menus, services.Categories, services.Items, services.Themes, suggestionService)
+        {
+            ControllerContext = TestSupport.ControllerContext(new() { ["RestaurantId"] = restaurant.Id.ToString() })
+        };
+
+        var result = controller.UpdateLocation(null, "Test Adres", "+90 555 123 45 67", "09:00 - 22:00", "@kocaoglurestoran");
+
+        Assert.IsType<JsonResult>(result);
+        var updated = context.Restaurants.Find(restaurant.Id);
+        Assert.NotNull(updated);
+        Assert.Equal("https://instagram.com/kocaoglurestoran", updated.InstagramUrl);
+    }
 }

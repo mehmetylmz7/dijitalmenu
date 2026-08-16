@@ -18,6 +18,8 @@ namespace EntityLayer.Concrete
         [StringLength(2048)]
         public string? ImageUrl { get; set; }
 
+        public int DisplayOrder { get; set; } = 0;
+
         public int MenuId { get; set; }
         public Menu Menu { get; set; }
 

@@ -164,10 +164,17 @@ public class HomeController : Controller
             return View();
         }
 
-        var cats    = _categoryService.TGetListAll().Where(c => c.MenuId == menu.Id).ToList();
+        var cats    = _categoryService.TGetListAll()
+                        .Where(c => c.MenuId == menu.Id)
+                        .OrderBy(c => c.DisplayOrder)
+                        .ThenBy(c => c.Id)
+                        .ToList();
         var catIds2 = cats.Select(c => c.Id).ToHashSet();
         var items   = _menuItemService.TGetListAll()
-                        .Where(mi => catIds2.Contains(mi.CategoryId)).ToList();
+                        .Where(mi => catIds2.Contains(mi.CategoryId))
+                        .OrderBy(mi => mi.DisplayOrder)
+                        .ThenBy(mi => mi.Id)
+                        .ToList();
 
         string appUrl = _configuration["AppUrl"];
         string baseUrl = !string.IsNullOrWhiteSpace(appUrl) ? appUrl : $"{Request.Scheme}://{Request.Host}";
