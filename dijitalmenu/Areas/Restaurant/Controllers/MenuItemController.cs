@@ -1,5 +1,6 @@
 using BusinessLayer.Abstract;
 using dijitalmenu.Filters;
+using dijitalmenu.Services;
 using EntityLayer.Concrete;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
@@ -24,17 +25,20 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
         private readonly ICategoryService _categoryService;
         private readonly IMenuService _menuService;
         private readonly IWebHostEnvironment _environment;
+        private readonly IAuditContextService _auditContextService;
 
         public MenuItemController(
             IMenuItemService menuItemService,
             ICategoryService categoryService,
             IMenuService menuService,
-            IWebHostEnvironment environment)
+            IWebHostEnvironment environment,
+            IAuditContextService auditContextService)
         {
             _menuItemService = menuItemService;
             _categoryService = categoryService;
             _menuService = menuService;
             _environment = environment;
+            _auditContextService = auditContextService;
         }
 
         private int GetRestaurantId() =>
@@ -97,6 +101,27 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
 
             menuItem.ImageUrl = uploadedImageUrl ?? menuItem.ImageUrl?.Trim();
             _menuItemService.TInsert(menuItem);
+
+            // Audit Log
+            var newValues = new
+            {
+                menuItem.Id,
+                menuItem.Name,
+                menuItem.Price,
+                menuItem.CategoryId,
+                menuItem.Description,
+                menuItem.ImageUrl,
+                menuItem.DisplayOrder
+            };
+
+            _auditContextService.Log(
+                action: "MENU_ITEM_CREATED",
+                entityType: "MenuItem",
+                entityId: menuItem.Id,
+                description: $"Yeni ürün eklendi: '{menuItem.Name}' ({menuItem.Price:C})",
+                newEntity: newValues
+            );
+
             return RedirectToAction("Index");
         }
 
@@ -136,6 +161,17 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 return RedirectToAction("Edit", new { id = menuItem.Id });
             }
 
+            var oldValues = new
+            {
+                existingItem.Id,
+                existingItem.Name,
+                existingItem.Price,
+                existingItem.CategoryId,
+                existingItem.Description,
+                existingItem.ImageUrl,
+                existingItem.DisplayOrder
+            };
+
             existingItem.Name = menuItem.Name.Trim();
             existingItem.Description = menuItem.Description?.Trim() ?? string.Empty;
             existingItem.Price = menuItem.Price;
@@ -143,6 +179,27 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             existingItem.ImageUrl = uploadedImageUrl ?? menuItem.ImageUrl?.Trim() ?? existingItem.ImageUrl;
 
             _menuItemService.TUpdate(existingItem);
+
+            var newValues = new
+            {
+                existingItem.Id,
+                existingItem.Name,
+                existingItem.Price,
+                existingItem.CategoryId,
+                existingItem.Description,
+                existingItem.ImageUrl,
+                existingItem.DisplayOrder
+            };
+
+            _auditContextService.Log(
+                action: "MENU_ITEM_UPDATED",
+                entityType: "MenuItem",
+                entityId: existingItem.Id,
+                description: $"Menü ürünü güncellendi: '{existingItem.Name}'",
+                oldEntity: oldValues,
+                newEntity: newValues
+            );
+
             return RedirectToAction("Index");
         }
 
@@ -153,7 +210,26 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             var categoryIds = GetMyCategories().Select(category => category.Id).ToHashSet();
 
             if (item != null && categoryIds.Contains(item.CategoryId))
+            {
+                var oldValues = new
+                {
+                    item.Id,
+                    item.Name,
+                    item.Price,
+                    item.CategoryId,
+                    item.Description
+                };
+
+                _auditContextService.Log(
+                    action: "MENU_ITEM_DELETED",
+                    entityType: "MenuItem",
+                    entityId: item.Id,
+                    description: $"Menü ürünü silindi: '{item.Name}'",
+                    oldEntity: oldValues
+                );
+
                 _menuItemService.TDelete(item);
+            }
 
             return RedirectToAction("Index");
         }
@@ -183,6 +259,20 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             return true;
         }
 
+        private static bool IsValidImageUrl(string? imageUrl)
+        {
+            if (string.IsNullOrWhiteSpace(imageUrl))
+                return true;
+
+            if (imageUrl.StartsWith("/images/menu-items/", StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            if (!Uri.TryCreate(imageUrl, UriKind.Absolute, out var uri))
+                return false;
+
+            return uri.Scheme is "http" or "https";
+        }
+
         private bool TrySavePhoto(IFormFile? photoFile, out string? imageUrl, out string error)
         {
             imageUrl = null;
@@ -191,47 +281,31 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             if (photoFile == null || photoFile.Length == 0)
                 return true;
 
-            var extension = Path.GetExtension(photoFile.FileName);
-            if (photoFile.Length > MaxImageFileSize || !AllowedImageExtensions.Contains(extension) ||
-                !AllowedImageContentTypes.Contains(photoFile.ContentType) || !HasValidImageSignature(photoFile))
+            if (photoFile.Length > MaxImageFileSize)
             {
-                error = "Görsel JPG, PNG, GIF veya WebP türünde ve en fazla 5 MB olmalıdır.";
+                error = "Yüklenen görsel en fazla 5 MB olabilir.";
                 return false;
             }
 
-            var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads");
-            Directory.CreateDirectory(uploadsFolder);
+            var extension = Path.GetExtension(photoFile.FileName);
+            if (!AllowedImageExtensions.Contains(extension) ||
+                !AllowedImageContentTypes.Contains(photoFile.ContentType))
+            {
+                error = "Sadece JPG, JPEG, PNG, GIF ve WEBP formatları desteklenmektedir.";
+                return false;
+            }
 
-            var newFileName = $"{Guid.NewGuid():N}{extension.ToLowerInvariant()}";
-            var filePath = Path.Combine(uploadsFolder, newFileName);
-            using var stream = new FileStream(filePath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
+            var folderPath = Path.Combine(_environment.WebRootPath, "images", "menu-items");
+            Directory.CreateDirectory(folderPath);
+
+            var fileName = $"{Guid.NewGuid():N}{extension.ToLowerInvariant()}";
+            var fullPath = Path.Combine(folderPath, fileName);
+
+            using var stream = new FileStream(fullPath, FileMode.Create);
             photoFile.CopyTo(stream);
-            imageUrl = $"/uploads/{newFileName}";
+
+            imageUrl = $"/images/menu-items/{fileName}";
             return true;
-        }
-
-        private static bool IsValidImageUrl(string? imageUrl)
-        {
-            if (string.IsNullOrWhiteSpace(imageUrl))
-                return true;
-
-            if (imageUrl.StartsWith("/uploads/", StringComparison.Ordinal) && !imageUrl.Contains("..", StringComparison.Ordinal))
-                return true;
-
-            return Uri.TryCreate(imageUrl, UriKind.Absolute, out var uri) &&
-                   (uri.Scheme == Uri.UriSchemeHttps || uri.Scheme == Uri.UriSchemeHttp);
-        }
-
-        private static bool HasValidImageSignature(IFormFile photoFile)
-        {
-            using var stream = photoFile.OpenReadStream();
-            Span<byte> header = stackalloc byte[12];
-            var read = stream.Read(header);
-
-            return (read >= 3 && header[0] == 0xFF && header[1] == 0xD8 && header[2] == 0xFF) ||
-                   (read >= 8 && header[..8].SequenceEqual(new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A })) ||
-                   (read >= 6 && (header[..6].SequenceEqual("GIF87a"u8) || header[..6].SequenceEqual("GIF89a"u8))) ||
-                   (read >= 12 && header[..4].SequenceEqual("RIFF"u8) && header[8..12].SequenceEqual("WEBP"u8));
         }
     }
 }

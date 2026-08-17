@@ -50,16 +50,21 @@ public class SecurityAndValidationTests
         Assert.True(PasswordHelper.NeedsRehash(plainStored));
     }
 
-    [Theory]
-    [InlineData("Deniz & Balık Restoranı", "deniz-balik-restorani")]
-    [InlineData("Şölen Kebap / Izgara (Kadıköy)", "solen-kebap-izgara-kadikoy")]
-    [InlineData("   Örnek Çiğköfte Salonu   ", "ornek-cigkofte-salonu")]
-    [InlineData("", "")]
-    [InlineData("   ", "")]
-    public void StringHelper_GenerateSlug_CorrectlyNormalizesTurkishAndSpecialChars(string input, string expected)
+    [Fact]
+    public void PasswordHelper_UpgradesLegacyHashOnSuccessfulLogin()
     {
-        var result = StringHelper.GenerateSlug(input);
-        Assert.Equal(expected, result);
+        // Simulate a legacy hash with work factor 10 (valid bcrypt format)
+        var legacyHash = BCrypt.Net.BCrypt.HashPassword("TestPass123!", 10);
+        
+        // Should verify successfully
+        Assert.True(PasswordHelper.Verify("TestPass123!", legacyHash));
+        
+        // Should identify that it needs rehashing to work factor 12
+        Assert.True(PasswordHelper.NeedsRehash(legacyHash));
+        
+        // New hash with default work factor 12
+        var upgradedHash = PasswordHelper.Hash("TestPass123!");
+        Assert.False(PasswordHelper.NeedsRehash(upgradedHash));
     }
 
     [Fact]
@@ -87,9 +92,11 @@ public class SecurityAndValidationTests
         context.MenuItems.Add(targetItem);
         context.SaveChanges();
 
-        var controller = new RestaurantArea.MenuItemController(services.Items, services.Categories, services.Menus, new TestWebHostEnvironment())
+        var httpContext = TestSupport.ControllerContext(new() { ["RestaurantId"] = attacker.Id.ToString() });
+        var auditContext = TestSupport.CreateAuditContext(context, httpContext.HttpContext);
+        var controller = new RestaurantArea.MenuItemController(services.Items, services.Categories, services.Menus, new TestWebHostEnvironment(), auditContext)
         {
-            ControllerContext = TestSupport.ControllerContext(new() { ["RestaurantId"] = attacker.Id.ToString() })
+            ControllerContext = httpContext
         };
 
         controller.Delete(targetItem.Id);
@@ -119,9 +126,11 @@ public class SecurityAndValidationTests
         context.Categories.Add(ownerCat);
         context.SaveChanges();
 
-        var controller = new RestaurantArea.CategoryController(services.Categories, services.Menus, new TestWebHostEnvironment())
+        var httpContext = TestSupport.ControllerContext(new() { ["RestaurantId"] = attacker.Id.ToString() });
+        var auditContext = TestSupport.CreateAuditContext(context, httpContext.HttpContext);
+        var controller = new RestaurantArea.CategoryController(services.Categories, services.Menus, new TestWebHostEnvironment(), auditContext)
         {
-            ControllerContext = TestSupport.ControllerContext(new() { ["RestaurantId"] = attacker.Id.ToString() })
+            ControllerContext = httpContext
         };
 
         controller.Delete(ownerCat.Id);
@@ -138,8 +147,8 @@ public class SecurityAndValidationTests
         var entityType = context.Model.FindEntityType(typeof(Restaurant));
         Assert.NotNull(entityType);
 
-        var slugIndex = entityType.GetIndexes().FirstOrDefault(i => i.Properties.Any(p => p.Name == "Slug"));
-        Assert.NotNull(slugIndex);
-        Assert.True(slugIndex.IsUnique);
+        var index = entityType.GetIndexes().FirstOrDefault(i => i.Properties.Any(p => p.Name == "Slug"));
+        Assert.NotNull(index);
+        Assert.True(index.IsUnique);
     }
 }

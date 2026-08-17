@@ -1,0 +1,139 @@
+@model List<EntityLayer.Concrete.Notification>
+@{
+    ViewData["Title"] = "Bildirimler";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    int unreadCount = ViewBag.UnreadCount ?? 0;
+    bool unreadOnly = ViewBag.UnreadOnly ?? false;
+}
+
+<style>
+    .notif-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 18px 22px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        transition: all 0.2s;
+    }
+    .notif-card.unread {
+        border-left: 4px solid var(--accent);
+        background: rgba(108, 99, 255, 0.05);
+    }
+    .notif-card:hover {
+        background: var(--surface2);
+    }
+    .notif-type-badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .notif-type-Security, .notif-type-Error {
+        background: rgba(255, 77, 109, 0.15);
+        color: #ff4d6d;
+        border: 1px solid rgba(255, 77, 109, 0.3);
+    }
+    .notif-type-Warning {
+        background: rgba(245, 158, 11, 0.15);
+        color: #fbbf24;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .notif-type-Info, .notif-type-Success {
+        background: rgba(34, 197, 94, 0.15);
+        color: #4ade80;
+        border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+    .notif-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 6px;
+    }
+    .notif-title {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--text);
+    }
+    .notif-msg {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        line-height: 1.5;
+    }
+    .notif-time {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-top: 8px;
+    }
+</style>
+
+<div class="card-header" style="background:transparent; border:none; padding:0 0 24px 0; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+    <div>
+        <h2 style="font-size:1.5rem; font-weight:700;">🔔 Sistem Bildirimleri</h2>
+        <p style="font-size:0.875rem; color:var(--text-muted); margin-top:4px;">Güvenlik uyarıları, yeni kayıtlar ve kritik admin bildirimleri.</p>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px;">
+        <a asp-area="Admin" asp-controller="Notification" asp-action="Index" asp-route-unreadOnly="@(!unreadOnly)" class="btn btn-secondary btn-sm">
+            @(unreadOnly ? "Tümünü Göster" : $"Sadece Okunmamışları Göster ({unreadCount})")
+        </a>
+        @if (unreadCount > 0)
+        {
+            <form asp-area="Admin" asp-controller="Notification" asp-action="MarkAllAsRead" method="post" style="display:inline;">
+                <button type="submit" class="btn btn-primary btn-sm">✓ Tümünü Okundu İşaretle</button>
+            </form>
+        }
+    </div>
+</div>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="card" style="padding:48px; text-align:center; color:var(--text-muted);">
+        <span style="font-size:2.5rem; display:block; margin-bottom:12px;">🎉</span>
+        <h3>Harika! Gösterilecek bildirim yok.</h3>
+        <p style="font-size:0.875rem; margin-top:6px;">Tüm bildirimler okundu veya henüz bir sistem uyarısı oluşmadı.</p>
+    </div>
+}
+else
+{
+    foreach (var notif in Model)
+    {
+        <div class="notif-card @(notif.IsRead ? "" : "unread")" id="notif-@notif.Id">
+            <div style="flex:1;">
+                <div class="notif-header">
+                    <span class="notif-type-badge notif-type-@notif.Type">@notif.Type</span>
+                    <span class="notif-title">@notif.Title</span>
+                    @if (!notif.IsRead)
+                    {
+                        <span style="width:8px; height:8px; border-radius:50%; background:var(--accent); display:inline-block;"></span>
+                    }
+                </div>
+                <div class="notif-msg">
+                    @notif.Message
+                </div>
+                <div class="notif-time">
+                    ⏱ @notif.CreatedAt.ToString("dd.MM.yyyy HH:mm:ss") UTC
+                    @if (notif.Restaurant != null)
+                    {
+                        <span> • 🏪 @notif.Restaurant.Name</span>
+                    }
+                </div>
+            </div>
+            <div>
+                @if (!notif.IsRead)
+                {
+                    <form asp-area="Admin" asp-controller="Notification" asp-action="MarkAsRead" asp-route-id="@notif.Id" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-secondary" title="Okundu işaretle">
+                            ✓ Okundu
+                        </button>
+                    </form>
+                }
+            </div>
+        </div>
+    }
+}

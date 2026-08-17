@@ -1,0 +1,544 @@
+@model List<EntityLayer.Concrete.AuditLog>
+@{
+    ViewData["Title"] = "Audit Logları";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var filter = ViewBag.Filter as BusinessLayer.Models.AuditLogFilterDto ?? new BusinessLayer.Models.AuditLogFilterDto();
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    int totalCount = ViewBag.TotalCount ?? 0;
+    var restaurants = ViewBag.Restaurants as List<EntityLayer.Concrete.Restaurant> ?? new List<EntityLayer.Concrete.Restaurant>();
+    var users = ViewBag.Users as List<EntityLayer.Concrete.User> ?? new List<EntityLayer.Concrete.User>();
+    var admins = ViewBag.Admins as List<EntityLayer.Concrete.Admin> ?? new List<EntityLayer.Concrete.Admin>();
+}
+
+<style>
+    .filter-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 24px;
+    }
+    .filter-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 14px;
+        align-items: flex-end;
+    }
+    .filter-item {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .filter-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .badge-action {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+    }
+    .badge-login-success { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+    .badge-login-failed { background: rgba(255, 77, 109, 0.15); color: #ff4d6d; border: 1px solid rgba(255, 77, 109, 0.3); }
+    .badge-logout { background: rgba(148, 163, 184, 0.15); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.3); }
+    .badge-create { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+    .badge-update { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-delete { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .badge-other { background: rgba(108, 99, 255, 0.15); color: var(--accent-light); border: 1px solid rgba(108, 99, 255, 0.3); }
+
+    .pagination-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+        padding-top: 16px;
+        border-top: 1px solid var(--border);
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .page-btn-group {
+        display: flex;
+        gap: 6px;
+    }
+    .page-btn {
+        padding: 6px 12px;
+        background: var(--surface2);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 0.8rem;
+        transition: all 0.2s;
+    }
+    .page-btn:hover {
+        background: var(--border);
+        color: #fff;
+    }
+    .page-btn.active {
+        background: var(--accent);
+        color: #fff;
+        border-color: var(--accent);
+    }
+
+    /* Modal Styles */
+    .modal-backdrop {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(4px);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        padding: 20px;
+    }
+    .modal-box {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        width: 100%;
+        max-width: 800px;
+        max-height: 90vh;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    }
+    .modal-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .modal-header h3 {
+        font-size: 1.15rem;
+        font-weight: 600;
+    }
+    .modal-close {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        font-size: 1.5rem;
+        cursor: pointer;
+        line-height: 1;
+    }
+    .modal-close:hover { color: #fff; }
+    .modal-body {
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    .detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        background: var(--surface2);
+        padding: 16px;
+        border-radius: 10px;
+        font-size: 0.85rem;
+    }
+    .detail-row {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .detail-label {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    .detail-val {
+        font-weight: 500;
+        word-break: break-all;
+    }
+    .json-container {
+        background: #0b0d13;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.82rem;
+        color: #38bdf8;
+        max-height: 250px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+    }
+</style>
+
+<div class="card-header" style="background:transparent; border:none; padding:0 0 20px 0; display:flex; justify-content:space-between; align-items:center;">
+    <div>
+        <h2 style="font-size:1.5rem; font-weight:700;">📜 Merkezi Audit Logları</h2>
+        <p style="font-size:0.875rem; color:var(--text-muted); margin-top:4px;">Kullanıcı, restoran ve sistem işlemlerinin detaylı denetim kayıtları.</p>
+    </div>
+    <div style="font-size:0.875rem; color:var(--text-muted);">
+        Toplam Kayıt: <strong style="color:var(--text)">@totalCount</strong>
+    </div>
+</div>
+
+<!-- Filtreleme Paneli -->
+<div class="filter-card">
+    <form method="get" asp-area="Admin" asp-controller="AuditLog" asp-action="Index">
+        <div class="filter-grid">
+            <div class="filter-item">
+                <label class="filter-label">Başlangıç Tarihi</label>
+                <input type="datetime-local" name="dateFrom" class="form-control"
+                       value="@(filter.DateFrom.HasValue ? filter.DateFrom.Value.ToString("yyyy-MM-ddTHH:mm") : "")" />
+            </div>
+            <div class="filter-item">
+                <label class="filter-label">Bitiş Tarihi</label>
+                <input type="datetime-local" name="dateTo" class="form-control"
+                       value="@(filter.DateTo.HasValue ? filter.DateTo.Value.ToString("yyyy-MM-ddTHH:mm") : "")" />
+            </div>
+            <div class="filter-item">
+                <label class="filter-label">Restoran</label>
+                <select name="restaurantId" class="form-control">
+                    <option value="">Tüm Restoranlar</option>
+                    @foreach (var r in restaurants)
+                    {
+                        <option value="@r.Id" selected="@(filter.RestaurantId == r.Id)">@r.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="filter-item">
+                <label class="filter-label">İşlem (Action)</label>
+                <select name="action" class="form-control">
+                    <option value="">Tüm İşlemler</option>
+                    <option value="LOGIN_SUCCESS" selected="@(filter.Action == "LOGIN_SUCCESS")">LOGIN_SUCCESS</option>
+                    <option value="LOGIN_FAILED" selected="@(filter.Action == "LOGIN_FAILED")">LOGIN_FAILED</option>
+                    <option value="LOGOUT" selected="@(filter.Action == "LOGOUT")">LOGOUT</option>
+                    <option value="PASSWORD_CHANGED" selected="@(filter.Action == "PASSWORD_CHANGED")">PASSWORD_CHANGED</option>
+                    <option value="RESTAURANT_CREATED" selected="@(filter.Action == "RESTAURANT_CREATED")">RESTAURANT_CREATED</option>
+                    <option value="RESTAURANT_UPDATED" selected="@(filter.Action == "RESTAURANT_UPDATED")">RESTAURANT_UPDATED</option>
+                    <option value="RESTAURANT_DELETED" selected="@(filter.Action == "RESTAURANT_DELETED")">RESTAURANT_DELETED</option>
+                    <option value="MENU_ITEM_CREATED" selected="@(filter.Action == "MENU_ITEM_CREATED")">MENU_ITEM_CREATED</option>
+                    <option value="MENU_ITEM_UPDATED" selected="@(filter.Action == "MENU_ITEM_UPDATED")">MENU_ITEM_UPDATED</option>
+                    <option value="MENU_ITEM_DELETED" selected="@(filter.Action == "MENU_ITEM_DELETED")">MENU_ITEM_DELETED</option>
+                    <option value="CATEGORY_CREATED" selected="@(filter.Action == "CATEGORY_CREATED")">CATEGORY_CREATED</option>
+                    <option value="CATEGORY_UPDATED" selected="@(filter.Action == "CATEGORY_UPDATED")">CATEGORY_UPDATED</option>
+                    <option value="CATEGORY_DELETED" selected="@(filter.Action == "CATEGORY_DELETED")">CATEGORY_DELETED</option>
+                </select>
+            </div>
+            <div class="filter-item">
+                <label class="filter-label">Varlık (Entity)</label>
+                <input type="text" name="entityType" class="form-control" placeholder="Örn: MenuItem" value="@filter.EntityType" />
+            </div>
+            <div class="filter-item">
+                <label class="filter-label">Arama / Anahtar Kelime</label>
+                <input type="text" name="keyword" class="form-control" placeholder="IP, açıklama, kullanıcı..." value="@filter.Keyword" />
+            </div>
+            <div class="filter-item" style="display:flex; flex-direction:row; gap:8px;">
+                <button type="submit" class="btn btn-primary" style="flex:1;">Filtrele</button>
+                <a asp-area="Admin" asp-controller="AuditLog" asp-action="Index" class="btn btn-secondary" title="Sıfırla">✕</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Tablo -->
+<div class="card">
+    <div class="card-body" style="padding:0;">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:140px;">Tarih (UTC)</th>
+                    <th>Restoran</th>
+                    <th>Kullanıcı / Admin</th>
+                    <th>İşlem</th>
+                    <th>Varlık</th>
+                    <th>IP Adresi</th>
+                    <th>Açıklama</th>
+                    <th style="width:80px; text-align:center;">İşlem</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model == null || !Model.Any())
+                {
+                    <tr>
+                        <td colspan="8" style="text-align:center; padding:40px; color:var(--text-muted);">
+                            Kriterlere uygun herhangi bir audit log kaydı bulunamadı.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var log in Model)
+                    {
+                        string badgeClass = "badge-other";
+                        if (log.Action == "LOGIN_SUCCESS") badgeClass = "badge-login-success";
+                        else if (log.Action == "LOGIN_FAILED") badgeClass = "badge-login-failed";
+                        else if (log.Action == "LOGOUT") badgeClass = "badge-logout";
+                        else if (log.Action.EndsWith("_CREATED")) badgeClass = "badge-create";
+                        else if (log.Action.EndsWith("_UPDATED") || log.Action == "PASSWORD_CHANGED") badgeClass = "badge-update";
+                        else if (log.Action.EndsWith("_DELETED")) badgeClass = "badge-delete";
+
+                        <tr>
+                            <td style="font-size:0.8rem; color:var(--text-muted); font-family:monospace;">
+                                @log.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")
+                            </td>
+                            <td>
+                                @if (log.Restaurant != null)
+                                {
+                                    <strong>@log.Restaurant.Name</strong>
+                                }
+                                else if (log.RestaurantId.HasValue)
+                                {
+                                    <span style="color:var(--text-muted)">Restoran #@log.RestaurantId</span>
+                                }
+                                else
+                                {
+                                    <span style="color:var(--text-muted)">-</span>
+                                }
+                            </td>
+                            <td>
+                                @if (log.Admin != null || log.AdminId.HasValue)
+                                {
+                                    <span style="color:#a78bfa">👑 @(log.Admin?.Username ?? log.Username ?? "Admin")</span>
+                                }
+                                else if (log.User != null || log.UserId.HasValue)
+                                {
+                                    <span>👤 @(log.User?.Username ?? log.Username ?? "Kullanıcı")</span>
+                                }
+                                else if (!string.IsNullOrEmpty(log.Username))
+                                {
+                                    <span style="color:var(--text-muted)">@log.Username</span>
+                                }
+                                else
+                                {
+                                    <span style="color:var(--text-muted)">Anonim</span>
+                                }
+                            </td>
+                            <td>
+                                <span class="badge-action @badgeClass">@log.Action</span>
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(log.EntityType))
+                                {
+                                    <span>@log.EntityType @(log.EntityId.HasValue ? $"#{log.EntityId}" : "")</span>
+                                }
+                                else
+                                {
+                                    <span style="color:var(--text-muted)">-</span>
+                                }
+                            </td>
+                            <td style="font-family:monospace; font-size:0.8rem;">
+                                @(log.IpAddress ?? "-")
+                            </td>
+                            <td style="max-width:260px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="@log.Description">
+                                @(log.Description ?? "-")
+                            </td>
+                            <td style="text-align:center;">
+                                <button type="button" class="btn btn-sm btn-secondary" onclick="openDetailModal(@log.Id)">
+                                    Detay
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Sayfalama -->
+@if (totalPages > 1)
+{
+    <div class="pagination-bar">
+        <div style="font-size:0.85rem; color:var(--text-muted);">
+            Sayfa <strong>@currentPage</strong> / <strong>@totalPages</strong> (Toplam @totalCount kayıt)
+        </div>
+        <div class="page-btn-group">
+            @if (currentPage > 1)
+            {
+                <a href="@Url.Action("Index", new {
+                    dateFrom = filter.DateFrom?.ToString("yyyy-MM-ddTHH:mm"),
+                    dateTo = filter.DateTo?.ToString("yyyy-MM-ddTHH:mm"),
+                    restaurantId = filter.RestaurantId,
+                    action = filter.Action,
+                    entityType = filter.EntityType,
+                    keyword = filter.Keyword,
+                    page = 1,
+                    pageSize = filter.PageSize
+                })" class="page-btn">« İlk</a>
+                <a href="@Url.Action("Index", new {
+                    dateFrom = filter.DateFrom?.ToString("yyyy-MM-ddTHH:mm"),
+                    dateTo = filter.DateTo?.ToString("yyyy-MM-ddTHH:mm"),
+                    restaurantId = filter.RestaurantId,
+                    action = filter.Action,
+                    entityType = filter.EntityType,
+                    keyword = filter.Keyword,
+                    page = currentPage - 1,
+                    pageSize = filter.PageSize
+                })" class="page-btn">‹ Önceki</a>
+            }
+
+            @for (int p = Math.Max(1, currentPage - 2); p <= Math.Min(totalPages, currentPage + 2); p++)
+            {
+                <a href="@Url.Action("Index", new {
+                    dateFrom = filter.DateFrom?.ToString("yyyy-MM-ddTHH:mm"),
+                    dateTo = filter.DateTo?.ToString("yyyy-MM-ddTHH:mm"),
+                    restaurantId = filter.RestaurantId,
+                    action = filter.Action,
+                    entityType = filter.EntityType,
+                    keyword = filter.Keyword,
+                    page = p,
+                    pageSize = filter.PageSize
+                })" class="page-btn @(p == currentPage ? "active" : "")">@p</a>
+            }
+
+            @if (currentPage < totalPages)
+            {
+                <a href="@Url.Action("Index", new {
+                    dateFrom = filter.DateFrom?.ToString("yyyy-MM-ddTHH:mm"),
+                    dateTo = filter.DateTo?.ToString("yyyy-MM-ddTHH:mm"),
+                    restaurantId = filter.RestaurantId,
+                    action = filter.Action,
+                    entityType = filter.EntityType,
+                    keyword = filter.Keyword,
+                    page = currentPage + 1,
+                    pageSize = filter.PageSize
+                })" class="page-btn">Sonraki ›</a>
+                <a href="@Url.Action("Index", new {
+                    dateFrom = filter.DateFrom?.ToString("yyyy-MM-ddTHH:mm"),
+                    dateTo = filter.DateTo?.ToString("yyyy-MM-ddTHH:mm"),
+                    restaurantId = filter.RestaurantId,
+                    action = filter.Action,
+                    entityType = filter.EntityType,
+                    keyword = filter.Keyword,
+                    page = totalPages,
+                    pageSize = filter.PageSize
+                })" class="page-btn">Son »</a>
+            }
+        </div>
+    </div>
+}
+
+<!-- Detay Modal -->
+<div id="detailModal" class="modal-backdrop">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3 id="modalTitle">Audit Log Detayı</h3>
+            <button type="button" class="modal-close" onclick="closeDetailModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="detail-grid">
+                <div class="detail-row">
+                    <span class="detail-label">İşlem (Action)</span>
+                    <span id="mAction" class="detail-val"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Tarih</span>
+                    <span id="mCreatedAt" class="detail-val"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Restoran</span>
+                    <span id="mRestaurant" class="detail-val"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Kullanıcı / Admin</span>
+                    <span id="mUser" class="detail-val"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Varlık (Entity)</span>
+                    <span id="mEntity" class="detail-val"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">IP Adresi</span>
+                    <span id="mIp" class="detail-val"></span>
+                </div>
+                <div class="detail-row" style="grid-column: span 2;">
+                    <span class="detail-label">Request Path</span>
+                    <span id="mPath" class="detail-val"></span>
+                </div>
+                <div class="detail-row" style="grid-column: span 2;">
+                    <span class="detail-label">User Agent</span>
+                    <span id="mUserAgent" class="detail-val" style="font-size:0.78rem; color:var(--text-muted);"></span>
+                </div>
+                <div class="detail-row" style="grid-column: span 2;">
+                    <span class="detail-label">Açıklama</span>
+                    <span id="mDesc" class="detail-val"></span>
+                </div>
+            </div>
+
+            <!-- JSON Değerleri -->
+            <div id="oldValuesBlock" style="display:none;">
+                <h4 style="font-size:0.85rem; font-weight:600; margin-bottom:6px; color:#f87171;">⬅ Eski Değerler (Old Values - JSONB)</h4>
+                <div id="mOldValues" class="json-container"></div>
+            </div>
+
+            <div id="newValuesBlock" style="display:none;">
+                <h4 style="font-size:0.85rem; font-weight:600; margin-bottom:6px; color:#4ade80;">➡ Yeni Değerler (New Values - JSONB)</h4>
+                <div id="mNewValues" class="json-container"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openDetailModal(id) {
+        fetch('@Url.Action("Details", "AuditLog", new { area = "Admin" })/' + id)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('modalTitle').innerText = 'Audit Log #' + data.id + ' — ' + data.action;
+                document.getElementById('mAction').innerText = data.action;
+                document.getElementById('mCreatedAt').innerText = data.createdAt;
+                document.getElementById('mRestaurant').innerText = data.restaurant ? data.restaurant + ' (#' + data.restaurantId + ')' : (data.restaurantId ? '#' + data.restaurantId : '-');
+                document.getElementById('mUser').innerText = data.admin ? '👑 ' + data.admin : (data.user ? '👤 ' + data.user : (data.username || '-'));
+                document.getElementById('mEntity').innerText = data.entityType ? data.entityType + (data.entityId ? ' #' + data.entityId : '') : '-';
+                document.getElementById('mIp').innerText = data.ipAddress || '-';
+                document.getElementById('mPath').innerText = data.requestPath || '-';
+                document.getElementById('mUserAgent').innerText = data.userAgent || '-';
+                document.getElementById('mDesc').innerText = data.description || '-';
+
+                var oldBlock = document.getElementById('oldValuesBlock');
+                var newBlock = document.getElementById('newValuesBlock');
+
+                if (data.oldValues) {
+                    try {
+                        var parsed = JSON.parse(data.oldValues);
+                        document.getElementById('mOldValues').innerText = JSON.stringify(parsed, null, 2);
+                    } catch(e) {
+                        document.getElementById('mOldValues').innerText = data.oldValues;
+                    }
+                    oldBlock.style.display = 'block';
+                } else {
+                    oldBlock.style.display = 'none';
+                }
+
+                if (data.newValues) {
+                    try {
+                        var parsed = JSON.parse(data.newValues);
+                        document.getElementById('mNewValues').innerText = JSON.stringify(parsed, null, 2);
+                    } catch(e) {
+                        document.getElementById('mNewValues').innerText = data.newValues;
+                    }
+                    newBlock.style.display = 'block';
+                } else {
+                    newBlock.style.display = 'none';
+                }
+
+                document.getElementById('detailModal').style.display = 'flex';
+            })
+            .catch(err => alert('Detay yüklenirken hata oluştu.'));
+    }
+
+    function closeDetailModal() {
+        document.getElementById('detailModal').style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        var modal = document.getElementById('detailModal');
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    };
+</script>

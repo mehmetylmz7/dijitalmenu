@@ -45,9 +45,11 @@ public class RestaurantWorkflowTests
         context.Restaurants.Add(restaurant); context.SaveChanges();
         var menu = new Menu { RestaurantId = restaurant.Id }; context.Menus.Add(menu); context.SaveChanges();
         var category = new Category { Name = "Ana Yemek", MenuId = menu.Id }; context.Categories.Add(category); context.SaveChanges();
-        var controller = new MenuItemController(services.Items, services.Categories, services.Menus, new TestWebHostEnvironment())
+        var httpContext = TestSupport.ControllerContext(new() { ["RestaurantId"] = restaurant.Id.ToString() });
+        var auditContext = TestSupport.CreateAuditContext(context, httpContext.HttpContext);
+        var controller = new MenuItemController(services.Items, services.Categories, services.Menus, new TestWebHostEnvironment(), auditContext)
         {
-            ControllerContext = TestSupport.ControllerContext(new() { ["RestaurantId"] = restaurant.Id.ToString() })
+            ControllerContext = httpContext
         };
         controller.TempData = TestSupport.TempData(controller.HttpContext);
 
@@ -72,7 +74,9 @@ public class RestaurantWorkflowTests
         context.Categories.AddRange(ownerCategory, attackerCategory); context.SaveChanges();
         var target = new MenuItem { Name = "Original", Description = "", Price = 10, CategoryId = ownerCategory.Id };
         context.MenuItems.Add(target); context.SaveChanges();
-        var controller = new MenuItemController(services.Items, services.Categories, services.Menus, new TestWebHostEnvironment()) { ControllerContext = TestSupport.ControllerContext(new() { ["RestaurantId"] = attacker.Id.ToString() }) };
+        var httpContext = TestSupport.ControllerContext(new() { ["RestaurantId"] = attacker.Id.ToString() });
+        var auditContext = TestSupport.CreateAuditContext(context, httpContext.HttpContext);
+        var controller = new MenuItemController(services.Items, services.Categories, services.Menus, new TestWebHostEnvironment(), auditContext) { ControllerContext = httpContext };
         controller.TempData = TestSupport.TempData(controller.HttpContext);
 
         controller.Edit(new MenuItem { Id = target.Id, Name = "Hijacked", Price = 50, CategoryId = attackerCategory.Id }, null);
@@ -90,7 +94,9 @@ public class RestaurantWorkflowTests
         var restaurant = new Restaurant { Name = "Test Restaurant", ThemeId = 1 }; context.Restaurants.Add(restaurant); context.SaveChanges();
         var menu = new Menu { RestaurantId = restaurant.Id }; context.Menus.Add(menu); context.SaveChanges();
         context.Categories.Add(new Category { Name = "İçecek", MenuId = menu.Id }); context.SaveChanges();
-        var controller = new CategoryController(services.Categories, services.Menus, new TestWebHostEnvironment()) { ControllerContext = TestSupport.ControllerContext(new() { ["RestaurantId"] = restaurant.Id.ToString() }) };
+        var httpContext = TestSupport.ControllerContext(new() { ["RestaurantId"] = restaurant.Id.ToString() });
+        var auditContext = TestSupport.CreateAuditContext(context, httpContext.HttpContext);
+        var controller = new CategoryController(services.Categories, services.Menus, new TestWebHostEnvironment(), auditContext) { ControllerContext = httpContext };
 
         var result = controller.Create("içecek", null);
 
@@ -113,9 +119,11 @@ public class RestaurantWorkflowTests
         context.Categories.AddRange(cat1, cat2, cat3); context.SaveChanges();
 
         var suggestionService = new CategorySuggestionManager();
-        var controller = new BuilderController(services.Restaurants, services.Menus, services.Categories, services.Items, services.Themes, suggestionService)
+        var httpContext = TestSupport.ControllerContext(new() { ["RestaurantId"] = restaurant.Id.ToString() });
+        var auditContext = TestSupport.CreateAuditContext(context, httpContext.HttpContext);
+        var controller = new BuilderController(services.Restaurants, services.Menus, services.Categories, services.Items, services.Themes, suggestionService, auditContext)
         {
-            ControllerContext = TestSupport.ControllerContext(new() { ["RestaurantId"] = restaurant.Id.ToString() })
+            ControllerContext = httpContext
         };
 
         var result = controller.UpdateCategoryOrder(new List<int> { cat3.Id, cat1.Id, cat2.Id });
@@ -142,9 +150,11 @@ public class RestaurantWorkflowTests
         context.MenuItems.AddRange(item1, item2); context.SaveChanges();
 
         var suggestionService = new CategorySuggestionManager();
-        var controller = new BuilderController(services.Restaurants, services.Menus, services.Categories, services.Items, services.Themes, suggestionService)
+        var httpContext = TestSupport.ControllerContext(new() { ["RestaurantId"] = restaurant.Id.ToString() });
+        var auditContext = TestSupport.CreateAuditContext(context, httpContext.HttpContext);
+        var controller = new BuilderController(services.Restaurants, services.Menus, services.Categories, services.Items, services.Themes, suggestionService, auditContext)
         {
-            ControllerContext = TestSupport.ControllerContext(new() { ["RestaurantId"] = restaurant.Id.ToString() })
+            ControllerContext = httpContext
         };
 
         var result = controller.UpdateMenuItemOrder(new List<int> { item2.Id, item1.Id });
@@ -164,9 +174,11 @@ public class RestaurantWorkflowTests
         context.Restaurants.Add(restaurant); context.SaveChanges();
 
         var suggestionService = new CategorySuggestionManager();
-        var controller = new BuilderController(services.Restaurants, services.Menus, services.Categories, services.Items, services.Themes, suggestionService)
+        var httpContext = TestSupport.ControllerContext(new() { ["RestaurantId"] = restaurant.Id.ToString() });
+        var auditContext = TestSupport.CreateAuditContext(context, httpContext.HttpContext);
+        var controller = new BuilderController(services.Restaurants, services.Menus, services.Categories, services.Items, services.Themes, suggestionService, auditContext)
         {
-            ControllerContext = TestSupport.ControllerContext(new() { ["RestaurantId"] = restaurant.Id.ToString() })
+            ControllerContext = httpContext
         };
 
         var result = controller.UpdateLocation(null, "Test Adres", "+90 555 123 45 67", "09:00 - 22:00", "@kocaoglurestoran");

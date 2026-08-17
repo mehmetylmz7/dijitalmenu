@@ -32,6 +32,9 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+// HttpContext Accessor
+builder.Services.AddHttpContextAccessor();
+
 // Data Access Layer DI Registration
 builder.Services.AddScoped<DataAccessLayer.Abstract.IAdminDal, DataAccessLayer.Repositories.AdminRepository>();
 builder.Services.AddScoped<DataAccessLayer.Abstract.ICategoryDal, DataAccessLayer.Repositories.CategoryRepository>();
@@ -41,6 +44,8 @@ builder.Services.AddScoped<DataAccessLayer.Abstract.IMenuItemDal, DataAccessLaye
 builder.Services.AddScoped<DataAccessLayer.Abstract.IRestaurantDal, DataAccessLayer.Repositories.RestaurantRepository>();
 builder.Services.AddScoped<DataAccessLayer.Abstract.IThemeDal, DataAccessLayer.Repositories.ThemeRepository>();
 builder.Services.AddScoped<DataAccessLayer.Abstract.IUserDal, DataAccessLayer.Repositories.UserRepository>();
+builder.Services.AddScoped<DataAccessLayer.Abstract.IAuditLogDal, DataAccessLayer.Repositories.AuditLogRepository>();
+builder.Services.AddScoped<DataAccessLayer.Abstract.INotificationDal, DataAccessLayer.Repositories.NotificationRepository>();
 
 // Business Layer DI Registration
 builder.Services.AddScoped<BusinessLayer.Abstract.IAdminService, BusinessLayer.Concrete.AdminManager>();
@@ -52,6 +57,11 @@ builder.Services.AddScoped<BusinessLayer.Abstract.IRestaurantService, BusinessLa
 builder.Services.AddScoped<BusinessLayer.Abstract.IThemeService, BusinessLayer.Concrete.ThemeManager>();
 builder.Services.AddScoped<BusinessLayer.Abstract.IUserService, BusinessLayer.Concrete.UserManager>();
 builder.Services.AddScoped<BusinessLayer.Abstract.ICategorySuggestionService, BusinessLayer.Concrete.CategorySuggestionManager>();
+builder.Services.AddScoped<BusinessLayer.Abstract.IAuditLogService, BusinessLayer.Concrete.AuditLogManager>();
+builder.Services.AddScoped<BusinessLayer.Abstract.INotificationService, BusinessLayer.Concrete.NotificationManager>();
+
+// Web Services Registration
+builder.Services.AddScoped<dijitalmenu.Services.IAuditContextService, dijitalmenu.Services.AuditContextService>();
 
 var app = builder.Build();
 

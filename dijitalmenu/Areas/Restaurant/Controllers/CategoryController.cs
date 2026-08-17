@@ -1,5 +1,6 @@
 using BusinessLayer.Abstract;
 using dijitalmenu.Filters;
+using dijitalmenu.Services;
 using EntityLayer.Concrete;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
@@ -23,12 +24,18 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
         private readonly ICategoryService _categoryService;
         private readonly IMenuService _menuService;
         private readonly IWebHostEnvironment _environment;
+        private readonly IAuditContextService _auditContextService;
 
-        public CategoryController(ICategoryService categoryService, IMenuService menuService, IWebHostEnvironment environment)
+        public CategoryController(
+            ICategoryService categoryService,
+            IMenuService menuService,
+            IWebHostEnvironment environment,
+            IAuditContextService auditContextService)
         {
             _categoryService = categoryService;
             _menuService = menuService;
             _environment = environment;
+            _auditContextService = auditContextService;
         }
 
         private int GetRestaurantId() =>
@@ -79,7 +86,17 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 return View();
             }
 
-            _categoryService.TInsert(new Category { Name = normalizedName, MenuId = menu.Id, ImageUrl = uploadedImageUrl });
+            var category = new Category { Name = normalizedName, MenuId = menu.Id, ImageUrl = uploadedImageUrl };
+            _categoryService.TInsert(category);
+
+            _auditContextService.Log(
+                action: "CATEGORY_CREATED",
+                entityType: "Category",
+                entityId: category.Id,
+                description: $"Yeni kategori eklendi: '{category.Name}'",
+                newEntity: new { category.Id, category.Name, category.MenuId, category.ImageUrl }
+            );
+
             return RedirectToAction("Index");
         }
 
@@ -116,9 +133,35 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 return RedirectToAction("Edit", new { id });
             }
 
+            var oldValues = new
+            {
+                category.Id,
+                category.Name,
+                category.MenuId,
+                category.ImageUrl
+            };
+
             category.Name = normalizedName;
             category.ImageUrl = uploadedImageUrl ?? category.ImageUrl;
             _categoryService.TUpdate(category);
+
+            var newValues = new
+            {
+                category.Id,
+                category.Name,
+                category.MenuId,
+                category.ImageUrl
+            };
+
+            _auditContextService.Log(
+                action: "CATEGORY_UPDATED",
+                entityType: "Category",
+                entityId: category.Id,
+                description: $"Kategori güncellendi: '{category.Name}'",
+                oldEntity: oldValues,
+                newEntity: newValues
+            );
+
             return RedirectToAction("Index");
         }
 
@@ -129,7 +172,24 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             var category = _categoryService.TGetByID(id);
 
             if (category != null && menu != null && category.MenuId == menu.Id)
+            {
+                var oldValues = new
+                {
+                    category.Id,
+                    category.Name,
+                    category.MenuId
+                };
+
+                _auditContextService.Log(
+                    action: "CATEGORY_DELETED",
+                    entityType: "Category",
+                    entityId: category.Id,
+                    description: $"Kategori silindi: '{category.Name}'",
+                    oldEntity: oldValues
+                );
+
                 _categoryService.TDelete(category);
+            }
 
             return RedirectToAction("Index");
         }
@@ -143,14 +203,20 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 return false;
             }
 
-            var categoryNameToCheck = normalizedName;
-            var turkishCulture = CultureInfo.GetCultureInfo("tr-TR");
-            var alreadyExists = _categoryService.TGetListAll().Any(category =>
-                category.MenuId == menuId && category.Id != currentCategoryId &&
-                string.Compare(category.Name, categoryNameToCheck, ignoreCase: true, turkishCulture) == 0);
-            if (alreadyExists)
+            var existingCategories = _categoryService.TGetListAll()
+                .Where(category => category.MenuId == menuId && (currentCategoryId == null || category.Id != currentCategoryId.Value))
+                .ToList();
+
+            var trCulture = CultureInfo.GetCultureInfo("tr-TR");
+            var targetToCompare = normalizedName;
+            var isDuplicate = existingCategories.Any(category =>
+                string.Equals(category.Name.Trim(), targetToCompare, StringComparison.CurrentCultureIgnoreCase) ||
+                string.Equals(category.Name.Trim(), targetToCompare, StringComparison.OrdinalIgnoreCase) ||
+                trCulture.CompareInfo.Compare(category.Name.Trim(), targetToCompare, CompareOptions.IgnoreCase) == 0);
+
+            if (isDuplicate)
             {
-                error = "Bu kategori zaten mevcut.";
+                error = "Bu menüde aynı isimde başka bir kategori zaten var.";
                 return false;
             }
 
@@ -166,35 +232,31 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             if (photoFile == null || photoFile.Length == 0)
                 return true;
 
-            var extension = Path.GetExtension(photoFile.FileName);
-            if (photoFile.Length > MaxImageFileSize || !AllowedImageExtensions.Contains(extension) ||
-                !AllowedImageContentTypes.Contains(photoFile.ContentType) || !HasValidImageSignature(photoFile))
+            if (photoFile.Length > MaxImageFileSize)
             {
-                error = "Görsel JPG, PNG, GIF veya WebP türünde ve en fazla 5 MB olmalıdır.";
+                error = "Yüklenen görsel en fazla 5 MB olabilir.";
                 return false;
             }
 
-            var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads");
-            Directory.CreateDirectory(uploadsFolder);
+            var extension = Path.GetExtension(photoFile.FileName);
+            if (!AllowedImageExtensions.Contains(extension) ||
+                !AllowedImageContentTypes.Contains(photoFile.ContentType))
+            {
+                error = "Sadece JPG, JPEG, PNG, GIF ve WEBP formatları desteklenmektedir.";
+                return false;
+            }
 
-            var newFileName = $"{Guid.NewGuid():N}{extension.ToLowerInvariant()}";
-            var filePath = Path.Combine(uploadsFolder, newFileName);
-            using var stream = new FileStream(filePath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
+            var folderPath = Path.Combine(_environment.WebRootPath, "images", "categories");
+            Directory.CreateDirectory(folderPath);
+
+            var fileName = $"{Guid.NewGuid():N}{extension.ToLowerInvariant()}";
+            var fullPath = Path.Combine(folderPath, fileName);
+
+            using var stream = new FileStream(fullPath, FileMode.Create);
             photoFile.CopyTo(stream);
-            imageUrl = $"/uploads/{newFileName}";
+
+            imageUrl = $"/images/categories/{fileName}";
             return true;
-        }
-
-        private static bool HasValidImageSignature(IFormFile photoFile)
-        {
-            using var stream = photoFile.OpenReadStream();
-            Span<byte> header = stackalloc byte[12];
-            var read = stream.Read(header);
-
-            return (read >= 3 && header[0] == 0xFF && header[1] == 0xD8 && header[2] == 0xFF) ||
-                   (read >= 8 && header[..8].SequenceEqual(new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A })) ||
-                   (read >= 6 && (header[..6].SequenceEqual("GIF87a"u8) || header[..6].SequenceEqual("GIF89a"u8))) ||
-                   (read >= 12 && header[..4].SequenceEqual("RIFF"u8) && header[8..12].SequenceEqual("WEBP"u8));
         }
     }
 }

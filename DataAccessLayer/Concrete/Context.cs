@@ -24,6 +24,9 @@ namespace DataAccessLayer.Concrete
         public DbSet<Theme> Themes { get; set; }
         public DbSet<User> Users { get; set; }
 
+        public DbSet<AuditLog> AuditLogs { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -48,7 +51,29 @@ namespace DataAccessLayer.Concrete
                 .HasIndex(restaurant => restaurant.Slug)
                 .IsUnique()
                 .HasFilter(null);
-        }
 
+            // AuditLog Configuration
+            modelBuilder.Entity<AuditLog>(entity =>
+            {
+                entity.Property(e => e.OldValues)
+                    .HasColumnType("jsonb");
+
+                entity.Property(e => e.NewValues)
+                    .HasColumnType("jsonb");
+
+                entity.HasIndex(e => new { e.RestaurantId, e.CreatedAt });
+                entity.HasIndex(e => e.CreatedAt);
+                entity.HasIndex(e => e.Action);
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => e.AdminId);
+            });
+
+            // Notification Configuration
+            modelBuilder.Entity<Notification>(entity =>
+            {
+                entity.HasIndex(e => new { e.RestaurantId, e.IsRead });
+                entity.HasIndex(e => e.CreatedAt);
+            });
         }
+    }
 }

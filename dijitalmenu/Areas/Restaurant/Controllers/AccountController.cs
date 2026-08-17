@@ -2,6 +2,8 @@ using BusinessLayer.Abstract;
 using dijitalmenu.Filters;
 using dijitalmenu.Helpers;
 using dijitalmenu.Models;
+using dijitalmenu.Services;
+using EntityLayer.Concrete;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
 
@@ -16,11 +18,16 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
 
         private readonly IUserService _userService;
         private readonly IRestaurantService _restaurantService;
+        private readonly IAuditContextService _auditContextService;
 
-        public AccountController(IUserService userService, IRestaurantService restaurantService)
+        public AccountController(
+            IUserService userService,
+            IRestaurantService restaurantService,
+            IAuditContextService auditContextService)
         {
             _userService = userService;
             _restaurantService = restaurantService;
+            _auditContextService = auditContextService;
         }
 
         private int GetCurrentUserId() =>
@@ -91,8 +98,21 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 return RedirectToAction("Index");
             }
 
+            var oldValues = new { user.Id, user.Username, user.RestaurantId };
+
             user.Username = username;
             _userService.TUpdate(user);
+
+            var newValues = new { user.Id, user.Username, user.RestaurantId };
+
+            _auditContextService.Log(
+                action: "USER_UPDATED",
+                entityType: "User",
+                entityId: user.Id,
+                description: $"Kullanıcı adı güncellendi: '{username}'",
+                oldEntity: oldValues,
+                newEntity: newValues
+            );
 
             HttpContext.Session.SetString("RestaurantUsername", username);
             TempData["Success"] = "Profil bilgileriniz başarıyla güncellendi.";
@@ -136,6 +156,17 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 return RedirectToAction("Index");
             }
 
+            var oldValues = new
+            {
+                restaurant.Id,
+                restaurant.Name,
+                restaurant.Phone,
+                restaurant.Address,
+                restaurant.GoogleMapsUrl,
+                restaurant.ImportantNotice,
+                restaurant.WorkingHours
+            };
+
             restaurant.Name = restaurantName;
             restaurant.Phone = string.IsNullOrWhiteSpace(phone) ? null : phone.Trim();
             restaurant.Address = string.IsNullOrWhiteSpace(address) ? null : address.Trim();
@@ -144,6 +175,26 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             restaurant.WorkingHours = string.IsNullOrWhiteSpace(workingHours) ? null : workingHours.Trim();
 
             _restaurantService.TUpdate(restaurant);
+
+            var newValues = new
+            {
+                restaurant.Id,
+                restaurant.Name,
+                restaurant.Phone,
+                restaurant.Address,
+                restaurant.GoogleMapsUrl,
+                restaurant.ImportantNotice,
+                restaurant.WorkingHours
+            };
+
+            _auditContextService.Log(
+                action: "RESTAURANT_UPDATED",
+                entityType: "Restaurant",
+                entityId: restaurant.Id,
+                description: $"Restoran işletme bilgileri güncellendi: '{restaurant.Name}'",
+                oldEntity: oldValues,
+                newEntity: newValues
+            );
 
             TempData["Success"] = "İşletme bilgileriniz başarıyla güncellendi.";
             return RedirectToAction("Index");
@@ -199,6 +250,14 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
 
             user.Password = PasswordHelper.Hash(newPassword);
             _userService.TUpdate(user);
+
+            // Audit Log: Password Changed (Never logging actual password values)
+            _auditContextService.Log(
+                action: "PASSWORD_CHANGED",
+                entityType: "User",
+                entityId: user.Id,
+                description: $"Kullanıcı şifresini başarıyla değiştirdi: '{user.Username}'"
+            );
 
             TempData["Success"] = "Şifreniz başarıyla değiştirildi.";
             return RedirectToAction("Index");

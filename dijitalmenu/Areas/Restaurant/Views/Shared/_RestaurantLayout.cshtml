@@ -551,6 +551,10 @@
            asp-area="Restaurant" asp-controller="Account" asp-action="Index">
             <span class="icon">👤</span> Hesabım
         </a>
+        <a class="sidebar-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "AuditLog" ? "active" : "")"
+           asp-area="Restaurant" asp-controller="AuditLog" asp-action="Index">
+            <span class="icon">📜</span> İşlem Geçmişi
+        </a>
     </nav>
 
     <div class="sidebar-footer">

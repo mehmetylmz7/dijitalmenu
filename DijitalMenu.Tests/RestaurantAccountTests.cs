@@ -26,14 +26,17 @@ public class RestaurantAccountTests
         context.Users.Add(user);
         context.SaveChanges();
 
-        var controller = new AccountController(services.Users, services.Restaurants)
+        var httpContext = TestSupport.ControllerContext(new()
         {
-            ControllerContext = TestSupport.ControllerContext(new()
-            {
-                ["RestaurantUserId"] = user.Id.ToString(),
-                ["RestaurantId"] = restaurant.Id.ToString(),
-                ["RestaurantUsername"] = user.Username
-            })
+            ["RestaurantUserId"] = user.Id.ToString(),
+            ["RestaurantId"] = restaurant.Id.ToString(),
+            ["RestaurantUsername"] = user.Username
+        });
+        var auditContext = TestSupport.CreateAuditContext(context, httpContext.HttpContext);
+
+        var controller = new AccountController(services.Users, services.Restaurants, auditContext)
+        {
+            ControllerContext = httpContext
         };
 
         var result = controller.Index();
@@ -68,8 +71,9 @@ public class RestaurantAccountTests
             ["RestaurantId"] = restaurant.Id.ToString(),
             ["RestaurantUsername"] = "old_user"
         });
+        var auditContext = TestSupport.CreateAuditContext(context, controllerContext.HttpContext);
 
-        var controller = new AccountController(services.Users, services.Restaurants)
+        var controller = new AccountController(services.Users, services.Restaurants, auditContext)
         {
             ControllerContext = controllerContext,
             TempData = TestSupport.TempData(controllerContext.HttpContext)
@@ -106,8 +110,9 @@ public class RestaurantAccountTests
             ["RestaurantUserId"] = user2.Id.ToString(),
             ["RestaurantId"] = r2.Id.ToString()
         });
+        var auditContext = TestSupport.CreateAuditContext(context, controllerContext.HttpContext);
 
-        var controller = new AccountController(services.Users, services.Restaurants)
+        var controller = new AccountController(services.Users, services.Restaurants, auditContext)
         {
             ControllerContext = controllerContext,
             TempData = TestSupport.TempData(controllerContext.HttpContext)
@@ -140,8 +145,9 @@ public class RestaurantAccountTests
             ["RestaurantUserId"] = user.Id.ToString(),
             ["RestaurantId"] = restaurant.Id.ToString()
         });
+        var auditContext = TestSupport.CreateAuditContext(context, controllerContext.HttpContext);
 
-        var controller = new AccountController(services.Users, services.Restaurants)
+        var controller = new AccountController(services.Users, services.Restaurants, auditContext)
         {
             ControllerContext = controllerContext,
             TempData = TestSupport.TempData(controllerContext.HttpContext)
@@ -182,8 +188,9 @@ public class RestaurantAccountTests
             ["RestaurantUserId"] = attackerUser.Id.ToString(),
             ["RestaurantId"] = attackerRestaurant.Id.ToString()
         });
+        var auditContext = TestSupport.CreateAuditContext(context, controllerContext.HttpContext);
 
-        var controller = new AccountController(services.Users, services.Restaurants)
+        var controller = new AccountController(services.Users, services.Restaurants, auditContext)
         {
             ControllerContext = controllerContext,
             TempData = TestSupport.TempData(controllerContext.HttpContext)
@@ -222,8 +229,9 @@ public class RestaurantAccountTests
             ["RestaurantUserId"] = user.Id.ToString(),
             ["RestaurantId"] = restaurant.Id.ToString()
         });
+        var auditContext = TestSupport.CreateAuditContext(context, controllerContext.HttpContext);
 
-        var controller = new AccountController(services.Users, services.Restaurants)
+        var controller = new AccountController(services.Users, services.Restaurants, auditContext)
         {
             ControllerContext = controllerContext,
             TempData = TestSupport.TempData(controllerContext.HttpContext)
@@ -262,8 +270,9 @@ public class RestaurantAccountTests
             ["RestaurantUserId"] = user.Id.ToString(),
             ["RestaurantId"] = restaurant.Id.ToString()
         });
+        var auditContext = TestSupport.CreateAuditContext(context, controllerContext.HttpContext);
 
-        var controller = new AccountController(services.Users, services.Restaurants)
+        var controller = new AccountController(services.Users, services.Restaurants, auditContext)
         {
             ControllerContext = controllerContext,
             TempData = TestSupport.TempData(controllerContext.HttpContext)
@@ -298,8 +307,9 @@ public class RestaurantAccountTests
             ["RestaurantUserId"] = user.Id.ToString(),
             ["RestaurantId"] = restaurant.Id.ToString()
         });
+        var auditContext = TestSupport.CreateAuditContext(context, controllerContext.HttpContext);
 
-        var controller = new AccountController(services.Users, services.Restaurants)
+        var controller = new AccountController(services.Users, services.Restaurants, auditContext)
         {
             ControllerContext = controllerContext,
             TempData = TestSupport.TempData(controllerContext.HttpContext)

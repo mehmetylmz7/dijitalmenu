@@ -1,9 +1,13 @@
 using BusinessLayer.Abstract;
 using DataAccessLayer.Concrete;
 using dijitalmenu.Helpers;
+using dijitalmenu.Services;
 using EntityLayer.Concrete;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace dijitalmenu.Areas.Restaurant.Controllers
 {
@@ -15,6 +19,8 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
         private readonly IMenuService _menuService;
         private readonly IThemeService _themeService;
         private readonly IDefaultCategoryService _defaultCategoryService;
+        private readonly IAuditContextService _auditContextService;
+        private readonly INotificationService _notificationService;
         private readonly Context _context;
 
         public AuthController(
@@ -23,6 +29,8 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             IMenuService menuService,
             IThemeService themeService,
             IDefaultCategoryService defaultCategoryService,
+            IAuditContextService auditContextService,
+            INotificationService notificationService,
             Context context)
         {
             _userService = userService;
@@ -30,6 +38,8 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             _menuService = menuService;
             _themeService = themeService;
             _defaultCategoryService = defaultCategoryService;
+            _auditContextService = auditContextService;
+            _notificationService = notificationService;
             _context = context;
         }
 
@@ -58,8 +68,33 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 }
 
                 SignIn(user);
+
+                // Audit Log: Success
+                _auditContextService.Log(
+                    action: "LOGIN_SUCCESS",
+                    entityType: "User",
+                    entityId: user.Id,
+                    restaurantId: user.RestaurantId,
+                    userId: user.Id,
+                    username: user.Username,
+                    description: $"Restoran kullanıcısı başarılı giriş yaptı: '{user.Username}'"
+                );
+
                 return RedirectToAction("Index", "Dashboard", new { area = "Restaurant" });
             }
+
+            // Audit Log: Failed (never logging password)
+            _auditContextService.Log(
+                action: "LOGIN_FAILED",
+                entityType: "User",
+                entityId: user?.Id,
+                restaurantId: user?.RestaurantId,
+                userId: user?.Id,
+                username: normalizedUsername,
+                description: $"Restoran paneline hatalı şifre veya kullanıcı adı ile giriş denemesi: '{normalizedUsername}'"
+            );
+
+            _auditContextService.CheckAndTriggerFailedLoginAlert(normalizedUsername);
 
             ViewBag.Error = "Kullanıcı adı veya şifre hatalı.";
             return View();
@@ -130,6 +165,27 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 _defaultCategoryService.TApplyToMenu(menu.Id);
 
                 SignIn(user);
+
+                // Audit Log: Restaurant Registration
+                _auditContextService.Log(
+                    action: "RESTAURANT_CREATED",
+                    entityType: "Restaurant",
+                    entityId: restaurant.Id,
+                    restaurantId: restaurant.Id,
+                    userId: user.Id,
+                    username: user.Username,
+                    description: $"Yeni restoran ve kullanıcı kaydı oluşturuldu: '{restaurant.Name}' (Kullanıcı: {user.Username})"
+                );
+
+                // Notification for Admin
+                _notificationService.CreateNotification(
+                    title: "Yeni Restoran Kaydı",
+                    message: $"'{restaurant.Name}' isimli yeni bir restoran sisteme kaydoldu.",
+                    type: "Info",
+                    restaurantId: restaurant.Id,
+                    userId: user.Id
+                );
+
                 return RedirectToAction("Index", "Dashboard", new { area = "Restaurant" });
             }
             catch (DbUpdateException)
@@ -140,9 +196,30 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             }
         }
 
+        [HttpPost]
         [HttpGet]
         public IActionResult Logout()
         {
+            var userIdStr = HttpContext.Session.GetString("RestaurantUserId");
+            var restIdStr = HttpContext.Session.GetString("RestaurantId");
+            var username = HttpContext.Session.GetString("RestaurantUsername");
+
+            int? userId = int.TryParse(userIdStr, out var u) ? u : null;
+            int? restId = int.TryParse(restIdStr, out var r) ? r : null;
+
+            if (userId.HasValue || !string.IsNullOrEmpty(username))
+            {
+                _auditContextService.Log(
+                    action: "LOGOUT",
+                    entityType: "User",
+                    entityId: userId,
+                    restaurantId: restId,
+                    userId: userId,
+                    username: username,
+                    description: $"Restoran kullanıcısı oturumu kapattı: '{username}'"
+                );
+            }
+
             HttpContext.Session.Clear();
             return RedirectToAction("Login", "Auth", new { area = "Restaurant" });
         }

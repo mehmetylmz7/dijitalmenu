@@ -1,5 +1,6 @@
 using BusinessLayer.Abstract;
 using dijitalmenu.Filters;
+using dijitalmenu.Services;
 using EntityLayer.Concrete;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -20,10 +21,16 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
         private readonly IMenuItemService _menuItemService;
         private readonly IThemeService _themeService;
         private readonly ICategorySuggestionService _categorySuggestionService;
+        private readonly IAuditContextService _auditContextService;
 
-        public BuilderController(IRestaurantService restaurantService, IMenuService menuService,
-            ICategoryService categoryService, IMenuItemService menuItemService,
-            IThemeService themeService, ICategorySuggestionService categorySuggestionService)
+        public BuilderController(
+            IRestaurantService restaurantService,
+            IMenuService menuService,
+            ICategoryService categoryService,
+            IMenuItemService menuItemService,
+            IThemeService themeService,
+            ICategorySuggestionService categorySuggestionService,
+            IAuditContextService auditContextService)
         {
             _restaurantService = restaurantService;
             _menuService = menuService;
@@ -31,6 +38,7 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             _menuItemService = menuItemService;
             _themeService = themeService;
             _categorySuggestionService = categorySuggestionService;
+            _auditContextService = auditContextService;
         }
 
         private int GetRestaurantId() =>
@@ -129,12 +137,19 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             if (category == null || category.MenuId != menu.Id)
                 return Json(new { success = false, message = "Kategori bulunamadı veya yetkisiz işlem." });
 
-            // İlgili ürünleri sil
             var items = _menuItemService.TGetListAll().Where(mi => mi.CategoryId == id).ToList();
             foreach (var item in items)
             {
                 _menuItemService.TDelete(item);
             }
+
+            _auditContextService.Log(
+                action: "CATEGORY_DELETED",
+                entityType: "Category",
+                entityId: category.Id,
+                description: $"Builder üzerinden kategori silindi: '{category.Name}'",
+                oldEntity: new { category.Id, category.Name, category.MenuId }
+            );
 
             _categoryService.TDelete(category);
 
@@ -152,6 +167,14 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             if (item == null || !myCatIds.Contains(item.CategoryId))
                 return Json(new { success = false, message = "Ürün bulunamadı veya yetkisiz işlem." });
 
+            _auditContextService.Log(
+                action: "MENU_ITEM_DELETED",
+                entityType: "MenuItem",
+                entityId: item.Id,
+                description: $"Builder üzerinden ürün silindi: '{item.Name}'",
+                oldEntity: new { item.Id, item.Name, item.Price, item.CategoryId }
+            );
+
             _menuItemService.TDelete(item);
 
             return Json(new { success = true, message = "Ürün başarıyla silindi." });
@@ -167,8 +190,18 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             var theme = _themeService.TGetByID(themeId);
             if (theme == null || !theme.IsActive) return Json(new { success = false, message = "Bu tema şu anda kullanıma kapalıdır." });
 
+            var oldThemeId = restaurant.ThemeId;
             restaurant.ThemeId = themeId;
             _restaurantService.TUpdate(restaurant);
+
+            _auditContextService.Log(
+                action: "THEME_SELECTED",
+                entityType: "Restaurant",
+                entityId: restaurant.Id,
+                description: $"Restoran teması değiştirildi: '{theme.Name}'",
+                oldEntity: new { ThemeId = oldThemeId },
+                newEntity: new { ThemeId = themeId, ThemeName = theme.Name }
+            );
 
             return Json(new { success = true, themeName = theme.Name });
         }
@@ -189,7 +222,6 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
 
             var menu = GetOrCreateMyMenu(rid);
 
-            // Çift kategori kontrolü
             var exists = _categoryService.TGetListAll()
                 .Any(c => c.MenuId == menu.Id && c.Name.Trim().Equals(name.Trim(), StringComparison.OrdinalIgnoreCase));
             
@@ -204,7 +236,14 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             var category = new Category { Name = name, MenuId = menu.Id, DisplayOrder = currentMaxOrder + 1 };
             _categoryService.TInsert(category);
 
-            // Yeni önerileri hesapla
+            _auditContextService.Log(
+                action: "CATEGORY_CREATED",
+                entityType: "Category",
+                entityId: category.Id,
+                description: $"Builder üzerinden yeni kategori eklendi: '{category.Name}'",
+                newEntity: new { category.Id, category.Name, category.MenuId, category.DisplayOrder }
+            );
+
             var categories = _categoryService.TGetListAll().Where(c => c.MenuId == menu.Id).OrderBy(c => c.DisplayOrder).ThenBy(c => c.Id).ToList();
             var existingNames = categories.Select(c => c.Name).ToList();
             var suggestions = _categorySuggestionService.GetSuggestions(existingNames, restaurant.Name);
@@ -234,7 +273,6 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             var menu = GetOrCreateMyMenu(rid);
             var category = _categoryService.TGetByID(categoryId);
 
-            // Güvenlik kontrolü: Kategori bu restorana mı ait?
             if (category == null || category.MenuId != menu.Id)
                 return Json(new { success = false, message = "Geçersiz kategori." });
 
@@ -253,6 +291,14 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             };
             _menuItemService.TInsert(item);
 
+            _auditContextService.Log(
+                action: "MENU_ITEM_CREATED",
+                entityType: "MenuItem",
+                entityId: item.Id,
+                description: $"Builder üzerinden yeni ürün eklendi: '{item.Name}' ({item.Price:C})",
+                newEntity: new { item.Id, item.Name, item.Price, item.CategoryId, item.DisplayOrder }
+            );
+
             return Json(new { 
                 success = true, 
                 item = new { id = item.Id, name = item.Name, description = item.Description, price = item.Price, categoryId = item.CategoryId, displayOrder = item.DisplayOrder }
@@ -267,7 +313,6 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             if (restaurant == null)
                 return Json(new { success = false, message = "Restoran bulunamadı." });
 
-            // Kullanıcı <iframe src="..."> yapıştırdıysa src URL'sini temizle
             if (!string.IsNullOrWhiteSpace(googleMapsUrl) && googleMapsUrl.Contains("<iframe"))
             {
                 var match = System.Text.RegularExpressions.Regex.Match(googleMapsUrl, @"src=[""']([^""']+)[""']");
@@ -286,7 +331,6 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 return Json(new { success = false, message = "Konum, adres veya telefon bilgisi geçersiz." });
             }
 
-            // Normalize Instagram URL
             if (!string.IsNullOrWhiteSpace(instagramUrl))
             {
                 var cleanIg = instagramUrl.Trim();
@@ -298,6 +342,15 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 instagramUrl = cleanIg;
             }
 
+            var oldValues = new
+            {
+                restaurant.GoogleMapsUrl,
+                restaurant.Address,
+                restaurant.Phone,
+                restaurant.WorkingHours,
+                restaurant.InstagramUrl
+            };
+
             restaurant.GoogleMapsUrl = normalizedMapsUrl;
             restaurant.Address = address?.Trim();
             restaurant.Phone = phone?.Trim();
@@ -305,6 +358,24 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             restaurant.InstagramUrl = string.IsNullOrWhiteSpace(instagramUrl) ? null : instagramUrl.Trim();
 
             _restaurantService.TUpdate(restaurant);
+
+            var newValues = new
+            {
+                restaurant.GoogleMapsUrl,
+                restaurant.Address,
+                restaurant.Phone,
+                restaurant.WorkingHours,
+                restaurant.InstagramUrl
+            };
+
+            _auditContextService.Log(
+                action: "RESTAURANT_UPDATED",
+                entityType: "Restaurant",
+                entityId: restaurant.Id,
+                description: "Builder üzerinden konum ve işletme bilgileri güncellendi.",
+                oldEntity: oldValues,
+                newEntity: newValues
+            );
 
             return Json(new { success = true, message = "Konum, saat, telefon ve Instagram bilgileri kaydedildi." });
         }
@@ -320,8 +391,18 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             if (notice != null && notice.Length > 1000)
                 return Json(new { success = false, message = "Bilgilendirme notu en fazla 1000 karakter olabilir." });
 
+            var oldNotice = restaurant.ImportantNotice;
             restaurant.ImportantNotice = string.IsNullOrWhiteSpace(notice) ? null : notice;
             _restaurantService.TUpdate(restaurant);
+
+            _auditContextService.Log(
+                action: "RESTAURANT_UPDATED",
+                entityType: "Restaurant",
+                entityId: restaurant.Id,
+                description: "Önemli duyuru / bilgilendirme notu güncellendi.",
+                oldEntity: new { ImportantNotice = oldNotice },
+                newEntity: new { ImportantNotice = restaurant.ImportantNotice }
+            );
 
             return Json(new { success = true, message = "Bilgilendirme notu güncellendi." });
         }

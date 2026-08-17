@@ -29,6 +29,26 @@ internal static class TestSupport
          new MenuManager(new MenuRepository(context)), new CategoryManager(new CategoryRepository(context)),
          new MenuItemManager(new MenuItemRepository(context)), new ThemeManager(new ThemeRepository(context)));
 
+    public static (IUserService Users, IRestaurantService Restaurants, IMenuService Menus, ICategoryService Categories, IMenuItemService Items, IThemeService Themes, IAdminService Admins, IAuditLogService AuditLogs, INotificationService Notifications) AllServices(Context context) =>
+        (new UserManager(new UserRepository(context)),
+         new RestaurantManager(new RestaurantRepository(context)),
+         new MenuManager(new MenuRepository(context)),
+         new CategoryManager(new CategoryRepository(context)),
+         new MenuItemManager(new MenuItemRepository(context)),
+         new ThemeManager(new ThemeRepository(context)),
+         new AdminManager(new AdminRepository(context)),
+         new AuditLogManager(new AuditLogRepository(context)),
+         new NotificationManager(new NotificationRepository(context)));
+
+    public static dijitalmenu.Services.IAuditContextService CreateAuditContext(Context context, HttpContext? httpContext = null)
+    {
+        var accessor = new HttpContextAccessor { HttpContext = httpContext ?? new DefaultHttpContext() };
+        var auditLogs = new AuditLogManager(new AuditLogRepository(context));
+        var notifications = new NotificationManager(new NotificationRepository(context));
+        var admins = new AdminManager(new AdminRepository(context));
+        return new dijitalmenu.Services.AuditContextService(accessor, auditLogs, notifications, admins);
+    }
+
     public static ControllerContext ControllerContext(Dictionary<string, string>? values = null)
     {
         var httpContext = new DefaultHttpContext { Session = new TestSession(values) };
