@@ -5,19 +5,32 @@ Restoranların tema seçerek dijital menü oluşturmasını sağlayan .NET 8 ASP
 ## Gereksinimler
 
 - .NET SDK 8
-- SQL Server veya SQL Express
+- Docker Desktop (PostgreSQL veritabanı container'ı için) veya PostgreSQL 15+
 
-## Yerel kurulum
+## Docker ile Hızlı Başlatma
 
-1. `dijitalmenu/appsettings.Development.json` içindeki `DefaultConnection` değerini kendi SQL Server örneğinize göre ayarlayın.
+Projeyi veritabanı dahil tüm servisleriyle Docker üzerinde çalıştırmak için:
+
+```bash
+docker compose up --build -d
+```
+
+Uygulama `http://localhost:8080` adresinde, PostgreSQL ise `localhost:5432` portunda çalışacaktır.
+
+## Yerel Geliştirme (Visual Studio / CLI)
+
+1. Sadece PostgreSQL container'ını başlatın:
+   ```bash
+   docker compose up postgres -d
+   ```
 2. `dotnet restore`
 3. `dotnet run --project dijitalmenu`
 
-Uygulama başlangıcında migration'lar otomatik uygulanır. Bu nedenle uygulama hesabının şema değiştirme yetkisi olmalıdır. Production ortamında migration'ları ayrı bir deployment adımı olarak çalıştırmak tercih edilmelidir.
+Uygulama başlangıcında migration'lar otomatik olarak PostgreSQL üzerine uygulanır.
 
 ## Güvenlik ve yapılandırma
 
-- Production'da `Seed:AdminUsername` ve `Seed:AdminPassword` değerlerini güvenli environment variable veya secret store üzerinden verin; varsayılan değerleri kullanmayın.
+- Production'da `POSTGRES_PASSWORD`, `Seed:AdminUsername` ve `Seed:AdminPassword` değerlerini güvenli environment variable üzerinden verin; varsayılan değerleri kullanmayın.
 - Yeni restoran parolası en az 12 karakter olmalı; büyük/küçük harf, rakam ve özel karakter içermelidir.
 - Ürün görselleri yalnızca JPG, PNG, GIF veya WebP formatında ve en fazla 5 MB olabilir.
 - Harita bağlantıları HTTPS üzerinden Google Maps alan adlarıyla sınırlıdır.
@@ -34,7 +47,3 @@ Restaurant oturumu ve antiforgery token gerektirir:
 - `POST /Restaurant/Builder/AddCategory`
 - `POST /Restaurant/Builder/AddMenuItem`
 - `POST /Restaurant/Builder/UpdateLocation`
-
-## Migration kontrolü
-
-`AddDataIntegrityConstraints` migration'ı unique index ve alan uzunluğu kuralları eklemeden önce mevcut veriyi doğrular. Hata verirse, bildirilen duplicate veya aşırı uzun kayıtlar düzeltilmeli; migration yeniden çalıştırılmalıdır. Migration veriyi sessizce kırpmaz veya birleştirmez.

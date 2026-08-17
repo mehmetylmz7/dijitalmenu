@@ -19,15 +19,9 @@ builder.Services.AddScoped<dijitalmenu.Filters.RestaurantAuthFilter>();
 
 builder.Services.AddDbContext<DataAccessLayer.Concrete.Context>(options =>
 {
-    var provider = builder.Configuration["DatabaseProvider"];
-    if (provider == "PostgreSQL")
-    {
-        options.UseNpgsql(builder.Configuration.GetConnectionString("PostgresConnection"));
-    }
-    else
-    {
-        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-    }
+    var connectionString = builder.Configuration.GetConnectionString("PostgresConnection")
+                           ?? builder.Configuration.GetConnectionString("DefaultConnection");
+    options.UseNpgsql(connectionString);
 });
 
 // Session
@@ -77,25 +71,12 @@ using (var scope = app.Services.CreateScope())
 
     try
     {
-        var provider = builder.Configuration["DatabaseProvider"];
-        if (provider == "PostgreSQL")
-        {
-            context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Restaurants"" ADD COLUMN IF NOT EXISTS ""ImportantNotice"" character varying(1000);");
-            context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Restaurants"" ADD COLUMN IF NOT EXISTS ""WorkingHours"" character varying(200);");
-            context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Restaurants"" ADD COLUMN IF NOT EXISTS ""InstagramUrl"" character varying(2048);");
-            context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Themes"" ADD COLUMN IF NOT EXISTS ""IsActive"" boolean NOT NULL DEFAULT true;");
-            context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Categories"" ADD COLUMN IF NOT EXISTS ""DisplayOrder"" integer NOT NULL DEFAULT 0;");
-            context.Database.ExecuteSqlRaw(@"ALTER TABLE ""MenuItems"" ADD COLUMN IF NOT EXISTS ""DisplayOrder"" integer NOT NULL DEFAULT 0;");
-        }
-        else
-        {
-            context.Database.ExecuteSqlRaw(@"IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[Restaurants]') AND name = 'ImportantNotice') ALTER TABLE [Restaurants] ADD [ImportantNotice] nvarchar(1000) NULL;");
-            context.Database.ExecuteSqlRaw(@"IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[Restaurants]') AND name = 'WorkingHours') ALTER TABLE [Restaurants] ADD [WorkingHours] nvarchar(200) NULL;");
-            context.Database.ExecuteSqlRaw(@"IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[Restaurants]') AND name = 'InstagramUrl') ALTER TABLE [Restaurants] ADD [InstagramUrl] nvarchar(2048) NULL;");
-            context.Database.ExecuteSqlRaw(@"IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[Themes]') AND name = 'IsActive') ALTER TABLE [Themes] ADD [IsActive] bit NOT NULL DEFAULT 1;");
-            context.Database.ExecuteSqlRaw(@"IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[Categories]') AND name = 'DisplayOrder') ALTER TABLE [Categories] ADD [DisplayOrder] int NOT NULL DEFAULT 0;");
-            context.Database.ExecuteSqlRaw(@"IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[MenuItems]') AND name = 'DisplayOrder') ALTER TABLE [MenuItems] ADD [DisplayOrder] int NOT NULL DEFAULT 0;");
-        }
+        context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Restaurants"" ADD COLUMN IF NOT EXISTS ""ImportantNotice"" character varying(1000);");
+        context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Restaurants"" ADD COLUMN IF NOT EXISTS ""WorkingHours"" character varying(200);");
+        context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Restaurants"" ADD COLUMN IF NOT EXISTS ""InstagramUrl"" character varying(2048);");
+        context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Themes"" ADD COLUMN IF NOT EXISTS ""IsActive"" boolean NOT NULL DEFAULT true;");
+        context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Categories"" ADD COLUMN IF NOT EXISTS ""DisplayOrder"" integer NOT NULL DEFAULT 0;");
+        context.Database.ExecuteSqlRaw(@"ALTER TABLE ""MenuItems"" ADD COLUMN IF NOT EXISTS ""DisplayOrder"" integer NOT NULL DEFAULT 0;");
     }
     catch (Exception ex)
     {
