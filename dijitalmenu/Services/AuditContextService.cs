@@ -37,16 +37,20 @@ namespace dijitalmenu.Services
             "SessionId"
         };
 
+        private readonly ILogger<AuditContextService>? _logger;
+
         public AuditContextService(
             IHttpContextAccessor httpContextAccessor,
             IAuditLogService auditLogService,
             INotificationService notificationService,
-            IAdminService adminService)
+            IAdminService adminService,
+            ILogger<AuditContextService>? logger = null)
         {
             _httpContextAccessor = httpContextAccessor;
             _auditLogService = auditLogService;
             _notificationService = notificationService;
             _adminService = adminService;
+            _logger = logger;
         }
 
         public string? GetClientIpAddress()
@@ -204,21 +208,28 @@ namespace dijitalmenu.Services
             var oldJson = oldEntity != null ? SerializeClean(oldEntity) : null;
             var newJson = newEntity != null ? SerializeClean(newEntity) : null;
 
-            _auditLogService.Log(
-                action: action,
-                entityType: entityType,
-                entityId: entityId,
-                description: description,
-                restaurantId: finalRestId,
-                userId: finalUserId,
-                adminId: finalAdminId,
-                username: finalUsername,
-                ipAddress: ip,
-                userAgent: ua,
-                requestPath: path,
-                oldValues: oldJson,
-                newValues: newJson
-            );
+            try
+            {
+                _auditLogService.Log(
+                    action: action,
+                    entityType: entityType,
+                    entityId: entityId,
+                    description: description,
+                    restaurantId: finalRestId,
+                    userId: finalUserId,
+                    adminId: finalAdminId,
+                    username: finalUsername,
+                    ipAddress: ip,
+                    userAgent: ua,
+                    requestPath: path,
+                    oldValues: oldJson,
+                    newValues: newJson
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Audit log kaydedilirken bir hata oluştu. (İşlem: {Action}, Entity: {EntityType})", action, entityType);
+            }
         }
 
         public void CheckAndTriggerFailedLoginAlert(string username)

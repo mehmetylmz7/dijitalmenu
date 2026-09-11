@@ -9,6 +9,7 @@ namespace EntityLayer.Concrete
     public class AuditLog
     {
         [Key]
+        [StringLength(50)]
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; } = ObjectId.GenerateNewId().ToString();

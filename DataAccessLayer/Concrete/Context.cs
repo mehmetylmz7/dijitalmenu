@@ -55,6 +55,11 @@ namespace DataAccessLayer.Concrete
             // AuditLog Configuration
             modelBuilder.Entity<AuditLog>(entity =>
             {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id)
+                    .HasMaxLength(50)
+                    .HasColumnType("character varying(50)");
+
                 entity.Property(e => e.OldValues)
                     .HasColumnType("jsonb");
 

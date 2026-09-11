@@ -127,6 +127,27 @@ using (var scope = app.Services.CreateScope())
         logger.LogWarning(ex, "Veritabanı migration adımı atlandı veya tablolar zaten mevcut.");
     }
 
+    try
+    {
+        context.Database.ExecuteSqlRaw(@"
+            DO $$
+            BEGIN
+                IF EXISTS (
+                    SELECT 1 FROM information_schema.columns 
+                    WHERE table_name = 'AuditLogs' AND column_name = 'Id' AND data_type = 'integer'
+                ) THEN
+                    ALTER TABLE ""AuditLogs"" ALTER COLUMN ""Id"" DROP IDENTITY IF EXISTS;
+                    ALTER TABLE ""AuditLogs"" ALTER COLUMN ""Id"" TYPE character varying(50) USING ""Id""::character varying;
+                END IF;
+            END $$;
+        ");
+    }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogWarning(ex, "AuditLogs.Id tipi varchar'a çevrilirken bir uyarı oluştu.");
+    }
+
     // Populate missing slugs for existing restaurants
     try
     {

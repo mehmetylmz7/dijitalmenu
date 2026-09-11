@@ -49,11 +49,9 @@ namespace DataAccessLayer.Migrations.Postgres
 
             modelBuilder.Entity("EntityLayer.Concrete.AuditLog", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.Property<string>("Id")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("Action")
                         .IsRequired()
