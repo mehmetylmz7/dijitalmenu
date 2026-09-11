@@ -23,12 +23,17 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
         public IActionResult Index(
             DateTime? dateFrom,
             DateTime? dateTo,
-            string? action,
+            [FromQuery(Name = "action")] string? action,
             string? entityType,
             string? keyword,
             int page = 1,
             int pageSize = 20)
         {
+            if (!HttpContext.Request.Query.ContainsKey("action"))
+            {
+                action = null;
+            }
+
             int restaurantId = GetRestaurantId();
             if (page < 1) page = 1;
             if (pageSize < 1 || pageSize > 100) pageSize = 20;
@@ -59,7 +64,7 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
         }
 
         [HttpGet]
-        public IActionResult Details(int id)
+        public IActionResult Details(string id)
         {
             int currentRestaurantId = GetRestaurantId();
             var log = _auditLogService.TGetByID(id);

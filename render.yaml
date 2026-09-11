@@ -11,7 +11,13 @@ services:
         sync: false
       - key: ConnectionStrings__DefaultConnection
         sync: false
+      - key: ConnectionStrings__PostgresConnection
+        sync: false
       - key: Seed__AdminUsername
         sync: false
       - key: Seed__AdminPassword
         sync: false
+    disk:
+      name: web_images
+      mountPath: /app/wwwroot/images
+      sizeGB: 1

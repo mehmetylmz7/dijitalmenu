@@ -4,6 +4,7 @@ using dijitalmenu.Helpers;
 using dijitalmenu.Services;
 using EntityLayer.Concrete;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -53,6 +54,7 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
         }
 
         [HttpPost]
+        [EnableRateLimiting("login-policy")]
         public IActionResult Login(string username, string password)
         {
             var normalizedUsername = username?.Trim() ?? string.Empty;

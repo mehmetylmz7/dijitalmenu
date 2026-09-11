@@ -290,6 +290,10 @@
                                 {
                                     <strong>@log.Restaurant.Name</strong>
                                 }
+                                else if (!string.IsNullOrEmpty(log.RestaurantName))
+                                {
+                                    <strong>@log.RestaurantName</strong>
+                                }
                                 else if (log.RestaurantId.HasValue)
                                 {
                                     <span style="color:var(--text-muted)">Restoran #@log.RestaurantId</span>
@@ -337,7 +341,7 @@
                                 @(log.Description ?? "-")
                             </td>
                             <td style="text-align:center;">
-                                <button type="button" class="btn btn-sm btn-secondary" onclick="openDetailModal(@log.Id)">
+                                <button type="button" class="btn btn-sm btn-secondary" onclick="openDetailModal('@log.Id')">
                                     Detay
                                 </button>
                             </td>

@@ -92,3 +92,22 @@ internal sealed class TestWebHostEnvironment : IWebHostEnvironment
     public string ContentRootPath { get; set; } = Path.GetTempPath();
     public IFileProvider ContentRootFileProvider { get; set; } = new NullFileProvider();
 }
+
+internal sealed class TestStorageService : dijitalmenu.Services.IStorageService
+{
+    public bool TrySaveImage(IFormFile? file, string subFolder, out string? fileUrl, out string? errorMessage)
+    {
+        errorMessage = null;
+        if (file == null || file.Length == 0)
+        {
+            fileUrl = null;
+            return true;
+        }
+
+        fileUrl = $"/images/{subFolder}/{file.FileName}";
+        return true;
+    }
+
+    public bool DeleteImage(string? relativeFileUrl) => true;
+}
+

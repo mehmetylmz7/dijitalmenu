@@ -94,7 +94,7 @@ public class SecurityAndValidationTests
 
         var httpContext = TestSupport.ControllerContext(new() { ["RestaurantId"] = attacker.Id.ToString() });
         var auditContext = TestSupport.CreateAuditContext(context, httpContext.HttpContext);
-        var controller = new RestaurantArea.MenuItemController(services.Items, services.Categories, services.Menus, new TestWebHostEnvironment(), auditContext)
+        var controller = new RestaurantArea.MenuItemController(services.Items, services.Categories, services.Menus, new TestStorageService(), auditContext)
         {
             ControllerContext = httpContext
         };
@@ -128,7 +128,7 @@ public class SecurityAndValidationTests
 
         var httpContext = TestSupport.ControllerContext(new() { ["RestaurantId"] = attacker.Id.ToString() });
         var auditContext = TestSupport.CreateAuditContext(context, httpContext.HttpContext);
-        var controller = new RestaurantArea.CategoryController(services.Categories, services.Menus, new TestWebHostEnvironment(), auditContext)
+        var controller = new RestaurantArea.CategoryController(services.Categories, services.Menus, new TestStorageService(), auditContext)
         {
             ControllerContext = httpContext
         };

@@ -2,6 +2,7 @@ using BusinessLayer.Abstract;
 using dijitalmenu.Helpers;
 using dijitalmenu.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using System.Linq;
 
 namespace dijitalmenu.Areas.Admin.Controllers
@@ -28,6 +29,7 @@ namespace dijitalmenu.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [EnableRateLimiting("login-policy")]
         public IActionResult Login(string username, string password)
         {
             var normalizedUsername = username?.Trim() ?? string.Empty;

@@ -11,30 +11,20 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
     [ServiceFilter(typeof(RestaurantAuthFilter))]
     public class CategoryController : Controller
     {
-        private const long MaxImageFileSize = 5 * 1024 * 1024;
-        private static readonly HashSet<string> AllowedImageExtensions = new(StringComparer.OrdinalIgnoreCase)
-        {
-            ".jpg", ".jpeg", ".png", ".gif", ".webp"
-        };
-        private static readonly HashSet<string> AllowedImageContentTypes = new(StringComparer.OrdinalIgnoreCase)
-        {
-            "image/jpeg", "image/png", "image/gif", "image/webp"
-        };
-
         private readonly ICategoryService _categoryService;
         private readonly IMenuService _menuService;
-        private readonly IWebHostEnvironment _environment;
+        private readonly IStorageService _storageService;
         private readonly IAuditContextService _auditContextService;
 
         public CategoryController(
             ICategoryService categoryService,
             IMenuService menuService,
-            IWebHostEnvironment environment,
+            IStorageService storageService,
             IAuditContextService auditContextService)
         {
             _categoryService = categoryService;
             _menuService = menuService;
-            _environment = environment;
+            _storageService = storageService;
             _auditContextService = auditContextService;
         }
 
@@ -79,7 +69,7 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 return View();
             }
 
-            if (!TrySavePhoto(photoFile, out var uploadedImageUrl, out var uploadError))
+            if (!_storageService.TrySaveImage(photoFile, "categories", out var uploadedImageUrl, out var uploadError))
             {
                 ViewBag.Error = uploadError;
                 ViewBag.RestaurantUsername = HttpContext.Session.GetString("RestaurantUsername");
@@ -127,7 +117,7 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 return RedirectToAction("Edit", new { id });
             }
 
-            if (!TrySavePhoto(photoFile, out var uploadedImageUrl, out var uploadError))
+            if (!_storageService.TrySaveImage(photoFile, "categories", out var uploadedImageUrl, out var uploadError))
             {
                 TempData["Error"] = uploadError;
                 return RedirectToAction("Edit", new { id });
@@ -140,6 +130,11 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 category.MenuId,
                 category.ImageUrl
             };
+
+            if (uploadedImageUrl != null && !string.IsNullOrEmpty(category.ImageUrl))
+            {
+                _storageService.DeleteImage(category.ImageUrl);
+            }
 
             category.Name = normalizedName;
             category.ImageUrl = uploadedImageUrl ?? category.ImageUrl;
@@ -188,6 +183,11 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                     oldEntity: oldValues
                 );
 
+                if (!string.IsNullOrEmpty(category.ImageUrl))
+                {
+                    _storageService.DeleteImage(category.ImageUrl);
+                }
+
                 _categoryService.TDelete(category);
             }
 
@@ -221,41 +221,6 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             }
 
             error = string.Empty;
-            return true;
-        }
-
-        private bool TrySavePhoto(IFormFile? photoFile, out string? imageUrl, out string error)
-        {
-            imageUrl = null;
-            error = string.Empty;
-
-            if (photoFile == null || photoFile.Length == 0)
-                return true;
-
-            if (photoFile.Length > MaxImageFileSize)
-            {
-                error = "Yüklenen görsel en fazla 5 MB olabilir.";
-                return false;
-            }
-
-            var extension = Path.GetExtension(photoFile.FileName);
-            if (!AllowedImageExtensions.Contains(extension) ||
-                !AllowedImageContentTypes.Contains(photoFile.ContentType))
-            {
-                error = "Sadece JPG, JPEG, PNG, GIF ve WEBP formatları desteklenmektedir.";
-                return false;
-            }
-
-            var folderPath = Path.Combine(_environment.WebRootPath, "images", "categories");
-            Directory.CreateDirectory(folderPath);
-
-            var fileName = $"{Guid.NewGuid():N}{extension.ToLowerInvariant()}";
-            var fullPath = Path.Combine(folderPath, fileName);
-
-            using var stream = new FileStream(fullPath, FileMode.Create);
-            photoFile.CopyTo(stream);
-
-            imageUrl = $"/images/categories/{fileName}";
             return true;
         }
     }

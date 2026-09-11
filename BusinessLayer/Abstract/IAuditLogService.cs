@@ -7,6 +7,8 @@ namespace BusinessLayer.Abstract
 {
     public interface IAuditLogService : IGenericService<AuditLog>
     {
+        AuditLog? TGetByID(string id);
+
         (List<AuditLog> Logs, int TotalCount) GetFilteredLogs(AuditLogFilterDto filter);
 
         void Log(

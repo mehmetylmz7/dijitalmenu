@@ -4,8 +4,15 @@ using System.Collections.Generic;
 
 namespace DataAccessLayer.Abstract
 {
-    public interface IAuditLogDal : IGenericDal<AuditLog>
+    public interface IAuditLogDal
     {
+        void Insert(AuditLog t);
+        void Delete(AuditLog t);
+        void Update(AuditLog t);
+        List<AuditLog> GetListAll();
+        AuditLog? GetByID(string id);
+        AuditLog? GetByID(int id);
+
         (List<AuditLog> Items, int TotalCount) GetPagedLogs(
             DateTime? dateFrom,
             DateTime? dateTo,
@@ -21,3 +28,4 @@ namespace DataAccessLayer.Abstract
         int GetFailedLoginCount(string username, string? ipAddress, TimeSpan duration);
     }
 }
+

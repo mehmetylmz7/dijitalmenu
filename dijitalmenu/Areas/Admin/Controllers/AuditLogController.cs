@@ -34,12 +34,17 @@ namespace dijitalmenu.Areas.Admin.Controllers
             int? restaurantId,
             int? userId,
             int? adminId,
-            string? action,
+            [FromQuery(Name = "action")] string? action,
             string? entityType,
             string? keyword,
             int page = 1,
             int pageSize = 20)
         {
+            if (!HttpContext.Request.Query.ContainsKey("action"))
+            {
+                action = null;
+            }
+
             if (page < 1) page = 1;
             if (pageSize < 1 || pageSize > 100) pageSize = 20;
 
@@ -75,7 +80,7 @@ namespace dijitalmenu.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        public IActionResult Details(int id)
+        public IActionResult Details(string id)
         {
             var log = _auditLogService.TGetByID(id);
             if (log == null)
@@ -89,7 +94,7 @@ namespace dijitalmenu.Areas.Admin.Controllers
                 action = log.Action,
                 entityType = log.EntityType,
                 entityId = log.EntityId,
-                restaurant = log.Restaurant?.Name,
+                restaurant = log.Restaurant?.Name ?? log.RestaurantName,
                 restaurantId = log.RestaurantId,
                 user = log.User?.Username,
                 userId = log.UserId,

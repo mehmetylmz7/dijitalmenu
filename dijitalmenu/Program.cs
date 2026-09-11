@@ -1,3 +1,5 @@
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,6 +32,24 @@ builder.Services.AddSession(options =>
     options.IdleTimeout = TimeSpan.FromMinutes(30);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+});
+
+// HTTP Rate Limiting (Brute-force koruması)
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("login-policy", httpContext =>
+    {
+        var clientIp = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        return RateLimitPartition.GetFixedWindowLimiter(clientIp, _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 5,
+            Window = TimeSpan.FromMinutes(1),
+            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+            QueueLimit = 0
+        });
+    });
 });
 
 // HttpContext Accessor
@@ -44,8 +64,35 @@ builder.Services.AddScoped<DataAccessLayer.Abstract.IMenuItemDal, DataAccessLaye
 builder.Services.AddScoped<DataAccessLayer.Abstract.IRestaurantDal, DataAccessLayer.Repositories.RestaurantRepository>();
 builder.Services.AddScoped<DataAccessLayer.Abstract.IThemeDal, DataAccessLayer.Repositories.ThemeRepository>();
 builder.Services.AddScoped<DataAccessLayer.Abstract.IUserDal, DataAccessLayer.Repositories.UserRepository>();
-builder.Services.AddScoped<DataAccessLayer.Abstract.IAuditLogDal, DataAccessLayer.Repositories.AuditLogRepository>();
+
+// MongoDB & Audit Log Registration
+
+var mongoConnectionString = builder.Configuration.GetConnectionString("MongoConnection")
+                         ?? builder.Configuration["MongoSettings:ConnectionString"]
+                         ?? builder.Configuration["MongoDbSettings:ConnectionString"]
+                         ?? Environment.GetEnvironmentVariable("MONGO_CONNECTION_STRING");
+
+var mongoDatabaseName = builder.Configuration["MongoSettings:DatabaseName"]
+                     ?? builder.Configuration["MongoDbSettings:DatabaseName"]
+                     ?? builder.Configuration["DatabaseSettings:DatabaseName"]
+                     ?? "DijitalMenuAudit";
+
+if (!string.IsNullOrWhiteSpace(mongoConnectionString))
+{
+    builder.Services.AddSingleton<MongoDB.Driver.IMongoClient>(_ => new MongoDB.Driver.MongoClient(mongoConnectionString));
+    builder.Services.AddScoped<MongoDB.Driver.IMongoDatabase>(sp =>
+    {
+        var client = sp.GetRequiredService<MongoDB.Driver.IMongoClient>();
+        return client.GetDatabase(mongoDatabaseName);
+    });
+    builder.Services.AddScoped<DataAccessLayer.Abstract.IAuditLogDal, DataAccessLayer.Repositories.MongoAuditLogRepository>();
+}
+else
+{
+    builder.Services.AddScoped<DataAccessLayer.Abstract.IAuditLogDal, DataAccessLayer.Repositories.AuditLogRepository>();
+}
 builder.Services.AddScoped<DataAccessLayer.Abstract.INotificationDal, DataAccessLayer.Repositories.NotificationRepository>();
+
 
 // Business Layer DI Registration
 builder.Services.AddScoped<BusinessLayer.Abstract.IAdminService, BusinessLayer.Concrete.AdminManager>();
@@ -62,6 +109,7 @@ builder.Services.AddScoped<BusinessLayer.Abstract.INotificationService, Business
 
 // Web Services Registration
 builder.Services.AddScoped<dijitalmenu.Services.IAuditContextService, dijitalmenu.Services.AuditContextService>();
+builder.Services.AddScoped<dijitalmenu.Services.IStorageService, dijitalmenu.Services.LocalStorageService>();
 
 var app = builder.Build();
 
@@ -77,21 +125,6 @@ using (var scope = app.Services.CreateScope())
     {
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
         logger.LogWarning(ex, "Veritabanı migration adımı atlandı veya tablolar zaten mevcut.");
-    }
-
-    try
-    {
-        context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Restaurants"" ADD COLUMN IF NOT EXISTS ""ImportantNotice"" character varying(1000);");
-        context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Restaurants"" ADD COLUMN IF NOT EXISTS ""WorkingHours"" character varying(200);");
-        context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Restaurants"" ADD COLUMN IF NOT EXISTS ""InstagramUrl"" character varying(2048);");
-        context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Themes"" ADD COLUMN IF NOT EXISTS ""IsActive"" boolean NOT NULL DEFAULT true;");
-        context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Categories"" ADD COLUMN IF NOT EXISTS ""DisplayOrder"" integer NOT NULL DEFAULT 0;");
-        context.Database.ExecuteSqlRaw(@"ALTER TABLE ""MenuItems"" ADD COLUMN IF NOT EXISTS ""DisplayOrder"" integer NOT NULL DEFAULT 0;");
-    }
-    catch (Exception ex)
-    {
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-        logger.LogWarning(ex, "ImportantNotice / WorkingHours / IsActive sütun kontrolü atlandı veya zaten mevcut.");
     }
 
     // Populate missing slugs for existing restaurants
@@ -134,24 +167,28 @@ using (var scope = app.Services.CreateScope())
         {
             if (app.Environment.IsDevelopment())
             {
-                username ??= "admin";
-                password ??= "DevPassword123!";
+                username = "admin";
+                password = "DevPassword123!";
                 var devLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
                 devLogger.LogWarning("Seed:AdminUsername/Password yapılandırılmamış. Development ortamı için varsayılan credential kullanılıyor.");
             }
             else
             {
                 var prodLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-                prodLogger.LogCritical("Production ortamında Seed:AdminUsername ve Seed:AdminPassword yapılandırılmalıdır!");
-                throw new InvalidOperationException("Production ortamında admin seed credential'ları yapılandırılmalıdır. 'Seed:AdminUsername' ve 'Seed:AdminPassword' environment variable'larını ayarlayın.");
+                prodLogger.LogWarning("Production ortamında Seed:AdminUsername veya Seed:AdminPassword tanımlanmamış. Admin seed adımı atlandı. İlk admin kullanıcısını oluşturmak için 'Seed__AdminUsername' ve 'Seed__AdminPassword' ortam değişkenlerini ayarlayın.");
             }
         }
 
-        adminService.TInsert(new EntityLayer.Concrete.Admin
+        if (!string.IsNullOrWhiteSpace(username) && !string.IsNullOrWhiteSpace(password))
         {
-            Username = username,
-            Password = dijitalmenu.Helpers.PasswordHelper.Hash(password)
-        });
+            adminService.TInsert(new EntityLayer.Concrete.Admin
+            {
+                Username = username,
+                Password = dijitalmenu.Helpers.PasswordHelper.Hash(password)
+            });
+            var seedLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+            seedLogger.LogInformation("Admin seed kullanıcısı başarıyla oluşturuldu: {Username}", username);
+        }
     }
 
     var themeService = scope.ServiceProvider.GetRequiredService<BusinessLayer.Abstract.IThemeService>();
@@ -512,10 +549,21 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+// Security Headers
+app.Use(async (context, next) =>
+{
+    context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+    context.Response.Headers["X-Frame-Options"] = "SAMEORIGIN";
+    context.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+    await next();
+});
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseRateLimiter();
 
 app.UseSession();
 

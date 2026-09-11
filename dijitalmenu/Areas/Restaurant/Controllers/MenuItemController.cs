@@ -11,33 +11,23 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
     [ServiceFilter(typeof(RestaurantAuthFilter))]
     public class MenuItemController : Controller
     {
-        private const long MaxImageFileSize = 5 * 1024 * 1024;
-        private static readonly HashSet<string> AllowedImageExtensions = new(StringComparer.OrdinalIgnoreCase)
-        {
-            ".jpg", ".jpeg", ".png", ".gif", ".webp"
-        };
-        private static readonly HashSet<string> AllowedImageContentTypes = new(StringComparer.OrdinalIgnoreCase)
-        {
-            "image/jpeg", "image/png", "image/gif", "image/webp"
-        };
-
         private readonly IMenuItemService _menuItemService;
         private readonly ICategoryService _categoryService;
         private readonly IMenuService _menuService;
-        private readonly IWebHostEnvironment _environment;
+        private readonly IStorageService _storageService;
         private readonly IAuditContextService _auditContextService;
 
         public MenuItemController(
             IMenuItemService menuItemService,
             ICategoryService categoryService,
             IMenuService menuService,
-            IWebHostEnvironment environment,
+            IStorageService storageService,
             IAuditContextService auditContextService)
         {
             _menuItemService = menuItemService;
             _categoryService = categoryService;
             _menuService = menuService;
-            _environment = environment;
+            _storageService = storageService;
             _auditContextService = auditContextService;
         }
 
@@ -93,7 +83,7 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 return RedirectToAction("Create");
             }
 
-            if (!TrySavePhoto(photoFile, out var uploadedImageUrl, out var uploadError))
+            if (!_storageService.TrySaveImage(photoFile, "menu-items", out var uploadedImageUrl, out var uploadError))
             {
                 TempData["Error"] = uploadError;
                 return RedirectToAction("Create");
@@ -155,7 +145,7 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 return RedirectToAction("Edit", new { id = menuItem.Id });
             }
 
-            if (!TrySavePhoto(photoFile, out var uploadedImageUrl, out var uploadError))
+            if (!_storageService.TrySaveImage(photoFile, "menu-items", out var uploadedImageUrl, out var uploadError))
             {
                 TempData["Error"] = uploadError;
                 return RedirectToAction("Edit", new { id = menuItem.Id });
@@ -171,6 +161,11 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 existingItem.ImageUrl,
                 existingItem.DisplayOrder
             };
+
+            if (uploadedImageUrl != null && !string.IsNullOrEmpty(existingItem.ImageUrl) && existingItem.ImageUrl.StartsWith("/images/menu-items/", StringComparison.OrdinalIgnoreCase))
+            {
+                _storageService.DeleteImage(existingItem.ImageUrl);
+            }
 
             existingItem.Name = menuItem.Name.Trim();
             existingItem.Description = menuItem.Description?.Trim() ?? string.Empty;
@@ -228,6 +223,11 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                     oldEntity: oldValues
                 );
 
+                if (!string.IsNullOrEmpty(item.ImageUrl) && item.ImageUrl.StartsWith("/images/menu-items/", StringComparison.OrdinalIgnoreCase))
+                {
+                    _storageService.DeleteImage(item.ImageUrl);
+                }
+
                 _menuItemService.TDelete(item);
             }
 
@@ -271,41 +271,6 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 return false;
 
             return uri.Scheme is "http" or "https";
-        }
-
-        private bool TrySavePhoto(IFormFile? photoFile, out string? imageUrl, out string error)
-        {
-            imageUrl = null;
-            error = string.Empty;
-
-            if (photoFile == null || photoFile.Length == 0)
-                return true;
-
-            if (photoFile.Length > MaxImageFileSize)
-            {
-                error = "Yüklenen görsel en fazla 5 MB olabilir.";
-                return false;
-            }
-
-            var extension = Path.GetExtension(photoFile.FileName);
-            if (!AllowedImageExtensions.Contains(extension) ||
-                !AllowedImageContentTypes.Contains(photoFile.ContentType))
-            {
-                error = "Sadece JPG, JPEG, PNG, GIF ve WEBP formatları desteklenmektedir.";
-                return false;
-            }
-
-            var folderPath = Path.Combine(_environment.WebRootPath, "images", "menu-items");
-            Directory.CreateDirectory(folderPath);
-
-            var fileName = $"{Guid.NewGuid():N}{extension.ToLowerInvariant()}";
-            var fullPath = Path.Combine(folderPath, fileName);
-
-            using var stream = new FileStream(fullPath, FileMode.Create);
-            photoFile.CopyTo(stream);
-
-            imageUrl = $"/images/menu-items/{fileName}";
-            return true;
         }
     }
 }

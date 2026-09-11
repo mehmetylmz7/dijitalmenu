@@ -23,7 +23,7 @@ namespace DataAccessLayer.Repositories
             _context.SaveChanges();
         }
 
-        public AuditLog? GetByID(int id)
+        public AuditLog? GetByID(string id)
         {
             return _context.AuditLogs
                 .Include(a => a.Restaurant)
@@ -31,6 +31,12 @@ namespace DataAccessLayer.Repositories
                 .Include(a => a.Admin)
                 .FirstOrDefault(a => a.Id == id);
         }
+
+        public AuditLog? GetByID(int id)
+        {
+            return GetByID(id.ToString());
+        }
+
 
         public List<AuditLog> GetListAll()
         {

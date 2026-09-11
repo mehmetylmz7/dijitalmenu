@@ -47,7 +47,7 @@ public class RestaurantWorkflowTests
         var category = new Category { Name = "Ana Yemek", MenuId = menu.Id }; context.Categories.Add(category); context.SaveChanges();
         var httpContext = TestSupport.ControllerContext(new() { ["RestaurantId"] = restaurant.Id.ToString() });
         var auditContext = TestSupport.CreateAuditContext(context, httpContext.HttpContext);
-        var controller = new MenuItemController(services.Items, services.Categories, services.Menus, new TestWebHostEnvironment(), auditContext)
+        var controller = new MenuItemController(services.Items, services.Categories, services.Menus, new TestStorageService(), auditContext)
         {
             ControllerContext = httpContext
         };
@@ -76,7 +76,7 @@ public class RestaurantWorkflowTests
         context.MenuItems.Add(target); context.SaveChanges();
         var httpContext = TestSupport.ControllerContext(new() { ["RestaurantId"] = attacker.Id.ToString() });
         var auditContext = TestSupport.CreateAuditContext(context, httpContext.HttpContext);
-        var controller = new MenuItemController(services.Items, services.Categories, services.Menus, new TestWebHostEnvironment(), auditContext) { ControllerContext = httpContext };
+        var controller = new MenuItemController(services.Items, services.Categories, services.Menus, new TestStorageService(), auditContext) { ControllerContext = httpContext };
         controller.TempData = TestSupport.TempData(controller.HttpContext);
 
         controller.Edit(new MenuItem { Id = target.Id, Name = "Hijacked", Price = 50, CategoryId = attackerCategory.Id }, null);
@@ -96,7 +96,7 @@ public class RestaurantWorkflowTests
         context.Categories.Add(new Category { Name = "İçecek", MenuId = menu.Id }); context.SaveChanges();
         var httpContext = TestSupport.ControllerContext(new() { ["RestaurantId"] = restaurant.Id.ToString() });
         var auditContext = TestSupport.CreateAuditContext(context, httpContext.HttpContext);
-        var controller = new CategoryController(services.Categories, services.Menus, new TestWebHostEnvironment(), auditContext) { ControllerContext = httpContext };
+        var controller = new CategoryController(services.Categories, services.Menus, new TestStorageService(), auditContext) { ControllerContext = httpContext };
 
         var result = controller.Create("içecek", null);
 

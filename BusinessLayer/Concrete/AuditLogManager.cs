@@ -21,10 +21,16 @@ namespace BusinessLayer.Concrete
             _auditLogDal.Delete(t);
         }
 
+        public AuditLog? TGetByID(string id)
+        {
+            return _auditLogDal.GetByID(id);
+        }
+
         public AuditLog TGetByID(int id)
         {
             return _auditLogDal.GetByID(id)!;
         }
+
 
         public List<AuditLog> TGetListAll()
         {

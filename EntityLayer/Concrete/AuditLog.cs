@@ -1,13 +1,17 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace EntityLayer.Concrete
 {
     public class AuditLog
     {
         [Key]
-        public int Id { get; set; }
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
 
         public int? RestaurantId { get; set; }
 
@@ -44,16 +48,25 @@ namespace EntityLayer.Concrete
         [Column(TypeName = "jsonb")]
         public string? NewValues { get; set; }
 
+        [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        // Navigation properties (optional/nullable)
+        // Denormalized name for fast and decoupled querying
+        [StringLength(150)]
+        public string? RestaurantName { get; set; }
+
+        // Navigation properties (optional/nullable - ignored by MongoDB serializer)
+        [BsonIgnore]
         [ForeignKey("RestaurantId")]
         public virtual Restaurant? Restaurant { get; set; }
 
+        [BsonIgnore]
         [ForeignKey("UserId")]
         public virtual User? User { get; set; }
 
+        [BsonIgnore]
         [ForeignKey("AdminId")]
         public virtual Admin? Admin { get; set; }
     }
 }
+

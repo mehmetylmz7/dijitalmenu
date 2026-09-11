@@ -15,6 +15,23 @@ services:
       timeout: 5s
       retries: 20
 
+  mongodb:
+    image: mongo:7.0
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: "${MONGO_INITDB_ROOT_USERNAME:-admin}"
+      MONGO_INITDB_ROOT_PASSWORD: "${MONGO_INITDB_ROOT_PASSWORD:-ChangeMe_12345!}"
+      MONGO_INITDB_DATABASE: "${MONGO_INITDB_DATABASE:-DijitalMenuAudit}"
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
   web:
     build:
       context: .
@@ -22,14 +39,23 @@ services:
     environment:
       ConnectionStrings__PostgresConnection: "Host=postgres;Port=5432;Database=${DB_NAME:-DijitalMenu};Username=postgres;Password=${POSTGRES_PASSWORD:-${MSSQL_SA_PASSWORD:-ChangeMe_12345!}}"
       ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=${DB_NAME:-DijitalMenu};Username=postgres;Password=${POSTGRES_PASSWORD:-${MSSQL_SA_PASSWORD:-ChangeMe_12345!}}"
+      ConnectionStrings__MongoConnection: "mongodb://${MONGO_INITDB_ROOT_USERNAME:-admin}:${MONGO_INITDB_ROOT_PASSWORD:-ChangeMe_12345!}@mongodb:27017/${MONGO_INITDB_DATABASE:-DijitalMenuAudit}?authSource=admin"
+      MongoSettings__DatabaseName: "${MONGO_INITDB_DATABASE:-DijitalMenuAudit}"
       Seed__AdminUsername: "${SEED_ADMIN_USERNAME:-admin}"
       Seed__AdminPassword: "${SEED_ADMIN_PASSWORD:-Admin123!}"
       ASPNETCORE_ENVIRONMENT: "Production"
     ports:
       - "8080:8080"
+    volumes:
+      - web_images:/app/wwwroot/images
     depends_on:
       postgres:
+        condition: service_healthy
+      mongodb:
         condition: service_healthy
 
 volumes:
   postgres_data:
+  web_images:
+  mongo_data:
+
