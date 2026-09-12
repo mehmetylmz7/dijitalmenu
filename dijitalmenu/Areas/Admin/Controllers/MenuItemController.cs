@@ -1,5 +1,6 @@
 using BusinessLayer.Abstract;
 using dijitalmenu.Filters;
+using dijitalmenu.Models;
 using dijitalmenu.Services;
 using EntityLayer.Concrete;
 using Microsoft.AspNetCore.Mvc;
@@ -40,8 +41,27 @@ namespace dijitalmenu.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(MenuItem menuItem)
+        [ActionName("Create")]
+        public IActionResult Create(MenuItemInputModel model)
         {
+            var category = _categoryService.TGetByID(model.CategoryId);
+            if (category == null)
+            {
+                ModelState.AddModelError("CategoryId", "Geçersiz kategori seçildi.");
+                ViewBag.Categories = _categoryService.TGetListAll();
+                ViewBag.AdminUser = HttpContext.Session.GetString("AdminUser");
+                return View();
+            }
+
+            var menuItem = new MenuItem
+            {
+                Name = model.Name.Trim(),
+                Price = model.Price,
+                CategoryId = model.CategoryId,
+                Description = model.Description?.Trim() ?? string.Empty,
+                ImageUrl = model.ImageUrl?.Trim()
+            };
+
             _menuItemService.TInsert(menuItem);
 
             _auditContextService.Log(
@@ -55,6 +75,18 @@ namespace dijitalmenu.Areas.Admin.Controllers
             return RedirectToAction("Index");
         }
 
+        [NonAction]
+        public IActionResult Create(MenuItem menuItem) =>
+            Create(new MenuItemInputModel
+            {
+                Id = menuItem.Id,
+                Name = menuItem.Name,
+                Price = menuItem.Price,
+                CategoryId = menuItem.CategoryId,
+                Description = menuItem.Description,
+                ImageUrl = menuItem.ImageUrl
+            });
+
         [HttpGet]
         public IActionResult Edit(int id)
         {
@@ -65,18 +97,28 @@ namespace dijitalmenu.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public IActionResult Edit(MenuItem menuItem)
+        [ActionName("Edit")]
+        public IActionResult Edit(MenuItemInputModel model)
         {
-            var existing = _menuItemService.TGetByID(menuItem.Id);
+            var existing = _menuItemService.TGetByID(model.Id);
             if (existing != null)
             {
+                var category = _categoryService.TGetByID(model.CategoryId);
+                if (category == null)
+                {
+                    ModelState.AddModelError("CategoryId", "Geçersiz kategori seçildi.");
+                    ViewBag.Categories = _categoryService.TGetListAll();
+                    ViewBag.AdminUser = HttpContext.Session.GetString("AdminUser");
+                    return View(existing);
+                }
+
                 var oldValues = new { existing.Id, existing.Name, existing.Price, existing.CategoryId, existing.Description, existing.ImageUrl };
 
-                existing.Name = menuItem.Name;
-                existing.Description = menuItem.Description;
-                existing.Price = menuItem.Price;
-                existing.CategoryId = menuItem.CategoryId;
-                existing.ImageUrl = menuItem.ImageUrl;
+                existing.Name = model.Name.Trim();
+                existing.Description = model.Description?.Trim() ?? string.Empty;
+                existing.Price = model.Price;
+                existing.CategoryId = model.CategoryId;
+                existing.ImageUrl = model.ImageUrl?.Trim();
 
                 _menuItemService.TUpdate(existing);
 
@@ -95,20 +137,30 @@ namespace dijitalmenu.Areas.Admin.Controllers
             return RedirectToAction("Index");
         }
 
+        [NonAction]
+        public IActionResult Edit(MenuItem menuItem) =>
+            Edit(new MenuItemInputModel
+            {
+                Id = menuItem.Id,
+                Name = menuItem.Name,
+                Price = menuItem.Price,
+                CategoryId = menuItem.CategoryId,
+                Description = menuItem.Description,
+                ImageUrl = menuItem.ImageUrl
+            });
+
         [HttpPost]
         public IActionResult Delete(int id)
         {
             var menuItem = _menuItemService.TGetByID(id);
             if (menuItem != null)
             {
-                var oldValues = new { menuItem.Id, menuItem.Name, menuItem.Price, menuItem.CategoryId };
-
                 _auditContextService.Log(
                     action: "MENU_ITEM_DELETED",
                     entityType: "MenuItem",
                     entityId: menuItem.Id,
                     description: $"Admin tarafından ürün silindi: '{menuItem.Name}'",
-                    oldEntity: oldValues
+                    oldEntity: new { menuItem.Id, menuItem.Name, menuItem.Price, menuItem.CategoryId }
                 );
 
                 _menuItemService.TDelete(menuItem);

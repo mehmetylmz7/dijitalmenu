@@ -1,5 +1,6 @@
 using BusinessLayer.Abstract;
 using dijitalmenu.Filters;
+using dijitalmenu.Models;
 using dijitalmenu.Services;
 using EntityLayer.Concrete;
 using Microsoft.AspNetCore.Mvc;
@@ -40,8 +41,19 @@ namespace dijitalmenu.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(Menu menu)
+        [ActionName("Create")]
+        public IActionResult Create(MenuInputModel model)
         {
+            var restaurant = _restaurantService.TGetByID(model.RestaurantId);
+            if (restaurant == null)
+            {
+                ModelState.AddModelError("RestaurantId", "Geçersiz restoran seçildi.");
+                ViewBag.Restaurants = _restaurantService.TGetListAll();
+                ViewBag.AdminUser = HttpContext.Session.GetString("AdminUser");
+                return View();
+            }
+
+            var menu = new Menu { RestaurantId = model.RestaurantId };
             _menuService.TInsert(menu);
 
             _auditContextService.Log(
@@ -56,6 +68,10 @@ namespace dijitalmenu.Areas.Admin.Controllers
             return RedirectToAction("Index");
         }
 
+        [NonAction]
+        public IActionResult Create(Menu menu) =>
+            Create(new MenuInputModel { Id = menu.Id, RestaurantId = menu.RestaurantId });
+
         [HttpGet]
         public IActionResult Edit(int id)
         {
@@ -66,13 +82,23 @@ namespace dijitalmenu.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public IActionResult Edit(Menu menu)
+        [ActionName("Edit")]
+        public IActionResult Edit(MenuInputModel model)
         {
-            var existing = _menuService.TGetByID(menu.Id);
+            var existing = _menuService.TGetByID(model.Id);
             if (existing != null)
             {
+                var restaurant = _restaurantService.TGetByID(model.RestaurantId);
+                if (restaurant == null)
+                {
+                    ModelState.AddModelError("RestaurantId", "Geçersiz restoran seçildi.");
+                    ViewBag.Restaurants = _restaurantService.TGetListAll();
+                    ViewBag.AdminUser = HttpContext.Session.GetString("AdminUser");
+                    return View(existing);
+                }
+
                 var oldValues = new { existing.Id, existing.RestaurantId };
-                existing.RestaurantId = menu.RestaurantId;
+                existing.RestaurantId = model.RestaurantId;
                 _menuService.TUpdate(existing);
                 var newValues = new { existing.Id, existing.RestaurantId };
 
@@ -89,6 +115,10 @@ namespace dijitalmenu.Areas.Admin.Controllers
 
             return RedirectToAction("Index");
         }
+
+        [NonAction]
+        public IActionResult Edit(Menu menu) =>
+            Edit(new MenuInputModel { Id = menu.Id, RestaurantId = menu.RestaurantId });
 
         [HttpPost]
         public IActionResult Delete(int id)

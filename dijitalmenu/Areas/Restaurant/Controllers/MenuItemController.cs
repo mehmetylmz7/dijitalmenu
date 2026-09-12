@@ -1,9 +1,13 @@
 using BusinessLayer.Abstract;
 using dijitalmenu.Filters;
+using dijitalmenu.Models;
 using dijitalmenu.Services;
 using EntityLayer.Concrete;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 
 namespace dijitalmenu.Areas.Restaurant.Controllers
 {
@@ -71,13 +75,14 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(MenuItem menuItem, IFormFile? photoFile)
+        [ActionName("Create")]
+        public IActionResult Create(MenuItemInputModel model, IFormFile? photoFile)
         {
             var categoryIds = GetMyCategories().Select(category => category.Id).ToHashSet();
-            if (!categoryIds.Contains(menuItem.CategoryId))
-                return RedirectToAction("Index");
+            if (!categoryIds.Contains(model.CategoryId))
+                return Forbid();
 
-            if (!TryValidateMenuItem(menuItem, out var validationError))
+            if (!TryValidateMenuItem(model, out var validationError))
             {
                 TempData["Error"] = validationError;
                 return RedirectToAction("Create");
@@ -89,7 +94,15 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 return RedirectToAction("Create");
             }
 
-            menuItem.ImageUrl = uploadedImageUrl ?? menuItem.ImageUrl?.Trim();
+            var menuItem = new MenuItem
+            {
+                Name = model.Name.Trim(),
+                Description = model.Description?.Trim() ?? string.Empty,
+                Price = model.Price,
+                CategoryId = model.CategoryId,
+                ImageUrl = uploadedImageUrl ?? model.ImageUrl?.Trim()
+            };
+
             _menuItemService.TInsert(menuItem);
 
             // Audit Log
@@ -115,15 +128,32 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             return RedirectToAction("Index");
         }
 
+        // Backward compatibility overload for unit tests
+        [NonAction]
+        public IActionResult Create(MenuItem menuItem, IFormFile? photoFile) =>
+            Create(new MenuItemInputModel
+            {
+                Id = menuItem.Id,
+                Name = menuItem.Name,
+                Description = menuItem.Description,
+                Price = menuItem.Price,
+                CategoryId = menuItem.CategoryId,
+                ImageUrl = menuItem.ImageUrl,
+                DisplayOrder = menuItem.DisplayOrder
+            }, photoFile);
+
         [HttpGet]
         public IActionResult Edit(int id)
         {
             var item = _menuItemService.TGetByID(id);
+            if (item == null)
+                return NotFound();
+
             var categories = GetMyCategories();
             var categoryIds = categories.Select(category => category.Id).ToHashSet();
 
-            if (item == null || !categoryIds.Contains(item.CategoryId))
-                return RedirectToAction("Index");
+            if (!categoryIds.Contains(item.CategoryId))
+                return Forbid();
 
             ViewBag.Categories = categories;
             ViewBag.RestaurantUsername = HttpContext.Session.GetString("RestaurantUsername");
@@ -131,24 +161,29 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
         }
 
         [HttpPost]
-        public IActionResult Edit(MenuItem menuItem, IFormFile? photoFile)
+        [ActionName("Edit")]
+        public IActionResult Edit(MenuItemInputModel model, IFormFile? photoFile)
         {
             var categoryIds = GetMyCategories().Select(category => category.Id).ToHashSet();
-            var existingItem = _menuItemService.TGetByID(menuItem.Id);
+            var existingItem = _menuItemService.TGetByID(model.Id);
 
-            if (existingItem == null || !categoryIds.Contains(existingItem.CategoryId) || !categoryIds.Contains(menuItem.CategoryId))
-                return RedirectToAction("Index");
+            if (existingItem == null)
+                return NotFound();
 
-            if (!TryValidateMenuItem(menuItem, out var validationError))
+            // Tenant isolation: Both the existing item and target category must belong to the tenant's menu
+            if (!categoryIds.Contains(existingItem.CategoryId) || !categoryIds.Contains(model.CategoryId))
+                return Forbid();
+
+            if (!TryValidateMenuItem(model, out var validationError))
             {
                 TempData["Error"] = validationError;
-                return RedirectToAction("Edit", new { id = menuItem.Id });
+                return RedirectToAction("Edit", new { id = model.Id });
             }
 
             if (!_storageService.TrySaveImage(photoFile, "menu-items", out var uploadedImageUrl, out var uploadError))
             {
                 TempData["Error"] = uploadError;
-                return RedirectToAction("Edit", new { id = menuItem.Id });
+                return RedirectToAction("Edit", new { id = model.Id });
             }
 
             var oldValues = new
@@ -167,11 +202,12 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 _storageService.DeleteImage(existingItem.ImageUrl);
             }
 
-            existingItem.Name = menuItem.Name.Trim();
-            existingItem.Description = menuItem.Description?.Trim() ?? string.Empty;
-            existingItem.Price = menuItem.Price;
-            existingItem.CategoryId = menuItem.CategoryId;
-            existingItem.ImageUrl = uploadedImageUrl ?? menuItem.ImageUrl?.Trim() ?? existingItem.ImageUrl;
+            // Safe explicit mapping (prevents mass assignment)
+            existingItem.Name = model.Name.Trim();
+            existingItem.Description = model.Description?.Trim() ?? string.Empty;
+            existingItem.Price = model.Price;
+            existingItem.CategoryId = model.CategoryId;
+            existingItem.ImageUrl = uploadedImageUrl ?? model.ImageUrl?.Trim() ?? existingItem.ImageUrl;
 
             _menuItemService.TUpdate(existingItem);
 
@@ -198,50 +234,66 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             return RedirectToAction("Index");
         }
 
+        // Backward compatibility overload for unit tests
+        [NonAction]
+        public IActionResult Edit(MenuItem menuItem, IFormFile? photoFile) =>
+            Edit(new MenuItemInputModel
+            {
+                Id = menuItem.Id,
+                Name = menuItem.Name,
+                Description = menuItem.Description,
+                Price = menuItem.Price,
+                CategoryId = menuItem.CategoryId,
+                ImageUrl = menuItem.ImageUrl,
+                DisplayOrder = menuItem.DisplayOrder
+            }, photoFile);
+
         [HttpPost]
         public IActionResult Delete(int id)
         {
             var item = _menuItemService.TGetByID(id);
+            if (item == null)
+                return NotFound();
+
             var categoryIds = GetMyCategories().Select(category => category.Id).ToHashSet();
+            if (!categoryIds.Contains(item.CategoryId))
+                return Forbid();
 
-            if (item != null && categoryIds.Contains(item.CategoryId))
+            var oldValues = new
             {
-                var oldValues = new
-                {
-                    item.Id,
-                    item.Name,
-                    item.Price,
-                    item.CategoryId,
-                    item.Description
-                };
+                item.Id,
+                item.Name,
+                item.Price,
+                item.CategoryId,
+                item.Description
+            };
 
-                _auditContextService.Log(
-                    action: "MENU_ITEM_DELETED",
-                    entityType: "MenuItem",
-                    entityId: item.Id,
-                    description: $"Menü ürünü silindi: '{item.Name}'",
-                    oldEntity: oldValues
-                );
+            _auditContextService.Log(
+                action: "MENU_ITEM_DELETED",
+                entityType: "MenuItem",
+                entityId: item.Id,
+                description: $"Menü ürünü silindi: '{item.Name}'",
+                oldEntity: oldValues
+            );
 
-                if (!string.IsNullOrEmpty(item.ImageUrl) && item.ImageUrl.StartsWith("/images/menu-items/", StringComparison.OrdinalIgnoreCase))
-                {
-                    _storageService.DeleteImage(item.ImageUrl);
-                }
-
-                _menuItemService.TDelete(item);
+            if (!string.IsNullOrEmpty(item.ImageUrl) && item.ImageUrl.StartsWith("/images/menu-items/", StringComparison.OrdinalIgnoreCase))
+            {
+                _storageService.DeleteImage(item.ImageUrl);
             }
+
+            _menuItemService.TDelete(item);
 
             return RedirectToAction("Index");
         }
 
-        private bool TryValidateMenuItem(MenuItem menuItem, out string error)
+        private bool TryValidateMenuItem(MenuItemInputModel model, out string error)
         {
-            menuItem.Name = menuItem.Name?.Trim() ?? string.Empty;
-            menuItem.Description = menuItem.Description?.Trim() ?? string.Empty;
-            menuItem.ImageUrl = menuItem.ImageUrl?.Trim();
+            model.Name = model.Name?.Trim() ?? string.Empty;
+            model.Description = model.Description?.Trim() ?? string.Empty;
+            model.ImageUrl = model.ImageUrl?.Trim();
 
             var validationResults = new List<ValidationResult>();
-            if (!Validator.TryValidateObject(menuItem, new ValidationContext(menuItem), validationResults, validateAllProperties: true))
+            if (!Validator.TryValidateObject(model, new ValidationContext(model), validationResults, validateAllProperties: true))
             {
                 error = validationResults
                     .Select(item => item.ErrorMessage)
@@ -249,7 +301,7 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 return false;
             }
 
-            if (!IsValidImageUrl(menuItem.ImageUrl))
+            if (!IsValidImageUrl(model.ImageUrl))
             {
                 error = "Görsel bağlantısı yalnızca HTTPS veya HTTP adresi olabilir.";
                 return false;

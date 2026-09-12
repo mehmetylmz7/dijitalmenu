@@ -96,8 +96,11 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             var menu = GetMyMenu();
             var category = _categoryService.TGetByID(id);
 
-            if (category == null || menu == null || category.MenuId != menu.Id)
-                return RedirectToAction("Index");
+            if (category == null)
+                return NotFound();
+
+            if (menu == null || category.MenuId != menu.Id)
+                return Forbid();
 
             ViewBag.RestaurantUsername = HttpContext.Session.GetString("RestaurantUsername");
             return View(category);
@@ -108,8 +111,11 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
         {
             var menu = GetMyMenu();
             var category = _categoryService.TGetByID(id);
-            if (category == null || menu == null || category.MenuId != menu.Id)
-                return RedirectToAction("Index");
+            if (category == null)
+                return NotFound();
+
+            if (menu == null || category.MenuId != menu.Id)
+                return Forbid();
 
             if (!TryNormalizeCategoryName(name, menu.Id, category.Id, out var normalizedName, out var error))
             {
@@ -166,30 +172,33 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             var menu = GetMyMenu();
             var category = _categoryService.TGetByID(id);
 
-            if (category != null && menu != null && category.MenuId == menu.Id)
+            if (category == null)
+                return NotFound();
+
+            if (menu == null || category.MenuId != menu.Id)
+                return Forbid();
+
+            var oldValues = new
             {
-                var oldValues = new
-                {
-                    category.Id,
-                    category.Name,
-                    category.MenuId
-                };
+                category.Id,
+                category.Name,
+                category.MenuId
+            };
 
-                _auditContextService.Log(
-                    action: "CATEGORY_DELETED",
-                    entityType: "Category",
-                    entityId: category.Id,
-                    description: $"Kategori silindi: '{category.Name}'",
-                    oldEntity: oldValues
-                );
+            _auditContextService.Log(
+                action: "CATEGORY_DELETED",
+                entityType: "Category",
+                entityId: category.Id,
+                description: $"Kategori silindi: '{category.Name}'",
+                oldEntity: oldValues
+            );
 
-                if (!string.IsNullOrEmpty(category.ImageUrl))
-                {
-                    _storageService.DeleteImage(category.ImageUrl);
-                }
-
-                _categoryService.TDelete(category);
+            if (!string.IsNullOrEmpty(category.ImageUrl))
+            {
+                _storageService.DeleteImage(category.ImageUrl);
             }
+
+            _categoryService.TDelete(category);
 
             return RedirectToAction("Index");
         }

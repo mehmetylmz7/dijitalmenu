@@ -7,5 +7,10 @@ RUN dotnet publish dijitalmenu/dijitalmenu.csproj -c Release -o /app/publish /p:
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 COPY --from=build /app/publish .
+
+# Create writable images directory and ensure ownership for non-root user
+RUN mkdir -p /app/wwwroot/images && chown -R $APP_UID:$APP_UID /app
+
+USER $APP_UID
 EXPOSE 8080
-ENTRYPOINT ["dotnet","dijitalmenu.dll"]
+ENTRYPOINT ["dotnet", "dijitalmenu.dll"]

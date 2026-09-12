@@ -1,5 +1,6 @@
 using BusinessLayer.Abstract;
 using dijitalmenu.Filters;
+using dijitalmenu.Models;
 using dijitalmenu.Services;
 using EntityLayer.Concrete;
 using Microsoft.AspNetCore.Mvc;
@@ -34,8 +35,20 @@ namespace dijitalmenu.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(Theme theme)
+        [ActionName("Create")]
+        public IActionResult Create(ThemeInputModel model)
         {
+            var theme = new Theme
+            {
+                Name = model.Name.Trim(),
+                PrimaryColor = model.PrimaryColor.Trim(),
+                SecondaryColor = model.SecondaryColor.Trim(),
+                BackgroundColor = model.BackgroundColor?.Trim() ?? "#ffffff",
+                FontFamily = model.FontFamily?.Trim() ?? "Inter, sans-serif",
+                Layout = model.Layout,
+                IsActive = model.IsActive
+            };
+
             _themeService.TInsert(theme);
 
             _auditContextService.Log(
@@ -49,6 +62,20 @@ namespace dijitalmenu.Areas.Admin.Controllers
             return RedirectToAction("Index");
         }
 
+        [NonAction]
+        public IActionResult Create(Theme theme) =>
+            Create(new ThemeInputModel
+            {
+                Id = theme.Id,
+                Name = theme.Name,
+                PrimaryColor = theme.PrimaryColor,
+                SecondaryColor = theme.SecondaryColor,
+                BackgroundColor = theme.BackgroundColor,
+                FontFamily = theme.FontFamily,
+                Layout = theme.Layout,
+                IsActive = theme.IsActive
+            });
+
         [HttpGet]
         public IActionResult Edit(int id)
         {
@@ -58,20 +85,21 @@ namespace dijitalmenu.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public IActionResult Edit(Theme theme)
+        [ActionName("Edit")]
+        public IActionResult Edit(ThemeInputModel model)
         {
-            var existing = _themeService.TGetByID(theme.Id);
+            var existing = _themeService.TGetByID(model.Id);
             if (existing != null)
             {
                 var oldValues = new { existing.Id, existing.Name, existing.PrimaryColor, existing.SecondaryColor, existing.BackgroundColor, existing.FontFamily, existing.Layout, existing.IsActive };
 
-                existing.Name = theme.Name;
-                existing.PrimaryColor = theme.PrimaryColor;
-                existing.SecondaryColor = theme.SecondaryColor;
-                existing.BackgroundColor = theme.BackgroundColor;
-                existing.FontFamily = theme.FontFamily;
-                existing.Layout = theme.Layout;
-                existing.IsActive = theme.IsActive;
+                existing.Name = model.Name.Trim();
+                existing.PrimaryColor = model.PrimaryColor.Trim();
+                existing.SecondaryColor = model.SecondaryColor.Trim();
+                existing.BackgroundColor = model.BackgroundColor?.Trim() ?? "#ffffff";
+                existing.FontFamily = model.FontFamily?.Trim() ?? "Inter, sans-serif";
+                existing.Layout = model.Layout;
+                existing.IsActive = model.IsActive;
 
                 _themeService.TUpdate(existing);
 
@@ -90,6 +118,20 @@ namespace dijitalmenu.Areas.Admin.Controllers
             return RedirectToAction("Index");
         }
 
+        [NonAction]
+        public IActionResult Edit(Theme theme) =>
+            Edit(new ThemeInputModel
+            {
+                Id = theme.Id,
+                Name = theme.Name,
+                PrimaryColor = theme.PrimaryColor,
+                SecondaryColor = theme.SecondaryColor,
+                BackgroundColor = theme.BackgroundColor,
+                FontFamily = theme.FontFamily,
+                Layout = theme.Layout,
+                IsActive = theme.IsActive
+            });
+
         [HttpPost]
         public IActionResult ToggleStatus(int id)
         {
@@ -101,16 +143,15 @@ namespace dijitalmenu.Areas.Admin.Controllers
                 _themeService.TUpdate(theme);
 
                 _auditContextService.Log(
-                    action: "THEME_UPDATED",
+                    action: "THEME_STATUS_TOGGLED",
                     entityType: "Theme",
                     entityId: theme.Id,
-                    description: $"Tema durumu değiştirildi: '{theme.Name}' -> {(theme.IsActive ? "Aktif" : "Pasif")}",
+                    description: $"Tema durumu değiştirildi: '{theme.Name}' ({oldStatus} -> {theme.IsActive})",
                     oldEntity: new { IsActive = oldStatus },
                     newEntity: new { IsActive = theme.IsActive }
                 );
-
-                TempData["Success"] = $"\"{theme.Name}\" teması {(theme.IsActive ? "aktifleştirildi" : "pasife alındı")}.";
             }
+
             return RedirectToAction("Index");
         }
 
@@ -130,6 +171,7 @@ namespace dijitalmenu.Areas.Admin.Controllers
 
                 _themeService.TDelete(theme);
             }
+
             return RedirectToAction("Index");
         }
     }

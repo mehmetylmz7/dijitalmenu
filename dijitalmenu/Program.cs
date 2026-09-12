@@ -33,6 +33,10 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
     options.Cookie.SameSite = SameSiteMode.Lax;
+    // Production: Secure flag only when HTTPS. 
+    // Set to SameAsRequest for development (localhost HTTP auto-detection), 
+    // Always for production (HTTPS required).
+    options.Cookie.SecurePolicy = builder.Environment.IsDevelopment() ? CookieSecurePolicy.SameAsRequest : CookieSecurePolicy.Always;
 });
 
 // HTTP Rate Limiting (Brute-force koruması)
@@ -110,6 +114,15 @@ builder.Services.AddScoped<BusinessLayer.Abstract.INotificationService, Business
 // Web Services Registration
 builder.Services.AddScoped<dijitalmenu.Services.IAuditContextService, dijitalmenu.Services.AuditContextService>();
 builder.Services.AddScoped<dijitalmenu.Services.IStorageService, dijitalmenu.Services.LocalStorageService>();
+builder.Services.AddSingleton<dijitalmenu.Services.ILoginAttemptService, dijitalmenu.Services.LoginAttemptService>();
+
+// Reverse Proxy Forwarded Headers Support (Cloudflare, Nginx, Docker)
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 
 var app = builder.Build();
 
@@ -564,6 +577,8 @@ using (var scope = app.Services.CreateScope())
 
 
 // Configure the HTTP request pipeline.
+app.UseForwardedHeaders();
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -576,6 +591,15 @@ app.Use(async (context, next) =>
     context.Response.Headers["X-Content-Type-Options"] = "nosniff";
     context.Response.Headers["X-Frame-Options"] = "SAMEORIGIN";
     context.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+    context.Response.Headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()";
+    context.Response.Headers["Content-Security-Policy"] =
+        "default-src 'self'; " +
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; " +
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; " +
+        "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:; " +
+        "img-src 'self' data: https: blob:; " +
+        "connect-src 'self' https://cdn.tailwindcss.com; " +
+        "frame-src 'self' https://www.google.com https://maps.google.com;";
     await next();
 });
 

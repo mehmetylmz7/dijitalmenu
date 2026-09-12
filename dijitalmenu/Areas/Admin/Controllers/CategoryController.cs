@@ -1,5 +1,6 @@
 using BusinessLayer.Abstract;
 using dijitalmenu.Filters;
+using dijitalmenu.Models;
 using dijitalmenu.Services;
 using EntityLayer.Concrete;
 using Microsoft.AspNetCore.Mvc;
@@ -40,8 +41,25 @@ namespace dijitalmenu.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(Category category)
+        [ActionName("Create")]
+        public IActionResult Create(CategoryInputModel model)
         {
+            var menu = _menuService.TGetByID(model.MenuId);
+            if (menu == null)
+            {
+                ModelState.AddModelError("MenuId", "Geçersiz menü seçildi.");
+                ViewBag.Menus = _menuService.TGetListAll();
+                ViewBag.AdminUser = HttpContext.Session.GetString("AdminUser");
+                return View();
+            }
+
+            var category = new Category
+            {
+                Name = model.Name.Trim(),
+                MenuId = model.MenuId,
+                ImageUrl = model.ImageUrl?.Trim()
+            };
+
             _categoryService.TInsert(category);
 
             _auditContextService.Log(
@@ -55,6 +73,10 @@ namespace dijitalmenu.Areas.Admin.Controllers
             return RedirectToAction("Index");
         }
 
+        [NonAction]
+        public IActionResult Create(Category category) =>
+            Create(new CategoryInputModel { Id = category.Id, Name = category.Name, MenuId = category.MenuId, ImageUrl = category.ImageUrl });
+
         [HttpGet]
         public IActionResult Edit(int id)
         {
@@ -65,16 +87,26 @@ namespace dijitalmenu.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public IActionResult Edit(Category category)
+        [ActionName("Edit")]
+        public IActionResult Edit(CategoryInputModel model)
         {
-            var existing = _categoryService.TGetByID(category.Id);
+            var existing = _categoryService.TGetByID(model.Id);
             if (existing != null)
             {
+                var menu = _menuService.TGetByID(model.MenuId);
+                if (menu == null)
+                {
+                    ModelState.AddModelError("MenuId", "Geçersiz menü seçildi.");
+                    ViewBag.Menus = _menuService.TGetListAll();
+                    ViewBag.AdminUser = HttpContext.Session.GetString("AdminUser");
+                    return View(existing);
+                }
+
                 var oldValues = new { existing.Id, existing.Name, existing.MenuId, existing.ImageUrl };
 
-                existing.Name = category.Name;
-                existing.MenuId = category.MenuId;
-                existing.ImageUrl = category.ImageUrl;
+                existing.Name = model.Name.Trim();
+                existing.MenuId = model.MenuId;
+                existing.ImageUrl = model.ImageUrl?.Trim();
 
                 _categoryService.TUpdate(existing);
 
@@ -92,6 +124,10 @@ namespace dijitalmenu.Areas.Admin.Controllers
 
             return RedirectToAction("Index");
         }
+
+        [NonAction]
+        public IActionResult Edit(Category category) =>
+            Edit(new CategoryInputModel { Id = category.Id, Name = category.Name, MenuId = category.MenuId, ImageUrl = category.ImageUrl });
 
         [HttpPost]
         public IActionResult Delete(int id)

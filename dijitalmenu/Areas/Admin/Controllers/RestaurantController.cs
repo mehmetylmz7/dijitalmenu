@@ -1,5 +1,7 @@
 using BusinessLayer.Abstract;
 using dijitalmenu.Filters;
+using dijitalmenu.Helpers;
+using dijitalmenu.Models;
 using dijitalmenu.Services;
 using EntityLayer.Concrete;
 using Microsoft.AspNetCore.Mvc;
@@ -45,8 +47,35 @@ namespace dijitalmenu.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(RestaurantEntity restaurant)
+        [ActionName("Create")]
+        public IActionResult Create(RestaurantInputModel model)
         {
+            var theme = _themeService.TGetByID(model.ThemeId);
+            if (theme == null)
+            {
+                ModelState.AddModelError("ThemeId", "Geçersiz tema seçildi.");
+                ViewBag.Themes = _themeService.TGetListAll().Where(t => t.IsActive).ToList();
+                ViewBag.AdminUser = HttpContext.Session.GetString("AdminUser");
+                return View();
+            }
+
+            var slug = !string.IsNullOrWhiteSpace(model.Slug)
+                ? StringHelper.GenerateSlug(model.Slug)
+                : StringHelper.GenerateSlug(model.Name);
+
+            var restaurant = new RestaurantEntity
+            {
+                Name = model.Name.Trim(),
+                Slug = slug,
+                ThemeId = model.ThemeId,
+                Phone = model.Phone?.Trim(),
+                Address = model.Address?.Trim(),
+                GoogleMapsUrl = model.GoogleMapsUrl?.Trim(),
+                ImportantNotice = model.ImportantNotice?.Trim(),
+                WorkingHours = model.WorkingHours?.Trim(),
+                InstagramUrl = model.InstagramUrl?.Trim()
+            };
+
             _restaurantService.TInsert(restaurant);
 
             _auditContextService.Log(
@@ -68,6 +97,22 @@ namespace dijitalmenu.Areas.Admin.Controllers
             return RedirectToAction("Index");
         }
 
+        [NonAction]
+        public IActionResult Create(RestaurantEntity restaurant) =>
+            Create(new RestaurantInputModel
+            {
+                Id = restaurant.Id,
+                Name = restaurant.Name,
+                Slug = restaurant.Slug,
+                ThemeId = restaurant.ThemeId,
+                Phone = restaurant.Phone,
+                Address = restaurant.Address,
+                GoogleMapsUrl = restaurant.GoogleMapsUrl,
+                ImportantNotice = restaurant.ImportantNotice,
+                WorkingHours = restaurant.WorkingHours,
+                InstagramUrl = restaurant.InstagramUrl
+            });
+
         [HttpGet]
         public IActionResult Edit(int id)
         {
@@ -78,22 +123,35 @@ namespace dijitalmenu.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public IActionResult Edit(RestaurantEntity restaurant)
+        [ActionName("Edit")]
+        public IActionResult Edit(RestaurantInputModel model)
         {
-            var existing = _restaurantService.TGetByID(restaurant.Id);
+            var existing = _restaurantService.TGetByID(model.Id);
             if (existing != null)
             {
+                var theme = _themeService.TGetByID(model.ThemeId);
+                if (theme == null)
+                {
+                    ModelState.AddModelError("ThemeId", "Geçersiz tema seçildi.");
+                    ViewBag.Themes = _themeService.TGetListAll().Where(t => t.IsActive).ToList();
+                    ViewBag.AdminUser = HttpContext.Session.GetString("AdminUser");
+                    return View(existing);
+                }
+
                 var oldValues = new { existing.Id, existing.Name, existing.Slug, existing.ThemeId, existing.Phone, existing.Address };
 
-                existing.Name = restaurant.Name;
-                existing.Slug = restaurant.Slug;
-                existing.ThemeId = restaurant.ThemeId;
-                existing.Phone = restaurant.Phone;
-                existing.Address = restaurant.Address;
-                existing.GoogleMapsUrl = restaurant.GoogleMapsUrl;
-                existing.ImportantNotice = restaurant.ImportantNotice;
-                existing.WorkingHours = restaurant.WorkingHours;
-                existing.InstagramUrl = restaurant.InstagramUrl;
+                existing.Name = model.Name.Trim();
+                if (!string.IsNullOrWhiteSpace(model.Slug))
+                {
+                    existing.Slug = StringHelper.GenerateSlug(model.Slug);
+                }
+                existing.ThemeId = model.ThemeId;
+                existing.Phone = model.Phone?.Trim();
+                existing.Address = model.Address?.Trim();
+                existing.GoogleMapsUrl = model.GoogleMapsUrl?.Trim();
+                existing.ImportantNotice = model.ImportantNotice?.Trim();
+                existing.WorkingHours = model.WorkingHours?.Trim();
+                existing.InstagramUrl = model.InstagramUrl?.Trim();
 
                 _restaurantService.TUpdate(existing);
 
@@ -113,27 +171,35 @@ namespace dijitalmenu.Areas.Admin.Controllers
             return RedirectToAction("Index");
         }
 
+        [NonAction]
+        public IActionResult Edit(RestaurantEntity restaurant) =>
+            Edit(new RestaurantInputModel
+            {
+                Id = restaurant.Id,
+                Name = restaurant.Name,
+                Slug = restaurant.Slug,
+                ThemeId = restaurant.ThemeId,
+                Phone = restaurant.Phone,
+                Address = restaurant.Address,
+                GoogleMapsUrl = restaurant.GoogleMapsUrl,
+                ImportantNotice = restaurant.ImportantNotice,
+                WorkingHours = restaurant.WorkingHours,
+                InstagramUrl = restaurant.InstagramUrl
+            });
+
         [HttpPost]
         public IActionResult Delete(int id)
         {
             var restaurant = _restaurantService.TGetByID(id);
             if (restaurant != null)
             {
-                var oldValues = new { restaurant.Id, restaurant.Name, restaurant.Slug };
-
                 _auditContextService.Log(
                     action: "RESTAURANT_DELETED",
                     entityType: "Restaurant",
                     entityId: restaurant.Id,
                     restaurantId: restaurant.Id,
-                    description: $"Admin tarafından restoran ve ilişkili tüm verileri silindi: '{restaurant.Name}'",
-                    oldEntity: oldValues
-                );
-
-                _notificationService.CreateNotification(
-                    title: "Kritik İşlem: Restoran Silindi",
-                    message: $"'{restaurant.Name}' adlı restoran ve ilişkili tüm menü/ürün kayıtları silindi.",
-                    type: "Warning"
+                    description: $"Admin tarafından restoran silindi: '{restaurant.Name}'",
+                    oldEntity: new { restaurant.Id, restaurant.Name, restaurant.Slug }
                 );
 
                 _restaurantService.TDelete(restaurant);

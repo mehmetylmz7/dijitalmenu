@@ -6,6 +6,7 @@ using EntityLayer.Concrete;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +24,7 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
         private readonly IAuditContextService _auditContextService;
         private readonly INotificationService _notificationService;
         private readonly Context _context;
+        private readonly ILoginAttemptService? _loginAttemptService;
 
         public AuthController(
             IUserService userService,
@@ -32,7 +34,8 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             IDefaultCategoryService defaultCategoryService,
             IAuditContextService auditContextService,
             INotificationService notificationService,
-            Context context)
+            Context context,
+            ILoginAttemptService? loginAttemptService = null)
         {
             _userService = userService;
             _restaurantService = restaurantService;
@@ -42,6 +45,7 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             _auditContextService = auditContextService;
             _notificationService = notificationService;
             _context = context;
+            _loginAttemptService = loginAttemptService;
         }
 
         [HttpGet]
@@ -58,16 +62,32 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
         public IActionResult Login(string username, string password)
         {
             var normalizedUsername = username?.Trim() ?? string.Empty;
+
+            // Account-level progressive throttling (abuse & brute-force defense without permanent lockout)
+            var attemptService = _loginAttemptService ?? (HttpContext?.RequestServices != null ? HttpContext.RequestServices.GetService<ILoginAttemptService>() : null);
+            if (attemptService != null && attemptService.IsLockedOut(normalizedUsername))
+            {
+                var remaining = attemptService.GetLockoutRemaining(normalizedUsername);
+                var seconds = remaining.HasValue ? (int)Math.Ceiling(remaining.Value.TotalSeconds) : 60;
+                ViewBag.Error = $"Çok fazla başarısız giriş denemesi yapıldı. Lütfen {seconds} saniye sonra tekrar deneyiniz.";
+                return View();
+            }
+
             var user = _userService.TGetListAll()
                 .FirstOrDefault(item => item.Username.Equals(normalizedUsername, StringComparison.OrdinalIgnoreCase));
 
             if (user != null && PasswordHelper.Verify(password, user.Password))
             {
+                attemptService?.ResetAttempts(normalizedUsername);
+
                 if (PasswordHelper.NeedsRehash(user.Password))
                 {
                     user.Password = PasswordHelper.Hash(password);
                     _userService.TUpdate(user);
                 }
+
+                // Session Fixation Protection: Clear existing session completely before setting new authenticated session
+                HttpContext.Session.Clear();
 
                 SignIn(user);
 
@@ -84,6 +104,8 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
 
                 return RedirectToAction("Index", "Dashboard", new { area = "Restaurant" });
             }
+
+            attemptService?.RecordFailedAttempt(normalizedUsername);
 
             // Audit Log: Failed (never logging password)
             _auditContextService.Log(
@@ -166,6 +188,8 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 _menuService.TInsert(menu);
                 _defaultCategoryService.TApplyToMenu(menu.Id);
 
+                // Session Fixation Protection on registration login
+                HttpContext.Session.Clear();
                 SignIn(user);
 
                 // Audit Log: Restaurant Registration

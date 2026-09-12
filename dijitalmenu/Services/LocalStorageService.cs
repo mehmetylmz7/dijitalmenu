@@ -44,6 +44,15 @@ public class LocalStorageService : IStorageService
             return false;
         }
 
+        // Validate subFolder to prevent directory traversal
+        if (string.IsNullOrWhiteSpace(subFolder) ||
+            subFolder.Contains("..", StringComparison.Ordinal) ||
+            subFolder.Any(c => Path.GetInvalidFileNameChars().Contains(c) && c != '/' && c != '\\'))
+        {
+            errorMessage = "Geçersiz hedef klasör.";
+            return false;
+        }
+
         var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
         if (!AllowedImageExtensions.Contains(extension) ||
             !AllowedImageContentTypes.Contains(file.ContentType, StringComparer.OrdinalIgnoreCase))
@@ -52,10 +61,29 @@ public class LocalStorageService : IStorageService
             return false;
         }
 
+        // Magic bytes / Binary signature inspection
+        if (!IsValidImageSignature(file, extension))
+        {
+            _logger.LogWarning("Geçersiz dosya imzası tespit edildi. Dosya adı: {FileName}, ContentType: {ContentType}", file.FileName, file.ContentType);
+            errorMessage = "Dosya içeriği geçerli bir görsel formatı ile eşleşmiyor.";
+            return false;
+        }
+
         try
         {
             var webRoot = _environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-            var folderPath = Path.Combine(webRoot, "images", subFolder);
+            var imagesBaseDir = Path.Combine(webRoot, "images");
+            var folderPath = Path.Combine(imagesBaseDir, subFolder);
+
+            // Canonical path validation
+            var canonicalFolderPath = Path.GetFullPath(folderPath);
+            var canonicalImagesBase = Path.GetFullPath(imagesBaseDir);
+            if (!canonicalFolderPath.StartsWith(canonicalImagesBase, StringComparison.OrdinalIgnoreCase))
+            {
+                errorMessage = "Geçersiz hedef yolu.";
+                return false;
+            }
+
             Directory.CreateDirectory(folderPath);
 
             var fileName = $"{Guid.NewGuid():N}{extension}";
@@ -88,9 +116,19 @@ public class LocalStorageService : IStorageService
             var webRoot = _environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
             var fullPath = Path.Combine(webRoot, normalizedPath);
 
-            if (File.Exists(fullPath))
+            var canonicalFullPath = Path.GetFullPath(fullPath);
+            var canonicalImagesDir = Path.GetFullPath(Path.Combine(webRoot, "images"));
+
+            // Path Traversal check: only allow deletion within the images folder
+            if (!canonicalFullPath.StartsWith(canonicalImagesDir, StringComparison.OrdinalIgnoreCase))
             {
-                File.Delete(fullPath);
+                _logger.LogWarning("Path traversal attempt blocked in DeleteImage: {FileUrl}", relativeFileUrl);
+                return false;
+            }
+
+            if (File.Exists(canonicalFullPath))
+            {
+                File.Delete(canonicalFullPath);
                 return true;
             }
         }
@@ -100,5 +138,35 @@ public class LocalStorageService : IStorageService
         }
 
         return false;
+    }
+
+    private static bool IsValidImageSignature(IFormFile file, string extension)
+    {
+        try
+        {
+            using var stream = file.OpenReadStream();
+            if (stream.Length < 12)
+                return false;
+
+            var header = new byte[12];
+            var bytesRead = stream.Read(header, 0, 12);
+            if (bytesRead < 12)
+                return false;
+
+            return extension switch
+            {
+                ".jpg" or ".jpeg" => header[0] == 0xFF && header[1] == 0xD8 && header[2] == 0xFF,
+                ".png" => header[0] == 0x89 && header[1] == 0x50 && header[2] == 0x4E && header[3] == 0x47 &&
+                          header[4] == 0x0D && header[5] == 0x0A && header[6] == 0x1A && header[7] == 0x0A,
+                ".gif" => header[0] == 0x47 && header[1] == 0x49 && header[2] == 0x46 && header[3] == 0x38, // "GIF8"
+                ".webp" => header[0] == 0x52 && header[1] == 0x49 && header[2] == 0x46 && header[3] == 0x46 && // "RIFF"
+                           header[8] == 0x57 && header[9] == 0x45 && header[10] == 0x42 && header[11] == 0x50, // "WEBP"
+                _ => false
+            };
+        }
+        catch
+        {
+            return false;
+        }
     }
 }

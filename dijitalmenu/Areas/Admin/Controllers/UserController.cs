@@ -2,6 +2,7 @@ using BusinessLayer.Abstract;
 using dijitalmenu.Filters;
 using dijitalmenu.Helpers;
 using dijitalmenu.Services;
+using dijitalmenu.Models;
 using EntityLayer.Concrete;
 using Microsoft.AspNetCore.Mvc;
 
@@ -41,12 +42,31 @@ namespace dijitalmenu.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(User user)
+        public IActionResult Create(UserViewModel userViewModel)
         {
-            user.Password = PasswordHelper.Hash(user.Password);
+            var restaurant = _restaurantService.TGetByID(userViewModel.RestaurantId);
+            if (restaurant == null)
+            {
+                ModelState.AddModelError("RestaurantId", "Geçersiz restoran seçildi.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Restaurants = _restaurantService.TGetListAll();
+                ViewBag.AdminUser = HttpContext.Session.GetString("AdminUser");
+                return View();
+            }
+
+            var user = new User
+            {
+                Username = userViewModel.Username,
+                RestaurantId = userViewModel.RestaurantId,
+                Password = PasswordHelper.Hash(userViewModel.Password)
+            };
+
             _userService.TInsert(user);
 
-            // Audit Log (Passwords are masked/excluded)
+            // Audit Log
             var newValues = new { user.Id, user.Username, user.RestaurantId };
 
             _auditContextService.Log(
@@ -71,19 +91,28 @@ namespace dijitalmenu.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public IActionResult Edit(User user)
+        public IActionResult Edit(UserViewModel userViewModel)
         {
-            var existing = _userService.TGetByID(user.Id);
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Restaurants = _restaurantService.TGetListAll();
+                ViewBag.AdminUser = HttpContext.Session.GetString("AdminUser");
+                return View();
+            }
+
+            var existing = _userService.TGetByID(userViewModel.Id);
             if (existing == null)
                 return RedirectToAction("Index");
 
             var oldValues = new { existing.Id, existing.Username, existing.RestaurantId };
 
-            existing.Username = user.Username;
-            existing.RestaurantId = user.RestaurantId;
+            // Only allow username update; RestaurantId is preserved from existing record
+            // to prevent mass assignment privilege escalation. Admin must use dedicated
+            // restaurant management workflow to reassign users to different restaurants.
+            existing.Username = userViewModel.Username;
 
-            if (!string.IsNullOrWhiteSpace(user.Password))
-                existing.Password = PasswordHelper.Hash(user.Password);
+            if (!string.IsNullOrWhiteSpace(userViewModel.Password))
+                existing.Password = PasswordHelper.Hash(userViewModel.Password);
 
             _userService.TUpdate(existing);
 
