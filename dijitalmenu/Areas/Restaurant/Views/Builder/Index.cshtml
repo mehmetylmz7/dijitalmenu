@@ -24,7 +24,7 @@
     /* LEFT PANEL */
     .builder-panel {
         width: 420px;
-        min-width: 420px;
+        min-width: 320px;
         background: #161b22;
         border-right: 1px solid #30363d;
         display: flex;
@@ -360,12 +360,12 @@
         border: 1px solid #30363d;
         color: #8b949e;
         border-radius: 4px;
-        width: 22px;
-        height: 22px;
+        width: 26px;
+        height: 26px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        font-size: 0.65rem;
+        font-size: 0.7rem;
         cursor: pointer;
         transition: all 0.15s;
     }
@@ -386,12 +386,12 @@
         border: 1px solid #30363d;
         color: #f85149;
         border-radius: 4px;
-        width: 22px;
-        height: 22px;
+        width: 26px;
+        height: 26px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        font-size: 0.7rem;
+        font-size: 0.75rem;
         cursor: pointer;
         transition: all 0.15s;
         margin-left: 2px;
@@ -420,6 +420,8 @@
         z-index: 9999;
         transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
         box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        max-width: 90vw;
+        box-sizing: border-box;
     }
 
     .builder-toast.show { transform: translateX(-50%) translateY(0); }
@@ -708,6 +710,43 @@
     select.builder-input option {
         background: #21262d;
         color: #e6edf3;
+    }
+
+    @@media (max-width: 992px) {
+        .builder-shell {
+            flex-direction: column;
+            height: auto;
+            overflow-y: visible;
+        }
+        .builder-panel {
+            width: 100%;
+            min-width: 100%;
+            height: auto;
+            border-right: none;
+            border-bottom: 1px solid #30363d;
+        }
+        .preview-panel {
+            min-height: 700px;
+        }
+        .preview-toolbar {
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 10px 16px;
+        }
+        .preview-stage {
+            padding: 16px 8px;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .theme-grid {
+            grid-template-columns: 1fr;
+        }
+        .phone-outer {
+            width: 100%;
+            max-width: 320px;
+            padding: 10px;
+        }
     }
 </style>
 }
@@ -1124,8 +1163,8 @@
             itemDiv.innerHTML = `
                 <div style="display:flex;align-items:center;min-width:0;flex:1;">
                     <span class="drag-handle" title="Sıralamak için sürükleyin">⠿</span>
-                    <span style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#e6edf3;max-width:140px;">${escapeHtml(cat.name)}</span>
-                    <span style="font-size:0.65rem;background:#161b22;color:#8b949e;padding:2px 6px;border-radius:10px;margin-left:6px;border:1px solid #30363d;">
+                    <span style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#e6edf3;flex:1;min-width:0;">${escapeHtml(cat.name)}</span>
+                    <span style="font-size:0.65rem;background:#161b22;color:#8b949e;padding:2px 6px;border-radius:10px;margin-left:6px;border:1px solid #30363d;flex-shrink:0;">
                         ${catItemCount} Ürün
                     </span>
                 </div>
@@ -1353,8 +1392,8 @@
             itemDiv.innerHTML = `
                 <div style="display:flex;align-items:center;min-width:0;flex:1;">
                     <span class="drag-handle" title="Sıralamak için sürükleyin">⠿</span>
-                    <span style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#e6edf3;max-width:130px;">${escapeHtml(item.name)}</span>
-                    <span style="font-size:0.68rem;color:#4ade80;font-weight:700;margin-left:6px;background:#16261c;padding:2px 6px;border-radius:6px;border:1px solid #22c55e44;">
+                    <span style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#e6edf3;flex:1;min-width:0;">${escapeHtml(item.name)}</span>
+                    <span style="font-size:0.68rem;color:#4ade80;font-weight:700;margin-left:6px;background:#16261c;padding:2px 6px;border-radius:6px;border:1px solid #22c55e44;flex-shrink:0;">
                         ${parseFloat(item.price).toFixed(2)} TL
                     </span>
                 </div>

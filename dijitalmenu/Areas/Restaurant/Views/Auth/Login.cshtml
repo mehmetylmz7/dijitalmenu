@@ -162,6 +162,7 @@
             font-size: 0.875rem;
             font-weight: 500;
             margin-bottom: 20px;
+            animation: fadeIn 0.25s ease;
         }
 
         .footer-link {
@@ -179,6 +180,17 @@
 
         .footer-link a:hover {
             text-decoration: underline;
+        }
+
+        @@keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @@media (max-width: 480px) {
+            body { padding: 16px 12px; }
+            .login-card { padding: 28px 20px; border-radius: 18px; }
+            .logo-header h1 { font-size: 1.3rem; }
         }
     </style>
 </head>

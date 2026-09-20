@@ -193,7 +193,8 @@
 
     .phone-mockup {
         position: relative;
-        width: 320px;
+        width: 100%;
+        max-width: 320px;
         height: 580px;
         background: #ffffff;
         border-radius: 36px;
@@ -205,6 +206,7 @@
         z-index: 2;
         transform: rotate(1deg);
         transition: transform 0.4s ease;
+        box-sizing: border-box;
     }
 
     .phone-mockup:hover {
@@ -1109,6 +1111,11 @@
     }
 
     @@media (max-width: 640px) {
+        .phone-mockup {
+            max-width: 290px;
+            height: 520px;
+            transform: none;
+        }
         .showcase-phone-frame {
             width: 100%;
             max-width: 310px;

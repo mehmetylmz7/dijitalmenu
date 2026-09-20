@@ -366,3 +366,5 @@ FodyWeavers.xsd
 .env
 .env.*
 !.env.example
+# Temporary frontend update directory
+dijitalmenu-frontend-guncelleme/

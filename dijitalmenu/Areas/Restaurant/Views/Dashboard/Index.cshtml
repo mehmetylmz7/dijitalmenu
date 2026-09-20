@@ -19,20 +19,20 @@
     <div class="card-header">
         <h5>🚀 Hızlı Menü İşlemleri</h5>
     </div>
-    <div class="card-body" style="display: flex; gap: 12px; flex-wrap: wrap;">
-        <a asp-area="Restaurant" asp-controller="Category" asp-action="Create" class="btn btn-primary">
+    <div class="card-body" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+        <a asp-area="Restaurant" asp-controller="Category" asp-action="Create" class="btn btn-primary" style="justify-content: center;">
             <span>➕</span> Yeni Kategori
         </a>
-        <a asp-area="Restaurant" asp-controller="MenuItem" asp-action="Create" class="btn btn-primary">
+        <a asp-area="Restaurant" asp-controller="MenuItem" asp-action="Create" class="btn btn-primary" style="justify-content: center;">
             <span>➕</span> Yeni Ürün
         </a>
-        <a asp-area="Restaurant" asp-controller="Category" asp-action="Index" class="btn btn-secondary">
+        <a asp-area="Restaurant" asp-controller="Category" asp-action="Index" class="btn btn-secondary" style="justify-content: center;">
             <span>🏷️</span> Kategorileri Yönet
         </a>
-        <a asp-area="Restaurant" asp-controller="MenuItem" asp-action="Index" class="btn btn-secondary">
+        <a asp-area="Restaurant" asp-controller="MenuItem" asp-action="Index" class="btn btn-secondary" style="justify-content: center;">
             <span>🍕</span> Ürünleri Yönet
         </a>
-        <a asp-area="Restaurant" asp-controller="Builder" asp-action="Index" class="btn btn-secondary">
+        <a asp-area="Restaurant" asp-controller="Builder" asp-action="Index" class="btn btn-secondary" style="justify-content: center;">
             <span>✨</span> Menü Oluşturucu
         </a>
     </div>
@@ -41,26 +41,26 @@
 <div class="card">
     <div class="card-header">
         <h5>📱 QR Kod ve Canlı Menü Bağlantınız</h5>
-        <span style="background: rgba(16, 185, 129, 0.12); color: var(--primary-dark); padding: 4px 12px; border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 700;">
-            İnternet Erişimi Aktif
+        <span style="background: var(--primary-dim); color: var(--primary-dark); padding: 4px 12px; border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 700;">
+            İnternet erişimi aktif
         </span>
     </div>
     <div class="card-body" style="text-align: center; display: flex; flex-direction: column; align-items: center; gap: 20px;">
         @if (ViewBag.QrCodeImage != null)
         {
             <div style="background: #ffffff; padding: 16px; border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow-sm); display: inline-block;">
-                <img src="@ViewBag.QrCodeImage" alt="Restoran QR Kodu" style="max-width: 220px; width: 100%; border-radius: 12px; display: block;" />
+                <img src="@ViewBag.QrCodeImage" alt="Restoran QR Kodu" width="220" height="220" style="max-width: 220px; width: 100%; height: auto; aspect-ratio: 1/1; border-radius: 12px; display: block;" />
             </div>
 
             <div style="background: var(--surface-low); padding: 18px 24px; border-radius: var(--radius-md); border: 1px solid var(--border); max-width: 650px; width: 100%;">
-                <span style="color: var(--text-secondary); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 8px;">
-                    Müşterilerinizin Erişeceği Canlı Menü Linki:
+                <span style="color: var(--text-secondary); font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 8px;">
+                    Müşterilerinizin erişeceği canlı menü linki
                 </span>
                 <div style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
                     <a href="@ViewBag.MenuUrl" target="_blank" rel="noopener" style="color: var(--primary-dark); font-weight: 700; font-size: 1.05rem; word-break: break-all; text-decoration: none;">
                         @ViewBag.MenuUrl
                     </a>
-                    <button type="button" onclick="navigator.clipboard.writeText('@ViewBag.MenuUrl'); alert('Menü bağlantısı kopyalandı!');" class="btn btn-secondary btn-sm">
+                    <button type="button" onclick="navigator.clipboard.writeText('@ViewBag.MenuUrl'); const el=this; el.innerHTML='<span>✓</span> Kopyalandı!'; setTimeout(()=>el.innerHTML='<span>📋</span> Kopyala', 2000);" class="btn btn-secondary btn-sm">
                         <span>📋</span> Kopyala
                     </button>
                 </div>
@@ -75,9 +75,9 @@
                 </a>
             </div>
 
-            <div style="background: rgba(16, 185, 129, 0.06); border: 1px solid rgba(16, 185, 129, 0.2); color: var(--primary-dark); padding: 14px 20px; border-radius: var(--radius-md); font-size: 0.85rem; max-width: 650px; width: 100%; display: flex; align-items: center; gap: 10px; text-align: left;">
+            <div style="background: var(--primary-dim); border: 1px solid rgba(16, 185, 129, 0.2); color: var(--primary-dark); padding: 14px 20px; border-radius: var(--radius-md); font-size: 0.85rem; max-width: 650px; width: 100%; display: flex; align-items: center; gap: 10px; text-align: left;">
                 <span style="font-size: 1.4rem; flex-shrink: 0;">🔒</span>
-                <span><strong>Sabit QR Garantisi:</strong> Menünüzdeki ürünler, fiyatlar veya tasarım değişse bile bu QR kodunuz asla değişmez. Masalardaki baskıları yenilemenize gerek kalmaz.</span>
+                <span><strong>Sabit QR garantisi:</strong> Menünüzdeki ürünler, fiyatlar veya tasarım değişse bile bu QR kodunuz asla değişmez. Masalardaki baskıları yenilemenize gerek kalmaz.</span>
             </div>
         }
         else

@@ -6,7 +6,7 @@
     <title>@ViewData["Title"] — Dijital Menü</title>
     <meta name="description" content="QR kodla açılan, modern ve kolay yönetilen dijital restoran menü platformu." />
 
-    <!-- Google Fonts: Sora (Headlines) & Inter (Body) -->
+    <!-- Google Fonts: Sora & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet" />
@@ -239,9 +239,48 @@
             color: var(--primary);
         }
 
+        .mobile-menu-btn {
+            display: none;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 8px 10px;
+            color: var(--charcoal);
+            font-size: 1.2rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .mobile-nav-drawer {
+            display: none;
+            position: fixed;
+            top: 76px;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            padding: 20px 24px;
+            flex-direction: column;
+            gap: 16px;
+            z-index: 99;
+            box-shadow: var(--shadow-lg);
+            animation: slideDownNav 0.2s ease;
+        }
+
+        .mobile-nav-drawer.open {
+            display: flex;
+        }
+
+        @@keyframes slideDownNav {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         /* ─── Mobile Responsiveness ─── */
         @@media (max-width: 768px) {
             .nav-menu { display: none; }
+            .mobile-menu-btn { display: inline-flex; align-items: center; justify-content: center; }
             .footer-container {
                 flex-direction: column;
                 text-align: center;
@@ -250,6 +289,12 @@
             .footer-links {
                 justify-content: center;
             }
+        }
+
+        @@media (max-width: 480px) {
+            .nav-container { padding: 0 16px; }
+            .btn-nav-login { display: none; }
+            .btn-nav-primary { padding: 8px 14px; font-size: 0.8rem; }
         }
     </style>
     @await RenderSectionAsync("Styles", required: false)
@@ -263,9 +308,9 @@
             </a>
 
             <nav class="nav-menu">
-                <a class="nav-link" href="#features">Özellikler</a>
-                <a class="nav-link" href="#how-it-works">Nasıl Çalışır?</a>
-                <a class="nav-link" href="#demo">Canlı Temalar</a>
+                <a class="nav-link" href="/#features">Özellikler</a>
+                <a class="nav-link" href="/#how-it-works">Nasıl Çalışır?</a>
+                <a class="nav-link" href="/#demo">Canlı Temalar</a>
             </nav>
 
             <div class="nav-actions">
@@ -275,7 +320,17 @@
                 <a class="btn-nav-primary" asp-area="Restaurant" asp-controller="Auth" asp-action="Register">
                     <span>Ücretsiz Başla</span>
                 </a>
+                <button type="button" class="mobile-menu-btn" onclick="document.getElementById('mobileNavDrawer').classList.toggle('open')" aria-label="Menüyü Aç">
+                    <span>☰</span>
+                </button>
             </div>
+        </div>
+
+        <div id="mobileNavDrawer" class="mobile-nav-drawer">
+            <a class="nav-link" href="/#features" onclick="document.getElementById('mobileNavDrawer').classList.remove('open')">Özellikler</a>
+            <a class="nav-link" href="/#how-it-works" onclick="document.getElementById('mobileNavDrawer').classList.remove('open')">Nasıl Çalışır?</a>
+            <a class="nav-link" href="/#demo" onclick="document.getElementById('mobileNavDrawer').classList.remove('open')">Canlı Temalar</a>
+            <a class="nav-link" asp-area="Restaurant" asp-controller="Auth" asp-action="Login">Restoran Girişi</a>
         </div>
     </header>
 
@@ -294,8 +349,8 @@
             </div>
 
             <div class="footer-links">
-                <a class="footer-link" href="#features">Özellikler</a>
-                <a class="footer-link" href="#demo">Temalar</a>
+                <a class="footer-link" href="/#features">Özellikler</a>
+                <a class="footer-link" href="/#demo">Temalar</a>
                 <a class="footer-link" asp-area="Restaurant" asp-controller="Auth" asp-action="Login">Restoran Girişi</a>
                 <a class="footer-link" asp-area="Admin" asp-controller="Auth" asp-action="Login">Admin Paneli</a>
             </div>
