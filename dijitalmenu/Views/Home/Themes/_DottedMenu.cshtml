@@ -220,13 +220,17 @@
                             var itemImg = !string.IsNullOrWhiteSpace(item.ImageUrl) 
                                 ? item.ImageUrl 
                                 : defaultItemImages[globalItemCounter % defaultItemImages.Length];
+                            var caloriesStr = item.Calories.HasValue ? item.Calories.Value.ToString() : "";
+                            var allergensEscaped = (item.Allergens ?? "").Replace("'", "\\'").Replace("\"", "&quot;");
 
                             <div class="dotted-menu-item cursor-pointer group flex items-end w-full py-1.5 hover:bg-white/60 rounded-xl px-1.5 -mx-1.5 transition-colors duration-150" 
                                  data-title="@item.Name" 
                                  data-price="@item.Price.ToString("N0") TL" 
                                  data-desc="@(string.IsNullOrWhiteSpace(item.Description) ? "Özel malzemeler ve şefin dokunuşuyla taze hazırlanmış lezzet." : item.Description)" 
                                  data-img="@itemImg"
-                                 onclick="openDottedModal('@item.Name', '@item.Price.ToString("N0") TL', '@(string.IsNullOrWhiteSpace(item.Description) ? "Özel malzemeler ve şefin dokunuşuyla taze hazırlanmış lezzet." : item.Description)', '@itemImg')">
+                                 data-calories="@caloriesStr"
+                                 data-allergens="@item.Allergens"
+                                 onclick="openDottedModal('@item.Name', '@item.Price.ToString("N0") TL', '@(string.IsNullOrWhiteSpace(item.Description) ? "Özel malzemeler ve şefin dokunuşuyla taze hazırlanmış lezzet." : item.Description)', '@itemImg', '@caloriesStr', '@allergensEscaped')">
                                 
                                 <!-- Left: Avatar + Title -->
                                 <div class="flex items-center gap-3 shrink-0 min-w-0 max-w-[70%]">
@@ -243,6 +247,19 @@
                                             <span class="text-[11px] text-[#575e70] line-clamp-1 block">
                                                 @item.Description
                                             </span>
+                                        }
+                                        @if (item.Calories.HasValue || !string.IsNullOrWhiteSpace(item.Allergens))
+                                        {
+                                            <div class="flex items-center gap-1.5 mt-0.5">
+                                                @if (item.Calories.HasValue)
+                                                {
+                                                    <span class="text-[10px] text-orange-600 bg-orange-50/80 px-1.5 py-0.5 rounded font-medium">🔥 @item.Calories.Value kcal</span>
+                                                }
+                                                @if (!string.IsNullOrWhiteSpace(item.Allergens))
+                                                {
+                                                    <span class="text-[10px] text-amber-700 bg-amber-50/80 px-1.5 py-0.5 rounded font-medium" title="@item.Allergens">⚠️ Alerjen</span>
+                                                }
+                                            </div>
                                         }
                                     </div>
                                 </div>
@@ -329,6 +346,16 @@
                         <h4 class="text-xs font-bold text-[#575e70] uppercase tracking-wider mb-1">Açıklama</h4>
                         <p class="text-sm text-[#3c4a42] leading-relaxed" id="modalDesc"></p>
                     </div>
+                    <div id="modalNutritionArea" class="mt-4 space-y-2 hidden">
+                        <div id="modalCaloriesWrap" class="hidden items-center gap-2 text-xs text-[#191c1d] bg-orange-50/70 border border-orange-200/50 px-3 py-1.5 rounded-lg">
+                            <span class="font-bold text-orange-600">🔥 Enerji:</span>
+                            <span id="modalCaloriesText" class="font-semibold text-orange-950"></span>
+                        </div>
+                        <div id="modalAllergensWrap" class="hidden items-start gap-2 text-xs text-amber-900 bg-amber-50/80 border border-amber-200/60 p-2.5 rounded-lg">
+                            <span class="font-bold text-amber-700 shrink-0">⚠️ Alerjenler:</span>
+                            <span id="modalAllergensText" class="leading-tight"></span>
+                        </div>
+                    </div>
                 </div>
                 <div class="mt-6 border-t border-[#bbcabf]/30 pt-4">
                     <button onclick="closeDottedModal()" class="w-full bg-[#006c49] text-white font-sora text-sm font-bold py-3 rounded-xl hover:bg-[#005236] transition-colors shadow-sm active:scale-95 cursor-pointer">
@@ -402,7 +429,7 @@
         }
     }
 
-    function openDottedModal(title, price, desc, imgSrc) {
+    function openDottedModal(title, price, desc, imgSrc, calories, allergens) {
         const modalOverlay = document.getElementById('itemModalOverlay');
         const modalContent = document.getElementById('itemModalContent');
         const modalTitle = document.getElementById('modalTitle');
@@ -414,6 +441,40 @@
         modalPrice.textContent = price;
         modalDesc.textContent = desc;
         modalImg.src = imgSrc || '';
+
+        // Kalori & Alerjen Alanı
+        const nutritionArea = document.getElementById('modalNutritionArea');
+        const caloriesWrap = document.getElementById('modalCaloriesWrap');
+        const caloriesText = document.getElementById('modalCaloriesText');
+        const allergensWrap = document.getElementById('modalAllergensWrap');
+        const allergensText = document.getElementById('modalAllergensText');
+
+        let hasNutrition = false;
+        if (calories && calories.trim().length > 0) {
+            caloriesText.textContent = calories.trim() + ' kcal';
+            caloriesWrap.classList.remove('hidden');
+            caloriesWrap.classList.add('flex');
+            hasNutrition = true;
+        } else {
+            caloriesWrap.classList.add('hidden');
+            caloriesWrap.classList.remove('flex');
+        }
+
+        if (allergens && allergens.trim().length > 0) {
+            allergensText.textContent = allergens.trim();
+            allergensWrap.classList.remove('hidden');
+            allergensWrap.classList.add('flex');
+            hasNutrition = true;
+        } else {
+            allergensWrap.classList.add('hidden');
+            allergensWrap.classList.remove('flex');
+        }
+
+        if (hasNutrition) {
+            nutritionArea.classList.remove('hidden');
+        } else {
+            nutritionArea.classList.add('hidden');
+        }
 
         modalOverlay.classList.remove('hidden');
         modalOverlay.classList.add('flex');

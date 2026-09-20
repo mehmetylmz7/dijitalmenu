@@ -30,6 +30,23 @@
             <span class="text-lg font-bold text-amber-800 whitespace-nowrap">@Model.Price</span>
         </div>
         <p class="text-stone-500 text-sm line-clamp-2 leading-relaxed">@Model.Description</p>
+        @if (Model.Calories.HasValue || !string.IsNullOrWhiteSpace(Model.Allergens))
+        {
+            <div class="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-stone-100 text-xs">
+                @if (Model.Calories.HasValue)
+                {
+                    <span class="inline-flex items-center gap-1 font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md">
+                        🔥 @Model.Calories.Value kcal
+                    </span>
+                }
+                @if (!string.IsNullOrWhiteSpace(Model.Allergens))
+                {
+                    <span class="inline-flex items-center gap-1 text-stone-600 bg-stone-100 px-2 py-0.5 rounded-md" title="Alerjenler: @Model.Allergens">
+                        ⚠️ @Model.Allergens
+                    </span>
+                }
+            </div>
+        }
     </div>
 
 </div>

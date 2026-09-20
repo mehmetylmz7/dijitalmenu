@@ -36,6 +36,7 @@ namespace dijitalmenu.Areas.Admin.Controllers
         public IActionResult Create()
         {
             ViewBag.Categories = _categoryService.TGetListAll();
+            ViewBag.Allergens = dijitalmenu.Helpers.AllergenHelper.DefaultAllergens;
             ViewBag.AdminUser = HttpContext.Session.GetString("AdminUser");
             return View();
         }
@@ -49,9 +50,12 @@ namespace dijitalmenu.Areas.Admin.Controllers
             {
                 ModelState.AddModelError("CategoryId", "Geçersiz kategori seçildi.");
                 ViewBag.Categories = _categoryService.TGetListAll();
+                ViewBag.Allergens = dijitalmenu.Helpers.AllergenHelper.DefaultAllergens;
                 ViewBag.AdminUser = HttpContext.Session.GetString("AdminUser");
                 return View();
             }
+
+            var allergens = dijitalmenu.Helpers.AllergenHelper.FormatAllergens(model.SelectedAllergens) ?? model.Allergens?.Trim();
 
             var menuItem = new MenuItem
             {
@@ -59,7 +63,9 @@ namespace dijitalmenu.Areas.Admin.Controllers
                 Price = model.Price,
                 CategoryId = model.CategoryId,
                 Description = model.Description?.Trim() ?? string.Empty,
-                ImageUrl = model.ImageUrl?.Trim()
+                ImageUrl = model.ImageUrl?.Trim(),
+                Calories = model.Calories,
+                Allergens = allergens
             };
 
             _menuItemService.TInsert(menuItem);
@@ -69,7 +75,7 @@ namespace dijitalmenu.Areas.Admin.Controllers
                 entityType: "MenuItem",
                 entityId: menuItem.Id,
                 description: $"Admin tarafından ürün eklendi: '{menuItem.Name}' ({menuItem.Price:C})",
-                newEntity: new { menuItem.Id, menuItem.Name, menuItem.Price, menuItem.CategoryId, menuItem.Description, menuItem.ImageUrl }
+                newEntity: new { menuItem.Id, menuItem.Name, menuItem.Price, menuItem.CategoryId, menuItem.Description, menuItem.ImageUrl, menuItem.Calories, menuItem.Allergens }
             );
 
             return RedirectToAction("Index");
@@ -84,15 +90,22 @@ namespace dijitalmenu.Areas.Admin.Controllers
                 Price = menuItem.Price,
                 CategoryId = menuItem.CategoryId,
                 Description = menuItem.Description,
-                ImageUrl = menuItem.ImageUrl
+                ImageUrl = menuItem.ImageUrl,
+                Calories = menuItem.Calories,
+                Allergens = menuItem.Allergens
             });
 
         [HttpGet]
         public IActionResult Edit(int id)
         {
-            ViewBag.Categories = _categoryService.TGetListAll();
-            ViewBag.AdminUser = HttpContext.Session.GetString("AdminUser");
             var menuItem = _menuItemService.TGetByID(id);
+            if (menuItem == null)
+                return NotFound();
+
+            ViewBag.Categories = _categoryService.TGetListAll();
+            ViewBag.Allergens = dijitalmenu.Helpers.AllergenHelper.DefaultAllergens;
+            ViewBag.SelectedAllergens = dijitalmenu.Helpers.AllergenHelper.ParseAllergens(menuItem.Allergens);
+            ViewBag.AdminUser = HttpContext.Session.GetString("AdminUser");
             return View(menuItem);
         }
 
@@ -108,21 +121,27 @@ namespace dijitalmenu.Areas.Admin.Controllers
                 {
                     ModelState.AddModelError("CategoryId", "Geçersiz kategori seçildi.");
                     ViewBag.Categories = _categoryService.TGetListAll();
+                    ViewBag.Allergens = dijitalmenu.Helpers.AllergenHelper.DefaultAllergens;
+                    ViewBag.SelectedAllergens = dijitalmenu.Helpers.AllergenHelper.ParseAllergens(existing.Allergens);
                     ViewBag.AdminUser = HttpContext.Session.GetString("AdminUser");
                     return View(existing);
                 }
 
-                var oldValues = new { existing.Id, existing.Name, existing.Price, existing.CategoryId, existing.Description, existing.ImageUrl };
+                var allergens = dijitalmenu.Helpers.AllergenHelper.FormatAllergens(model.SelectedAllergens) ?? model.Allergens?.Trim();
+
+                var oldValues = new { existing.Id, existing.Name, existing.Price, existing.CategoryId, existing.Description, existing.ImageUrl, existing.Calories, existing.Allergens };
 
                 existing.Name = model.Name.Trim();
                 existing.Description = model.Description?.Trim() ?? string.Empty;
                 existing.Price = model.Price;
                 existing.CategoryId = model.CategoryId;
                 existing.ImageUrl = model.ImageUrl?.Trim();
+                existing.Calories = model.Calories;
+                existing.Allergens = allergens;
 
                 _menuItemService.TUpdate(existing);
 
-                var newValues = new { existing.Id, existing.Name, existing.Price, existing.CategoryId, existing.Description, existing.ImageUrl };
+                var newValues = new { existing.Id, existing.Name, existing.Price, existing.CategoryId, existing.Description, existing.ImageUrl, existing.Calories, existing.Allergens };
 
                 _auditContextService.Log(
                     action: "MENU_ITEM_UPDATED",
@@ -146,7 +165,9 @@ namespace dijitalmenu.Areas.Admin.Controllers
                 Price = menuItem.Price,
                 CategoryId = menuItem.CategoryId,
                 Description = menuItem.Description,
-                ImageUrl = menuItem.ImageUrl
+                ImageUrl = menuItem.ImageUrl,
+                Calories = menuItem.Calories,
+                Allergens = menuItem.Allergens
             });
 
         [HttpPost]

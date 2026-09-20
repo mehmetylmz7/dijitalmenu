@@ -22,5 +22,7 @@ namespace dijitalmenu.Models
         public string Category    { get; set; } = "";
         public string ImageUrl    { get; set; } = "";
         public bool   IsSpecial   { get; set; }
+        public int?   Calories    { get; set; }
+        public string? Allergens  { get; set; }
     }
 }

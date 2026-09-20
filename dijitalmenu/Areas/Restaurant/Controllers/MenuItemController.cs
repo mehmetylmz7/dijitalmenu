@@ -70,6 +70,7 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             }
 
             ViewBag.Categories = categories;
+            ViewBag.Allergens = dijitalmenu.Helpers.AllergenHelper.DefaultAllergens;
             ViewBag.RestaurantUsername = HttpContext.Session.GetString("RestaurantUsername");
             return View();
         }
@@ -94,13 +95,17 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 return RedirectToAction("Create");
             }
 
+            var allergens = dijitalmenu.Helpers.AllergenHelper.FormatAllergens(model.SelectedAllergens) ?? model.Allergens?.Trim();
+
             var menuItem = new MenuItem
             {
                 Name = model.Name.Trim(),
                 Description = model.Description?.Trim() ?? string.Empty,
                 Price = model.Price,
                 CategoryId = model.CategoryId,
-                ImageUrl = uploadedImageUrl ?? model.ImageUrl?.Trim()
+                ImageUrl = uploadedImageUrl ?? model.ImageUrl?.Trim(),
+                Calories = model.Calories,
+                Allergens = allergens
             };
 
             _menuItemService.TInsert(menuItem);
@@ -114,7 +119,9 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 menuItem.CategoryId,
                 menuItem.Description,
                 menuItem.ImageUrl,
-                menuItem.DisplayOrder
+                menuItem.DisplayOrder,
+                menuItem.Calories,
+                menuItem.Allergens
             };
 
             _auditContextService.Log(
@@ -139,7 +146,9 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 Price = menuItem.Price,
                 CategoryId = menuItem.CategoryId,
                 ImageUrl = menuItem.ImageUrl,
-                DisplayOrder = menuItem.DisplayOrder
+                DisplayOrder = menuItem.DisplayOrder,
+                Calories = menuItem.Calories,
+                Allergens = menuItem.Allergens
             }, photoFile);
 
         [HttpGet]
@@ -156,6 +165,8 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 return Forbid();
 
             ViewBag.Categories = categories;
+            ViewBag.Allergens = dijitalmenu.Helpers.AllergenHelper.DefaultAllergens;
+            ViewBag.SelectedAllergens = dijitalmenu.Helpers.AllergenHelper.ParseAllergens(item.Allergens);
             ViewBag.RestaurantUsername = HttpContext.Session.GetString("RestaurantUsername");
             return View(item);
         }
@@ -186,6 +197,8 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 return RedirectToAction("Edit", new { id = model.Id });
             }
 
+            var allergens = dijitalmenu.Helpers.AllergenHelper.FormatAllergens(model.SelectedAllergens) ?? model.Allergens?.Trim();
+
             var oldValues = new
             {
                 existingItem.Id,
@@ -194,7 +207,9 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 existingItem.CategoryId,
                 existingItem.Description,
                 existingItem.ImageUrl,
-                existingItem.DisplayOrder
+                existingItem.DisplayOrder,
+                existingItem.Calories,
+                existingItem.Allergens
             };
 
             if (uploadedImageUrl != null && !string.IsNullOrEmpty(existingItem.ImageUrl) && existingItem.ImageUrl.StartsWith("/images/menu-items/", StringComparison.OrdinalIgnoreCase))
@@ -208,6 +223,8 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
             existingItem.Price = model.Price;
             existingItem.CategoryId = model.CategoryId;
             existingItem.ImageUrl = uploadedImageUrl ?? model.ImageUrl?.Trim() ?? existingItem.ImageUrl;
+            existingItem.Calories = model.Calories;
+            existingItem.Allergens = allergens;
 
             _menuItemService.TUpdate(existingItem);
 
@@ -219,7 +236,9 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 existingItem.CategoryId,
                 existingItem.Description,
                 existingItem.ImageUrl,
-                existingItem.DisplayOrder
+                existingItem.DisplayOrder,
+                existingItem.Calories,
+                existingItem.Allergens
             };
 
             _auditContextService.Log(
@@ -245,7 +264,9 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
                 Price = menuItem.Price,
                 CategoryId = menuItem.CategoryId,
                 ImageUrl = menuItem.ImageUrl,
-                DisplayOrder = menuItem.DisplayOrder
+                DisplayOrder = menuItem.DisplayOrder,
+                Calories = menuItem.Calories,
+                Allergens = menuItem.Allergens
             }, photoFile);
 
         [HttpPost]

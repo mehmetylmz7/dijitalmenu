@@ -29,6 +29,12 @@ namespace EntityLayer.Concrete
 
         public int DisplayOrder { get; set; } = 0;
 
+        [Range(0, 10000)]
+        public int? Calories { get; set; }
+
+        [StringLength(500)]
+        public string? Allergens { get; set; }
+
         public int CategoryId { get; set; }
         public Category Category { get; set; }
     }

@@ -68,6 +68,23 @@
                                 <p class="text-zinc-400 text-sm font-light leading-relaxed">
                                     @(string.IsNullOrWhiteSpace(item.Description) ? "Bu yemek için açıklama belirtilmemiş." : item.Description)
                                 </p>
+                                @if (item.Calories.HasValue || !string.IsNullOrWhiteSpace(item.Allergens))
+                                {
+                                    <div class="flex flex-wrap items-center gap-2 mt-2">
+                                        @if (item.Calories.HasValue)
+                                        {
+                                            <span class="inline-flex items-center text-[11px] font-medium text-orange-600 bg-orange-50 border border-orange-200/60 px-2 py-0.5 rounded">
+                                                🔥 @item.Calories.Value kcal
+                                            </span>
+                                        }
+                                        @if (!string.IsNullOrWhiteSpace(item.Allergens))
+                                        {
+                                            <span class="inline-flex items-center text-[11px] font-medium text-amber-700 bg-amber-50 border border-amber-200/60 px-2 py-0.5 rounded" title="Alerjenler: @item.Allergens">
+                                                ⚠️ @item.Allergens
+                                            </span>
+                                        }
+                                    </div>
+                                }
                             </div>
                         </div>
                     }

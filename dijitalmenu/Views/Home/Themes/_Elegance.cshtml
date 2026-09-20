@@ -263,6 +263,19 @@
           {
             <p class="elegance-dish-desc">@item.Description</p>
           }
+          @if (item.Calories.HasValue || !string.IsNullOrWhiteSpace(item.Allergens))
+          {
+            <div style="display:flex;gap:8px;align-items:center;font-size:11px;margin-top:3px;opacity:0.85;">
+              @if (item.Calories.HasValue)
+              {
+                <span style="color:#e07a5f;font-weight:600;">🔥 @item.Calories.Value kcal</span>
+              }
+              @if (!string.IsNullOrWhiteSpace(item.Allergens))
+              {
+                <span style="font-style:italic;" title="Alerjenler: @item.Allergens">⚠️ @item.Allergens</span>
+              }
+            </div>
+          }
         </div>
       }
     </section>

@@ -24,6 +24,14 @@ namespace dijitalmenu.Models
         public string? ImageUrl { get; set; }
 
         public int DisplayOrder { get; set; }
+
+        [Range(0, 10000, ErrorMessage = "Kalori 0 ile 10.000 kcal arasında olmalıdır.")]
+        public int? Calories { get; set; }
+
+        [StringLength(500, ErrorMessage = "Alerjen listesi en fazla 500 karakter olabilir.")]
+        public string? Allergens { get; set; }
+
+        public string[]? SelectedAllergens { get; set; }
     }
 
     public class MenuInputModel
