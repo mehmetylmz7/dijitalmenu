@@ -17,30 +17,30 @@
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         :root {
-            --sidebar-w: 260px;
-            --primary: #10B981;
-            --primary-dark: #006c49;
-            --primary-light: #4edea3;
-            --primary-dim: rgba(16, 185, 129, 0.12);
-            --charcoal: #111827;
-            --charcoal-light: #1f2937;
-            --bg: #f8f9fa;
+            --sidebar-w: 276px;
+            --primary: #f97316;
+            --primary-dark: #c2410c;
+            --primary-light: #fdba74;
+            --primary-dim: rgba(249, 115, 22, 0.12);
+            --charcoal: #172033;
+            --charcoal-light: #263247;
+            --bg: #f5f7fb;
             --surface: #ffffff;
-            --surface-low: #f3f4f5;
-            --surface-container: #edeeef;
-            --text: #191c1d;
-            --text-secondary: #575e70;
-            --text-muted: #7d8590;
-            --border: #E5E7EB;
-            --border-light: #f0f1f2;
-            --danger: #ef4444;
+            --surface-low: #f8fafc;
+            --surface-container: #eef2f7;
+            --text: #172033;
+            --text-secondary: #667085;
+            --text-muted: #98a2b3;
+            --border: #e4e9f0;
+            --border-light: #edf1f5;
+            --danger: #e5484d;
             --warning: #f59e0b;
-            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.05);
-            --radius-sm: 8px;
-            --radius-md: 14px;
-            --radius-lg: 20px;
-            --radius-xl: 28px;
+            --shadow-sm: 0 2px 8px rgba(23, 32, 51, 0.04);
+            --shadow-md: 0 12px 32px rgba(23, 32, 51, 0.08);
+            --radius-sm: 10px;
+            --radius-md: 16px;
+            --radius-lg: 22px;
+            --radius-xl: 30px;
             --radius-full: 9999px;
             --font-display: 'Sora', sans-serif;
             --font-body: 'Inter', sans-serif;
@@ -58,8 +58,8 @@
         /* ─── Sidebar ─── */
         .sidebar {
             width: var(--sidebar-w);
-            background: var(--charcoal);
-            border-right: 1px solid var(--charcoal-light);
+            background: linear-gradient(180deg, #172033 0%, #101827 100%);
+            border-right: 1px solid rgba(255, 255, 255, 0.06);
             display: flex;
             flex-direction: column;
             position: fixed;
@@ -271,8 +271,10 @@
         }
 
         .content {
-            padding: 32px;
+            padding: 36px 40px 48px;
             flex: 1;
+            max-width: 1600px;
+            width: 100%;
         }
 
         /* ─── Modern Card System ─── */
@@ -281,8 +283,8 @@
             border: 1px solid var(--border);
             border-radius: var(--radius-lg);
             overflow: hidden;
-            box-shadow: var(--shadow-sm);
-            margin-bottom: 24px;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 26px;
         }
 
         .card-header {
@@ -539,7 +541,7 @@
         </a>
         <a class="sidebar-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "MenuItem" ? "active" : "")"
            asp-area="Restaurant" asp-controller="MenuItem" asp-action="Index">
-            <span class="icon">🍕</span> Ürünler
+            <span class="icon">���</span> Ürünler
         </a>
         <a class="sidebar-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Builder" ? "active" : "")"
            asp-area="Restaurant" asp-controller="Builder" asp-action="Index">

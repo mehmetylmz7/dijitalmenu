@@ -18,26 +18,26 @@
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         :root {
-            --primary: #10B981;
-            --primary-dark: #006c49;
-            --primary-light: #4edea3;
-            --charcoal: #111827;
-            --bg: #f8f9fa;
+            --primary: #f97316;
+            --primary-dark: #c2410c;
+            --primary-light: #fdba74;
+            --charcoal: #172033;
+            --bg: #f5f7fb;
             --surface: #ffffff;
-            --surface-low: #f3f4f5;
-            --text: #191c1d;
-            --text-secondary: #575e70;
-            --border: #E5E7EB;
-            --shadow-lg: 0 20px 48px rgba(17, 24, 39, 0.08);
-            --radius-md: 14px;
-            --radius-lg: 24px;
+            --surface-low: #f8fafc;
+            --text: #172033;
+            --text-secondary: #667085;
+            --border: #e4e9f0;
+            --shadow-lg: 0 24px 70px rgba(23, 32, 51, 0.12);
+            --radius-md: 16px;
+            --radius-lg: 28px;
             --font-display: 'Sora', sans-serif;
             --font-body: 'Inter', sans-serif;
         }
 
         body {
             font-family: var(--font-body);
-            background: var(--bg);
+            background: radial-gradient(circle at 15% 15%, rgba(249, 115, 22, 0.12), transparent 30%), radial-gradient(circle at 85% 85%, rgba(23, 32, 51, 0.08), transparent 32%), var(--bg);
             color: var(--text);
             min-height: 100vh;
             display: flex;
