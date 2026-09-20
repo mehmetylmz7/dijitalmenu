@@ -169,9 +169,26 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
 
             try
             {
+                string baseSlug = StringHelper.GenerateSlug(restaurantName);
+                if (string.IsNullOrWhiteSpace(baseSlug))
+                    baseSlug = "restoran";
+
+                var existingSlugs = _restaurantService.TGetListAll()
+                    .Where(r => !string.IsNullOrWhiteSpace(r.Slug))
+                    .Select(r => r.Slug!)
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+                string candidateSlug = baseSlug;
+                int counter = 1;
+                while (existingSlugs.Contains(candidateSlug))
+                {
+                    candidateSlug = $"{baseSlug}-{counter++}";
+                }
+
                 var restaurant = new EntityLayer.Concrete.Restaurant
                 {
                     Name = restaurantName,
+                    Slug = candidateSlug,
                     ThemeId = selectedTheme.Id
                 };
                 _restaurantService.TInsert(restaurant);
@@ -214,9 +231,16 @@ namespace dijitalmenu.Areas.Restaurant.Controllers
 
                 return RedirectToAction("Index", "Dashboard", new { area = "Restaurant" });
             }
-            catch (DbUpdateException)
+            catch (DbUpdateException ex)
             {
-                ViewBag.Error = "Kayıt tamamlanamadı. Kullanıcı adı zaten alınmış olabilir; lütfen tekrar deneyin.";
+                if (ex.InnerException?.Message.Contains("IX_Users_Username", StringComparison.OrdinalIgnoreCase) == true)
+                {
+                    ViewBag.Error = "Bu kullanıcı adı zaten alınmış; lütfen başka bir kullanıcı adı deneyin.";
+                }
+                else
+                {
+                    ViewBag.Error = "Kayıt işlemi tamamlanamadı. Lütfen bilgilerinizi kontrol edip tekrar deneyin.";
+                }
                 PopulateThemes(themes);
                 return View();
             }
