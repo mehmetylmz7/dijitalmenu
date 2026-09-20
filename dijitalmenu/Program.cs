@@ -161,32 +161,59 @@ using (var scope = app.Services.CreateScope())
         logger.LogWarning(ex, "AuditLogs.Id tipi varchar'a çevrilirken bir uyarı oluştu.");
     }
 
-    // Populate missing slugs for existing restaurants
+    // Populate missing slugs for existing restaurants safely
     try
     {
-        var restaurantsWithoutSlug = context.Restaurants.Where(r => string.IsNullOrEmpty(r.Slug)).ToList();
-        if (restaurantsWithoutSlug.Any())
+        var allRestaurants = context.Restaurants.ToList();
+        if (allRestaurants.Any())
         {
-            foreach (var rest in restaurantsWithoutSlug)
-            {
-                string baseSlug = dijitalmenu.Helpers.StringHelper.GenerateSlug(rest.Name);
-                if (string.IsNullOrEmpty(baseSlug)) baseSlug = "restoran";
+            var occupiedSlugs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var needSlugUpdate = new List<EntityLayer.Concrete.Restaurant>();
 
-                string candidate = baseSlug;
-                int counter = 1;
-                while (context.Restaurants.Any(r => r.Id != rest.Id && r.Slug == candidate))
+            // İlk geçiş: Zaten benzersiz ve dolu olan slug'ları topla, çakışan veya boş olanları belirle
+            foreach (var rest in allRestaurants)
+            {
+                if (string.IsNullOrWhiteSpace(rest.Slug))
                 {
-                    candidate = $"{baseSlug}-{counter++}";
+                    needSlugUpdate.Add(rest);
                 }
-                rest.Slug = candidate;
+                else if (!occupiedSlugs.Add(rest.Slug))
+                {
+                    // Bu slug zaten başka bir restoranda vardı (duplicate!), yenilenmesi gerek
+                    needSlugUpdate.Add(rest);
+                }
             }
-            context.SaveChanges();
+
+            if (needSlugUpdate.Any())
+            {
+                foreach (var rest in needSlugUpdate)
+                {
+                    string baseSlug = dijitalmenu.Helpers.StringHelper.GenerateSlug(rest.Name);
+                    if (string.IsNullOrWhiteSpace(baseSlug)) 
+                    {
+                        baseSlug = $"restoran-{rest.Id}";
+                    }
+
+                    string candidate = baseSlug;
+                    int counter = 1;
+                    while (occupiedSlugs.Contains(candidate))
+                    {
+                        candidate = $"{baseSlug}-{counter++}";
+                    }
+
+                    rest.Slug = candidate;
+                    occupiedSlugs.Add(candidate);
+                }
+
+                context.SaveChanges();
+            }
         }
     }
     catch (Exception ex)
     {
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-        logger.LogWarning(ex, "Restoran Slug değerleri güncellenirken bir uyarı oluştu.");
+        logger.LogError(ex, "Restoran Slug değerleri güncellenirken bir hata oluştu. ChangeTracker sıfırlanıyor.");
+        context.ChangeTracker.Clear();
     }
 
     // Admin bootstrap seed
